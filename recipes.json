@@ -1,0 +1,746 @@
+[
+  {
+    "id": 3000,
+    "name": "Poached Egg",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3001,
+    "name": "Miso Soup",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3002,
+    "name": "Fried Egg",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3003,
+    "name": "Spinach Quiche",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3004,
+    "name": "Apple Cider Soda",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3005,
+    "name": "Coconut Water",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3006,
+    "name": "Marinated Seafood",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3007,
+    "name": "Omelet",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Kurtz Starter)",
+    "howToObtain": "Unlocked automatically when Kurtz opens the Restaurant.",
+    "recipeItemId": 0
+  },
+  {
+    "id": 3008,
+    "name": "Hot Sandwich",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 6)",
+    "howToObtain": "Win Cooking Battle 6 against Dinah at the HQ Restaurant.",
+    "recipeItemId": 8008
+  },
+  {
+    "id": 3009,
+    "name": "Hamburg Steak",
+    "category": "Main",
+    "location": "Eastern Desert",
+    "howToObtain": "Found in a treasure chest (gimmick battle) in the Eastern Desert.",
+    "recipeItemId": 8009
+  },
+  {
+    "id": 3010,
+    "name": "Salmon Steak",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 2)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 2.",
+    "recipeItemId": 8010
+  },
+  {
+    "id": 3011,
+    "name": "Spring Roll",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 11)",
+    "howToObtain": "Win Cooking Battle 11 against Ryu at the HQ Restaurant.",
+    "recipeItemId": 8011
+  },
+  {
+    "id": 3012,
+    "name": "Pot-au-feu",
+    "category": "Appetizer",
+    "location": "HQ Restaurant (Cooking Battle 7)",
+    "howToObtain": "Win Cooking Battle 7 against Simmere at the HQ Restaurant.",
+    "recipeItemId": 8012
+  },
+  {
+    "id": 3013,
+    "name": "Tlayuda",
+    "category": "Main",
+    "location": "Altverden Village",
+    "howToObtain": "Rare find at the Tool Shop in Altverden Village.",
+    "recipeItemId": 8013
+  },
+  {
+    "id": 3014,
+    "name": "Rabbit Stew",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 2)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 2.",
+    "recipeItemId": 8014
+  },
+  {
+    "id": 3015,
+    "name": "Ramen",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 1)",
+    "howToObtain": "Win Cooking Battle 1 against Tall Fry at the HQ Restaurant.",
+    "recipeItemId": 8015
+  },
+  {
+    "id": 3016,
+    "name": "Tiger Salad",
+    "category": "Appetizer",
+    "location": "The Treefolk Village",
+    "howToObtain": "Speak to the NPC in front of the Rune Shop in The Treefolk Village after the Euchrisse story arc.",
+    "recipeItemId": 8016
+  },
+  {
+    "id": 3017,
+    "name": "Cold Pasta",
+    "category": "Main",
+    "location": "Dabavin",
+    "howToObtain": "Rare find at the General Store in Dabavin.",
+    "recipeItemId": 8017
+  },
+  {
+    "id": 3018,
+    "name": "Scallop Lunch Set",
+    "category": "Main",
+    "location": "Bounty Hill",
+    "howToObtain": "Found in a treasure chest in Bounty Hill (unlocked in the deeper section).",
+    "recipeItemId": 8018
+  },
+  {
+    "id": 3019,
+    "name": "Bang Bang Ji",
+    "category": "Main",
+    "location": "Skriss Village",
+    "howToObtain": "Rare find at the General Store in Skriss Village.",
+    "recipeItemId": 8019
+  },
+  {
+    "id": 3020,
+    "name": "Cold Noodles",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 2)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 2.",
+    "recipeItemId": 8020
+  },
+  {
+    "id": 3021,
+    "name": "Chopan Salad",
+    "category": "Appetizer",
+    "location": "The Eldroad",
+    "howToObtain": "Found in a treasure chest (gimmick battle) along The Eldroad.",
+    "recipeItemId": 8021
+  },
+  {
+    "id": 3022,
+    "name": "Gazpacho",
+    "category": "Appetizer",
+    "location": "Dabavin",
+    "howToObtain": "Speak to the NPC in the southern-central area of Dabavin (or treasure chest in The Greatwood - South).",
+    "recipeItemId": 8022
+  },
+  {
+    "id": 3023,
+    "name": "Ceviche Tostadas",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8023
+  },
+  {
+    "id": 3024,
+    "name": "Nanban Fish",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 1)",
+    "howToObtain": "Unlocked by developing the HQ Restaurant to Level 1.",
+    "recipeItemId": 8024
+  },
+  {
+    "id": 3025,
+    "name": "Black Tea Cookies",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8025
+  },
+  {
+    "id": 3026,
+    "name": "Pancakes",
+    "category": "Dessert",
+    "location": "Altverden Village",
+    "howToObtain": "Speak to the NPC in the northeastern house in Altverden Village.",
+    "recipeItemId": 8026
+  },
+  {
+    "id": 3027,
+    "name": "Jelly Beans",
+    "category": "Dessert",
+    "location": "Impershi'arc",
+    "howToObtain": "Rare find at the General Store in Impershi'arc.",
+    "recipeItemId": 8027
+  },
+  {
+    "id": 3028,
+    "name": "Lemon Honey Pickles",
+    "category": "Dessert",
+    "location": "Hishahn",
+    "howToObtain": "Speak to the NPC inside the house west of the Inn in Hishahn.",
+    "recipeItemId": 8028
+  },
+  {
+    "id": 3029,
+    "name": "Steamed Bread",
+    "category": "Dessert",
+    "location": "Athrabalt",
+    "howToObtain": "Rare find (Star Item) at the Tool Shop in Athrabalt.",
+    "recipeItemId": 8029
+  },
+  {
+    "id": 3030,
+    "name": "Lollipop",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 1)",
+    "howToObtain": "Unlocked by developing the HQ Restaurant to Level 1.",
+    "recipeItemId": 8030
+  },
+  {
+    "id": 3031,
+    "name": "Pavlova",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8031
+  },
+  {
+    "id": 3032,
+    "name": "Sugar Toast",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 1)",
+    "howToObtain": "Unlocked by developing the HQ Restaurant to Level 1.",
+    "recipeItemId": 8032
+  },
+  {
+    "id": 3033,
+    "name": "Baumkuchen",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8033
+  },
+  {
+    "id": 3034,
+    "name": "Colorful Macarons",
+    "category": "Dessert",
+    "location": "Twinhorne West",
+    "howToObtain": "Rare find at the Tool Shop in Twinhorne West.",
+    "recipeItemId": 8034
+  },
+  {
+    "id": 3035,
+    "name": "Pretzel",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 2)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 2.",
+    "recipeItemId": 8035
+  },
+  {
+    "id": 3036,
+    "name": "Baked Flan",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8036
+  },
+  {
+    "id": 3037,
+    "name": "Spicy Hamburg Steak",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8037
+  },
+  {
+    "id": 3038,
+    "name": "Moonview Kebab",
+    "category": "Main",
+    "location": "Hishahn Old Town",
+    "howToObtain": "Found in a treasure chest (gimmick battle guarded by Remora) in Hishahn Old Town.",
+    "recipeItemId": 8038
+  },
+  {
+    "id": 3039,
+    "name": "Tomato Sandwich",
+    "category": "Main",
+    "location": "Kyshiri Village",
+    "howToObtain": "Speak to the NPC inside a house in Kyshiri Village.",
+    "recipeItemId": 8039
+  },
+  {
+    "id": 3040,
+    "name": "Vegetable Milk Soup",
+    "category": "Appetizer",
+    "location": "Dappled Forest",
+    "howToObtain": "Found in a treasure chest in the middle section of Dappled Forest (required for Foxiel).",
+    "recipeItemId": 8040
+  },
+  {
+    "id": 3041,
+    "name": "Sautéed Chicken",
+    "category": "Main",
+    "location": "Dappled Forest",
+    "howToObtain": "Found in a treasure chest in the far northern area of Dappled Forest.",
+    "recipeItemId": 8041
+  },
+  {
+    "id": 3042,
+    "name": "Umeboshi Chazuke",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 2)",
+    "howToObtain": "Win Cooking Battle 2 against Goemon at the HQ Restaurant.",
+    "recipeItemId": 8042
+  },
+  {
+    "id": 3043,
+    "name": "Vegetable Juice",
+    "category": "Appetizer",
+    "location": "The Treefolk Village",
+    "howToObtain": "Speak to a Treefolk NPC in front of the Inn in The Treefolk Village.",
+    "recipeItemId": 8043
+  },
+  {
+    "id": 3044,
+    "name": "Blue Impact Curry",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 8)",
+    "howToObtain": "Win Cooking Battle 8 against Forreger at the HQ Restaurant.",
+    "recipeItemId": 8044
+  },
+  {
+    "id": 3045,
+    "name": "Tom Yam Kung",
+    "category": "Main",
+    "location": "Rune-Lens Research Laboratory",
+    "howToObtain": "Found in a treasure chest inside the Rune-Lens Research Laboratory.",
+    "recipeItemId": 8045
+  },
+  {
+    "id": 3046,
+    "name": "Herb Chicken",
+    "category": "Main",
+    "location": "Arenside",
+    "howToObtain": "Rare find at the Item Shop in Arenside.",
+    "recipeItemId": 8046
+  },
+  {
+    "id": 3047,
+    "name": "Maqluba",
+    "category": "Main",
+    "location": "Ardinale City",
+    "howToObtain": "Speak to an NPC inside a circular building on the leftmost side of Low Town in Ardinale City.",
+    "recipeItemId": 8047
+  },
+  {
+    "id": 3048,
+    "name": "Shrimp Doria",
+    "category": "Main",
+    "location": "Twinhorne West",
+    "howToObtain": "Speak to an NPC in the first house on the left next to the Rune Shop in Twinhorne West.",
+    "recipeItemId": 8048
+  },
+  {
+    "id": 3049,
+    "name": "Raclette",
+    "category": "Main",
+    "location": "Ardinale City",
+    "howToObtain": "Speak to the NPC in the house near the Smithy in Ardinale City.",
+    "recipeItemId": 8049
+  },
+  {
+    "id": 3050,
+    "name": "Mee Siam",
+    "category": "Main",
+    "location": "Daphan Village",
+    "howToObtain": "Rare find at the General Store in Daphan Village.",
+    "recipeItemId": 8050
+  },
+  {
+    "id": 3051,
+    "name": "Cheese Fondue",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 3)",
+    "howToObtain": "Win Cooking Battle 3 against Terrance at the HQ Restaurant.",
+    "recipeItemId": 8051
+  },
+  {
+    "id": 3052,
+    "name": "Steak",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 5)",
+    "howToObtain": "Win Cooking Battle 5 against Carne at the HQ Restaurant.",
+    "recipeItemId": 8052
+  },
+  {
+    "id": 3053,
+    "name": "Avocado Sushi",
+    "category": "Main",
+    "location": "Den of the Dunes",
+    "howToObtain": "Found in a treasure chest inside the Den of the Dunes.",
+    "recipeItemId": 8053
+  },
+  {
+    "id": 3054,
+    "name": "Hummus",
+    "category": "Main",
+    "location": "Arenside",
+    "howToObtain": "Speak to an NPC inside the northwestern house in Arenside after the Euchrisse story arc.",
+    "recipeItemId": 8054
+  },
+  {
+    "id": 3055,
+    "name": "Fresh Spring Roll",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8055
+  },
+  {
+    "id": 3056,
+    "name": "Ahi Poke",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 4)",
+    "howToObtain": "Win Cooking Battle 4 against Pescoe at the HQ Restaurant.",
+    "recipeItemId": 8056
+  },
+  {
+    "id": 3057,
+    "name": "Cold Pho",
+    "category": "Main",
+    "location": "Hishahn",
+    "howToObtain": "Speak to an NPC in the house left of the Smithy in Hishahn after retaking Eltisweiss.",
+    "recipeItemId": 8057
+  },
+  {
+    "id": 3058,
+    "name": "Cheese on Crackers",
+    "category": "Dessert",
+    "location": "Altverden Village",
+    "howToObtain": "Speak to an NPC inside the northeastern house in Altverden Village after the Euchrisse story arc.",
+    "recipeItemId": 8058
+  },
+  {
+    "id": 3059,
+    "name": "Spiced Coffee",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Cooking Battle 12)",
+    "howToObtain": "Win Cooking Battle 12 against Waft at the HQ Restaurant.",
+    "recipeItemId": 8059
+  },
+  {
+    "id": 3060,
+    "name": "Mint Chip Ice Cream",
+    "category": "Dessert",
+    "location": "Seaside Cavern",
+    "howToObtain": "Found in a treasure chest inside the Seaside Cavern.",
+    "recipeItemId": 8060
+  },
+  {
+    "id": 3061,
+    "name": "Sasa Dango",
+    "category": "Dessert",
+    "location": "Yarnaan",
+    "howToObtain": "Speak to the elderly woman on the east side of 2F in Yarnaan.",
+    "recipeItemId": 8061
+  },
+  {
+    "id": 3062,
+    "name": "Cream Cake",
+    "category": "Dessert",
+    "location": "Seaside Cavern",
+    "howToObtain": "Found in a treasure chest (gimmick battle) inside the Seaside Cavern.",
+    "recipeItemId": 8062
+  },
+  {
+    "id": 3063,
+    "name": "Herb Tea",
+    "category": "Dessert",
+    "location": "Daphan Village",
+    "howToObtain": "Speak to one of the street performers in the western area of Daphan Village.",
+    "recipeItemId": 8063
+  },
+  {
+    "id": 3064,
+    "name": "Strawberry Milk",
+    "category": "Dessert",
+    "location": "Kyshiri Village",
+    "howToObtain": "Speak to an NPC inside a house in Kyshiri Village after gaining access to Hishahn.",
+    "recipeItemId": 8064
+  },
+  {
+    "id": 3065,
+    "name": "Shell-On Shrimp",
+    "category": "Main",
+    "location": "Euchrisse",
+    "howToObtain": "Found in a treasure chest (gimmick battle) in the Euchrisse region.",
+    "recipeItemId": 8065
+  },
+  {
+    "id": 3066,
+    "name": "Duck Soup",
+    "category": "Main",
+    "location": "Norristar",
+    "howToObtain": "Found in a treasure chest (gimmick battle) in the Norristar region.",
+    "recipeItemId": 8066
+  },
+  {
+    "id": 3067,
+    "name": "Chili con Carne",
+    "category": "Main",
+    "location": "Skriss Village",
+    "howToObtain": "Speak with the man in the first house on the left next to the Inn in Skriss Village.",
+    "recipeItemId": 8067
+  },
+  {
+    "id": 3068,
+    "name": "Roast Beef",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 9)",
+    "howToObtain": "Win Cooking Battle 9 against Sears at the HQ Restaurant.",
+    "recipeItemId": 8068
+  },
+  {
+    "id": 3069,
+    "name": "Curry",
+    "category": "Main",
+    "location": "Skriss Village",
+    "howToObtain": "Speak with the child in the first house on the left next to the Inn in Skriss Village.",
+    "recipeItemId": 8069
+  },
+  {
+    "id": 3070,
+    "name": "Shark Fin Soup",
+    "category": "Main",
+    "location": "Impershi'arc",
+    "howToObtain": "Speak to an NPC in the northwest house in Impershi'arc.",
+    "recipeItemId": 8070
+  },
+  {
+    "id": 3071,
+    "name": "Grilled Tutuva",
+    "category": "Main",
+    "location": "The Treefolk Village",
+    "howToObtain": "Speak to an NPC near the Trading Post in The Treefolk Village after gaining access to Hishahn (required to recruit Kurtz).",
+    "recipeItemId": 8071
+  },
+  {
+    "id": 3072,
+    "name": "Pineapple Pork",
+    "category": "Main",
+    "location": "Werne Village",
+    "howToObtain": "Purchasable at the Item Shop in Werne Village.",
+    "recipeItemId": 8072
+  },
+  {
+    "id": 3073,
+    "name": "Deluxe Gyoza",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 13)",
+    "howToObtain": "Win Cooking Battle 13 against Culinary Golem 1.0 at the HQ Restaurant.",
+    "recipeItemId": 8073
+  },
+  {
+    "id": 3074,
+    "name": "Smørrebrød",
+    "category": "Main",
+    "location": "HQ Restaurant (Development Level 3)",
+    "howToObtain": "Unlocked by upgrading the HQ Restaurant to Level 3.",
+    "recipeItemId": 8074
+  },
+  {
+    "id": 3075,
+    "name": "Breton Galette",
+    "category": "Dessert",
+    "location": "Rune Research Lab (UG Passage)",
+    "howToObtain": "Found in a treasure chest in the underground passage of the Rune Research Lab.",
+    "recipeItemId": 8075
+  },
+  {
+    "id": 3076,
+    "name": "Nanami Ice Cream",
+    "category": "Dessert",
+    "location": "Runebarrows",
+    "howToObtain": "Found in a treasure chest in the Runebarrows during CJ's recruitment quest.",
+    "recipeItemId": 8076
+  },
+  {
+    "id": 3077,
+    "name": "Fruit Parfait",
+    "category": "Dessert",
+    "location": "The Treefolk Village",
+    "howToObtain": "Rare find at the General Store in The Treefolk Village.",
+    "recipeItemId": 8077
+  },
+  {
+    "id": 3078,
+    "name": "Blueberry Pie",
+    "category": "Dessert",
+    "location": "The Chelonian Goliath, Vilashnu",
+    "howToObtain": "Found in a treasure chest inside Vilashnu (The Chelonian Goliath).",
+    "recipeItemId": 8078
+  },
+  {
+    "id": 3079,
+    "name": "Dark Chocolate Cake",
+    "category": "Dessert",
+    "location": "Runebarrows",
+    "howToObtain": "Found in a treasure chest in the Runebarrows during CJ's recruitment quest.",
+    "recipeItemId": 8079
+  },
+  {
+    "id": 3080,
+    "name": "Mixed Fruit",
+    "category": "Dessert",
+    "location": "Bounty Hill",
+    "howToObtain": "Found in a treasure chest in the final area of Bounty Hill that opens after the events at Snowpeak Pass.",
+    "recipeItemId": 8080
+  },
+  {
+    "id": 3081,
+    "name": "Spicy Pig's Ear",
+    "category": "Appetizer",
+    "location": "Ardinale City",
+    "howToObtain": "Speak to the bandana-wearing NPC in front of a building on the leftmost side of Low Town in Ardinale City.",
+    "recipeItemId": 8081
+  },
+  {
+    "id": 3082,
+    "name": "Shooting Star",
+    "category": "Dessert",
+    "location": "Eltisweiss",
+    "howToObtain": "Speak to the NPC in the northeastern house in Eltisweiss after the events at Snowpeak Pass.",
+    "recipeItemId": 8082
+  },
+  {
+    "id": 3083,
+    "name": "Brew Bar Satay",
+    "category": "Main",
+    "location": "Athrabalt",
+    "howToObtain": "Speak to the NPC in the house next to the Appraiser's Shop in Athrabalt.",
+    "recipeItemId": 8083
+  },
+  {
+    "id": 3084,
+    "name": "Chocolate Pizza",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Cooking Battle 14)",
+    "howToObtain": "Win Cooking Battle 14 against Quince at the HQ Restaurant.",
+    "recipeItemId": 8084
+  },
+  {
+    "id": 3085,
+    "name": "Pasta Carbonara",
+    "category": "Main",
+    "location": "The Chelonian Goliath, Vilashnu",
+    "howToObtain": "Found in a treasure chest inside Vilashnu (The Chelonian Goliath).",
+    "recipeItemId": 8085
+  },
+  {
+    "id": 3086,
+    "name": "Dragon Doria",
+    "category": "Main",
+    "location": "The Eldroad",
+    "howToObtain": "Found in a treasure chest along The Eldroad.",
+    "recipeItemId": 8086
+  },
+  {
+    "id": 3087,
+    "name": "Triple Burger",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 15)",
+    "howToObtain": "Win Cooking Battle 15 against Trey at the HQ Restaurant.",
+    "recipeItemId": 8087
+  },
+  {
+    "id": 3088,
+    "name": "Galactic Meat",
+    "category": "Main",
+    "location": "Fort Xialuke",
+    "howToObtain": "Speak to an NPC at Fort Xialuke when the story objective is retaking Eltisweiss.",
+    "recipeItemId": 8088
+  },
+  {
+    "id": 3089,
+    "name": "Nigiri Selection",
+    "category": "Main",
+    "location": "HQ Restaurant (Cooking Battle 17)",
+    "howToObtain": "Win Cooking Battle 17 against Chairman at the HQ Restaurant.",
+    "recipeItemId": 8089
+  },
+  {
+    "id": 3090,
+    "name": "Osechi",
+    "category": "Main",
+    "location": "Gardhaven Castle",
+    "howToObtain": "Found in a treasure chest on 2F of Gardhaven Castle.",
+    "recipeItemId": 8090
+  },
+  {
+    "id": 3091,
+    "name": "Cherry Pie",
+    "category": "Dessert",
+    "location": "Eltisweiss",
+    "howToObtain": "Rare find at the Tool Shop in Eltisweiss.",
+    "recipeItemId": 8091
+  },
+  {
+    "id": 3092,
+    "name": "Golden Zucotto",
+    "category": "Dessert",
+    "location": "HQ Restaurant (Cooking Battle 16)",
+    "howToObtain": "Win Cooking Battle 16 against Masked Woman (Celia) at the HQ Restaurant.",
+    "recipeItemId": 8092
+  }
+]
