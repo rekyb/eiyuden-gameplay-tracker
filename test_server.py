@@ -24,8 +24,9 @@ class TestServerAPI(unittest.TestCase):
         with open(os.path.join(cls.static_dir, "index.html"), "w", encoding="utf-8") as f:
             f.write("<!DOCTYPE html><html><body>Eiyuden Tracker Test</body></html>")
 
-        # Copy characters.json and UserData0.dat to temp_dir for test fixtures
+        # Copy characters.json, recipes.json, and UserData0.dat to temp_dir for test fixtures
         cls.characters_path = os.path.abspath("characters.json")
+        cls.recipes_path = os.path.abspath("recipes.json")
         cls.real_save_path = os.path.abspath("UserData0.dat")
         cls.test_save_copy = os.path.join(cls.temp_dir, "UserData0.dat")
         shutil.copy2(cls.real_save_path, cls.test_save_copy)
@@ -40,6 +41,7 @@ class TestServerAPI(unittest.TestCase):
             port=0,
             config_path=cls.config_path,
             characters_path=cls.characters_path,
+            recipes_path=cls.recipes_path,
             static_dir=cls.static_dir,
         )
         cls.server_port = cls.httpd.server_address[1]
@@ -139,6 +141,40 @@ class TestServerAPI(unittest.TestCase):
             self.assertIsNotNone(nowa)
             self.assertEqual(nowa["name"], "Nowa")
             self.assertEqual(nowa["role"], "Battle")
+
+    def test_get_recipes(self):
+        """GET /api/recipes returns 93 recipe records."""
+        req = urllib.request.Request(self._url("/api/recipes"), method="GET")
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertIsInstance(data, list)
+            self.assertEqual(len(data), 93)
+            self.assertEqual(data[0]["id"], 3000)
+            self.assertEqual(data[0]["name"], "Poached Egg")
+
+    def test_get_and_post_recipes_cooked(self):
+        """POST /api/recipes/cooked saves IDs and GET returns them."""
+        # 1. POST cooked IDs
+        payload = {"cooked_ids": [3000, 3026, 3071]}
+        req_post = urllib.request.Request(
+            self._url("/api/recipes/cooked"),
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req_post) as resp:
+            self.assertEqual(resp.status, 200)
+            res = json.loads(resp.read().decode("utf-8"))
+            self.assertTrue(res.get("success"))
+            self.assertEqual(res.get("cooked_ids"), [3000, 3026, 3071])
+
+        # 2. GET cooked IDs
+        req_get = urllib.request.Request(self._url("/api/recipes/cooked"), method="GET")
+        with urllib.request.urlopen(req_get) as resp:
+            self.assertEqual(resp.status, 200)
+            res = json.loads(resp.read().decode("utf-8"))
+            self.assertEqual(res.get("cooked_ids"), [3000, 3026, 3071])
 
     def test_get_save_status_valid(self):
         """GET /api/save/status parses configured save and returns summary."""

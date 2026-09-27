@@ -320,6 +320,25 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             self.send_json([], status=200)
             return
 
+        if path == "/api/recipes":
+            if os.path.isfile(self.server.recipes_path):
+                try:
+                    with open(self.server.recipes_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    self.send_json(data)
+                    return
+                except Exception as exc:
+                    self.send_json({"error": f"Failed reading recipes.json: {exc}"}, status=500)
+                    return
+            self.send_json([], status=200)
+            return
+
+        if path == "/api/recipes/cooked":
+            cfg = load_config(self.server.config_path)
+            cooked = cfg.get("cooked_recipe_ids", [])
+            self.send_json({"cooked_ids": cooked if isinstance(cooked, list) else []})
+            return
+
         if path == "/api/save/status":
             cfg = load_config(self.server.config_path)
             save_path = cfg.get("save_path", "UserData0.dat")
@@ -384,6 +403,29 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                     "detected_steam_path": detect_steam_save_path(),
                 },
             })
+            return
+
+        if path == "/api/recipes/cooked":
+            try:
+                payload = json.loads(body.decode("utf-8"))
+            except Exception:
+                self.send_json({"error": "Invalid JSON body"}, status=400)
+                return
+
+            if not isinstance(payload, dict) or "cooked_ids" not in payload:
+                self.send_json({"error": "Missing 'cooked_ids' in payload"}, status=400)
+                return
+
+            cooked_ids = payload["cooked_ids"]
+            if not isinstance(cooked_ids, list) or not all(isinstance(x, int) for x in cooked_ids):
+                self.send_json({"error": "'cooked_ids' must be a list of integers"}, status=400)
+                return
+
+            cfg = load_config(self.server.config_path)
+            cfg["cooked_recipe_ids"] = sorted(list(set(cooked_ids)))
+            save_config(cfg, self.server.config_path)
+
+            self.send_json({"success": True, "cooked_ids": cfg["cooked_recipe_ids"]})
             return
 
         if path == "/api/save/browse":
@@ -488,11 +530,13 @@ class SaveTrackerServer(ThreadingHTTPServer):
         RequestHandlerClass,
         config_path: str = "config.json",
         characters_path: str = "characters.json",
+        recipes_path: str = "recipes.json",
         static_dir: str = "static",
     ):
         super().__init__(server_address, RequestHandlerClass)
         self.config_path = config_path
         self.characters_path = characters_path
+        self.recipes_path = recipes_path
         self.static_dir = static_dir
 
 
@@ -501,6 +545,7 @@ def create_server(
     port: int = 8000,
     config_path: str = "config.json",
     characters_path: str = "characters.json",
+    recipes_path: str = "recipes.json",
     static_dir: str = "static",
 ) -> SaveTrackerServer:
     """Create a configured SaveTrackerServer instance."""
@@ -509,6 +554,7 @@ def create_server(
         SaveTrackerRequestHandler,
         config_path=config_path,
         characters_path=characters_path,
+        recipes_path=recipes_path,
         static_dir=static_dir,
     )
 
@@ -520,6 +566,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
     parser.add_argument("--config", default="config.json", help="Path to config.json (default: config.json)")
     parser.add_argument("--characters", default="characters.json", help="Path to characters.json (default: characters.json)")
+    parser.add_argument("--recipes", default="recipes.json", help="Path to recipes.json (default: recipes.json)")
     parser.add_argument("--static", default="static", help="Path to static assets directory (default: static)")
     parser.add_argument("--open", action="store_true", help="Automatically open browser on launch")
 
@@ -529,6 +576,7 @@ def main() -> None:
         port=args.port,
         config_path=args.config,
         characters_path=args.characters,
+        recipes_path=args.recipes,
         static_dir=args.static,
     )
 
