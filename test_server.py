@@ -235,6 +235,40 @@ class TestServerAPI(unittest.TestCase):
         ) as resp:
             self.assertEqual(resp.status, 200)
 
+    def test_post_save_browse_selected(self):
+        """POST /api/save/browse updates config and returns summary when file selected."""
+        from unittest import mock
+        with mock.patch("server.open_native_file_browser", return_value=self.test_save_copy):
+            req = urllib.request.Request(
+                self._url("/api/save/browse"),
+                data=b"{}",
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req) as resp:
+                self.assertEqual(resp.status, 200)
+                data = json.loads(resp.read().decode("utf-8"))
+                self.assertTrue(data.get("success"))
+                self.assertEqual(data.get("path"), os.path.normpath(self.test_save_copy))
+                self.assertIn("summary", data)
+                self.assertEqual(len(data["summary"]["recruited_ids"]), 87)
+
+    def test_post_save_browse_cancelled(self):
+        """POST /api/save/browse returns cancelled=True when dialog dismissed."""
+        from unittest import mock
+        with mock.patch("server.open_native_file_browser", return_value=""):
+            req = urllib.request.Request(
+                self._url("/api/save/browse"),
+                data=b"{}",
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req) as resp:
+                self.assertEqual(resp.status, 200)
+                data = json.loads(resp.read().decode("utf-8"))
+                self.assertFalse(data.get("success"))
+                self.assertTrue(data.get("cancelled"))
+
     def test_post_save_upload_raw_bytes(self):
         """POST /api/save/upload accepts raw binary data, saves, and returns summary."""
         with open(self.real_save_path, "rb") as f:

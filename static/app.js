@@ -31,6 +31,7 @@ const dom = {
   btnBackup: null,
   btnConfig: null,
   btnCloseConfig: null,
+  btnBrowseFile: null,
   btnSavePath: null,
   btnUseSteam: null,
 
@@ -449,6 +450,7 @@ function cacheDomElements() {
   dom.btnBackup = document.getElementById('btn-backup');
   dom.btnConfig = document.getElementById('btn-config');
   dom.btnCloseConfig = document.getElementById('btn-close-config');
+  dom.btnBrowseFile = document.getElementById('btn-browse-file');
   dom.btnSavePath = document.getElementById('btn-save-path');
   dom.btnUseSteam = document.getElementById('btn-use-steam');
 
@@ -649,56 +651,55 @@ function setupEventListeners() {
     });
   }
 
-  // Drop Zone and File Input (Handling nested input without duplicate dialogs)
-  if (dom.dropZone && dom.fileInput) {
-    // Only trigger file picker when clicking dropZone container, not when clicking fileInput itself
-    dom.dropZone.addEventListener('click', (e) => {
-      if (e.target !== dom.fileInput) {
-        dom.fileInput.click();
-      }
-    });
+  // Native File Browser trigger
+  if (dom.btnBrowseFile) {
+    dom.btnBrowseFile.addEventListener('click', async () => {
+      dom.btnBrowseFile.disabled = true;
+      const prevText = dom.btnBrowseFile.textContent;
+      dom.btnBrowseFile.textContent = 'Browsing...';
 
-    // Stop propagation so clicking file input doesn't bubble and re-trigger dropZone click
-    dom.fileInput.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-
-    // Keyboard accessibility for drop zone
-    dom.dropZone.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        dom.fileInput.click();
-      }
-    });
-
-    // Drag and Drop events
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dom.dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dom.dropZone.classList.add('dragover');
-      });
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dom.dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dom.dropZone.classList.remove('dragover');
-      });
-    });
-
-    dom.dropZone.addEventListener('drop', (e) => {
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        handleFileUpload(files[0]);
-      }
-    });
-
-    dom.fileInput.addEventListener('change', () => {
-      if (dom.fileInput.files && dom.fileInput.files.length > 0) {
-        handleFileUpload(dom.fileInput.files[0]);
-        dom.fileInput.value = ''; // Reset so identical file can be selected again
+      try {
+        const res = await fetch('/api/save/browse', { method: 'POST' });
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        if (data.cancelled) {
+          // User closed or cancelled the file dialog
+          return;
+        }
+        if (data.success && data.path) {
+          if (dom.configPathInput) {
+            dom.configPathInput.value = data.path;
+          }
+          if (state.saveConfig) {
+            state.saveConfig.save_path = data.path;
+            state.saveConfig.file_exists = true;
+          }
+          try {
+            localStorage.setItem('eiyuden_save_path', data.path);
+          } catch (e) {
+            // Ignore storage restrictions
+          }
+          if (data.summary) {
+            state.saveStatus = data.summary;
+            state.recruitedIds = new Set(data.summary.recruited_ids || []);
+            updateStats();
+            updateProgress();
+            renderTable();
+          }
+          showToast(`Save file set to: ${data.path}`, 'success');
+          if (dom.configDialog && typeof dom.configDialog.close === 'function') {
+            dom.configDialog.close();
+          }
+        } else if (data.error) {
+          showToast(data.error, 'error');
+        }
+      } catch (err) {
+        showToast(`Failed to browse file: ${err.message}`, 'error');
+      } finally {
+        dom.btnBrowseFile.disabled = false;
+        dom.btnBrowseFile.textContent = prevText;
       }
     });
   }

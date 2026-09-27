@@ -133,6 +133,27 @@ def save_config(config_data: Dict[str, Any], config_path: str = "config.json") -
         json.dump(config_data, f, indent=2)
 
 
+def open_native_file_browser(initial_dir: str = "") -> str:
+    """Open native OS file picker and return selected file path, or empty string if cancelled."""
+    try:
+        import tkinter
+        from tkinter import filedialog
+        root = tkinter.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        filepath = filedialog.askopenfilename(
+            parent=root,
+            title="Select Eiyuden Chronicle Save File",
+            initialdir=initial_dir if initial_dir and os.path.isdir(initial_dir) else os.getcwd(),
+            filetypes=[("Save Files (*.dat)", "*.dat"), ("All Files (*.*)", "*.*")],
+        )
+        root.destroy()
+        return filepath or ""
+    except Exception as exc:
+        print(f"Native file picker error: {exc}")
+        return ""
+
+
 class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
     """HTTP Request Handler for Eiyuden Save Tracker API and static assets."""
 
@@ -317,6 +338,34 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                     "file_exists": os.path.isfile(new_save_path),
                     "detected_steam_path": detect_steam_save_path(),
                 },
+            })
+            return
+
+        if path == "/api/save/browse":
+            cfg = load_config(self.server.config_path)
+            current_path = cfg.get("save_path", "")
+            initial_dir = ""
+            if current_path and os.path.isdir(os.path.dirname(current_path)):
+                initial_dir = os.path.dirname(os.path.abspath(current_path))
+            else:
+                steam_path = detect_steam_save_path()
+                if steam_path and os.path.isfile(steam_path):
+                    initial_dir = os.path.dirname(steam_path)
+
+            selected_path = open_native_file_browser(initial_dir)
+            if not selected_path:
+                self.send_json({"success": False, "cancelled": True})
+                return
+
+            normalized = os.path.normpath(selected_path)
+            cfg["save_path"] = normalized
+            save_config(cfg, self.server.config_path)
+
+            summary = save_reader.read_save_summary(normalized)
+            self.send_json({
+                "success": True,
+                "path": normalized,
+                "summary": summary,
             })
             return
 
