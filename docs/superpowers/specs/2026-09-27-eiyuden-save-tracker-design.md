@@ -61,23 +61,20 @@ A curated database covering all 121 heroes:
 * `missable` (bool): True if the character has strict timing or story cutoff points (e.g., Leene).
 
 ### 3.3 Frontend Dashboard (`index.html`, `style.css`, `app.js`)
-* **Header Bar**:
-  * Game summary card: Protagonist, Playtime, Baqua, Fortress Level & Population.
-  * Progress Meter: Visual bar showing `X / 121 Recruited (Y%)`.
-  * Controls:
-    * `[Sync with Save]`: Re-queries the backend and updates recruitment checkboxes.
-    * `[Backup Save]`: Triggers a timestamped backup with instant toast confirmation.
-    * `[Save Location]`: Displays current path with a modal/input to browse or enter a new path or drag-and-drop a file.
+* **Design Philosophy**: Minimalist, clean, and distraction-free. Avoid fancy colors, excessive icons, or unnecessary animations. Maximize readability, clear typography, high contrast, and efficient information layout.
+* **Header & Controls Bar**:
+  * Clean text-based summary: Active Protagonist, Playtime, Baqua, HQ Level & Population.
+  * Compact progress indicator: `Recruited: X / 121 (Y%)`.
+  * Simple, clear action buttons: `[Sync with Save]`, `[Backup Save]`, `[Select Save File]`.
 * **Filter & Search Controls**:
-  * Filter tabs: **All (121)**, **Recruited (X)**, **Missing (Y)**, **Missable Only**.
-  * Role filters: All, Battle, Support, Attendant.
-  * Search input: Instant text filtering by character name or location.
-* **Character Grid / Cards**:
-  * Card design with:
-    * Character name and role badge.
-    * Recruited status indicator (Green checkmark vs. Amber missing icon).
-    * Location badge.
-    * Collapsible/expandable recruitment instructions.
+  * Minimalist filter tabs: `All (121)` | `Recruited (X)` | `Missing (Y)` | `Missable`.
+  * Instant search bar: Fast filtering by hero name, location, or requirement keywords.
+* **Character Directory**:
+  * Clear, compact table / list layout:
+    * Hero Name & Role (Battle / Support / Attendant).
+    * Status: Clear `[Recruited]` or `[Missing]` badge.
+    * Recruitment Location.
+    * Recruitment Instructions / Requirements (concise, step-by-step).
 
 ---
 
