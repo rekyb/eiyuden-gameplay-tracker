@@ -233,33 +233,13 @@ function createCharacterRowHtml(char, isRecruited) {
 // =============================================================================
 
 /**
- * Updates the summary stats cards in the header.
+ * Updates the active save path indicator in the header.
  */
 function updateStats() {
   const cfgPath = state.saveConfig?.save_path || 'UserData0.dat';
   if (dom.statSavePath) {
     dom.statSavePath.textContent = cfgPath;
     dom.statSavePath.title = cfgPath;
-  }
-
-  const status = state.saveStatus;
-  const fileExists = Boolean(status?.file_exists);
-
-  if (dom.statProtagonist) {
-    dom.statProtagonist.textContent = fileExists && status.protagonist ? status.protagonist : '—';
-  }
-  if (dom.statPlaytime) {
-    dom.statPlaytime.textContent = fileExists && status.playtime_formatted ? status.playtime_formatted : '—';
-  }
-  if (dom.statMoney) {
-    dom.statMoney.textContent = fileExists && typeof status.money === 'number'
-      ? `${Number(status.money).toLocaleString()} Baqua`
-      : '—';
-  }
-  if (dom.statHq) {
-    dom.statHq.textContent = fileExists
-      ? `Lv. ${status.town_level ?? 0} (${Number(status.population ?? 0).toLocaleString()} pop)`
-      : '—';
   }
 }
 
