@@ -111,7 +111,15 @@ Pancakes  | Dessert   | Altverden Village | Acquired      | [✓]
 - Clicking the checkbox marks the dish as cooked for the **"Gourmand Hero"** achievement.
 - The row displays a subtle indicator when cooked.
 
-### 5.2 Persistence Architecture
+### 5.2 Tooltips & User Guidance
+- **Column Header Hint**: The `Cooked` table header displays a subtle indicator and tooltip:
+  `Cooked ⓘ` with `title="Click checkbox manually when you have prepared this dish at Kurtz's restaurant for the Gourmand Hero achievement."`
+- **Section Hint**: A discreet, minimalist hint note above the table:
+  `"Tip: Check off dishes manually as you prepare them at Kurtz's restaurant to track your progress toward the Gourmand Hero Steam achievement."`
+- **Individual Checkbox Tooltip**: Every checkbox in the table includes a clear native tooltip:
+  `title="Mark as cooked for the Gourmand Hero achievement"` and accessible `aria-label="Mark [Dish Name] as cooked"`.
+
+### 5.3 Persistence Architecture
 1. **Client Mirror (`localStorage`)**:
    - Key: `eiyuden_cooked_recipes` (JSON array of recipe IDs, e.g. `[3000, 3001, 3026]`).
    - Read synchronously during initialization for zero-latency UI rendering.
@@ -132,21 +140,23 @@ Inside `<section id="view-recipes" class="view-panel" hidden>`:
    - `Acquired: X / 93 (XX.X%)`
    - `Cooked: Y / 93 (YY.X%)`
    - Visual track bar showing acquired percentage.
-2. **Filter Tabs**:
+2. **Guidance Hint**:
+   - A clean hint paragraph: `<p class="recipes-hint">Tip: Check off dishes manually as you prepare them at Kurtz's restaurant to track your progress toward the Gourmand Hero Steam achievement.</p>`
+3. **Filter Tabs**:
    - `All (93)`
    - `Acquired (X)`
    - `Not Acquired (Y)`
    - `Cooked (Z)`
    - `Not Cooked (W)`
-3. **Live Search Box**:
+4. **Live Search Box**:
    - Text search filtering across dish name, category, and location/notes.
-4. **Recipes Table**:
+5. **Recipes Table**:
    - Columns:
      - `Name` (`.col-recipe-name`): Dish name.
      - `Category` (`.col-recipe-cat`): Appetizer, Main, or Dessert badge.
      - `Location / Source` (`.col-recipe-loc`): Where to find it.
      - `Status` (`.col-recipe-status`): `Acquired` (green) or `Not Acquired` (subtle gray).
-     - `Cooked` (`.col-recipe-cooked`): Clickable checkbox `<input type="checkbox">`.
+     - `Cooked` (`.col-recipe-cooked`): Clickable checkbox `<input type="checkbox">` with tooltip.
 
 ### 6.2 Styling Guidelines (`static/style.css`)
 - Dark high-contrast palette consistent with existing theme.
