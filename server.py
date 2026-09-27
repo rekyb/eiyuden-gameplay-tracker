@@ -135,6 +135,7 @@ def save_config(config_data: Dict[str, Any], config_path: str = "config.json") -
 
 def open_native_file_browser(initial_dir: str = "") -> str:
     """Open native OS file picker and return selected file path, or empty string if cancelled."""
+    # 1. Try tkinter
     try:
         import tkinter
         from tkinter import filedialog
@@ -150,8 +151,35 @@ def open_native_file_browser(initial_dir: str = "") -> str:
         root.destroy()
         return filepath or ""
     except Exception as exc:
-        print(f"Native file picker error: {exc}")
-        return ""
+        print(f"Tkinter file picker error, attempting Windows fallback: {exc}")
+
+    # 2. Windows fallback via PowerShell OpenFileDialog
+    if sys.platform == "win32":
+        try:
+            import subprocess
+            target_dir = initial_dir if initial_dir and os.path.isdir(initial_dir) else os.getcwd()
+            # Escaping single quotes in dir
+            safe_dir = target_dir.replace("'", "''")
+            ps_script = (
+                "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
+                "$dialog = New-Object System.Windows.Forms.OpenFileDialog; "
+                "$dialog.Title = 'Select Eiyuden Chronicle Save File'; "
+                "$dialog.Filter = 'Save Files (*.dat)|*.dat|All Files (*.*)|*.*'; "
+                f"$dialog.InitialDirectory = '{safe_dir}'; "
+                "$dialog.TopMost = $true; "
+                "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $dialog.FileName }"
+            )
+            res = subprocess.run(
+                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            return res.stdout.strip()
+        except Exception as exc:
+            print(f"PowerShell file picker error: {exc}")
+
+    return ""
 
 
 class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
