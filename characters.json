@@ -84,7 +84,7 @@
     "name": "Mellore",
     "role": "Battle",
     "location": "Eltisweiss -> Redthroat Ridge",
-    "howToRecruit": "Speak with her in Eltisweiss during 'The Watch Captain\\'s First Job', then track her to Redthroat Ridge and defeat the Nerthus boss.",
+    "howToRecruit": "Speak with her in Eltisweiss during 'The Watch Captain's First Job', then track her to Redthroat Ridge and defeat the Nerthus boss.",
     "missable": false
   },
   {
@@ -92,7 +92,7 @@
     "name": "Yuferius",
     "role": "Battle",
     "location": "Impershi'arc (Story)",
-    "howToRecruit": "Joins automatically after competing in the sandcraft race during 'Shi\\'arcs of a Scale'.",
+    "howToRecruit": "Joins automatically after competing in the sandcraft race during 'Shi'arcs of a Scale'.",
     "missable": false
   },
   {
@@ -172,7 +172,7 @@
     "name": "Yusuke",
     "role": "Battle",
     "location": "Fort Xialuke",
-    "howToRecruit": "Speak to him near the entrance gate of Fort Xialuke during or after 'The Watch Captain\\'s First Job' and recruit him directly.",
+    "howToRecruit": "Speak to him near the entrance gate of Fort Xialuke during or after 'The Watch Captain's First Job' and recruit him directly.",
     "missable": false
   },
   {
@@ -380,7 +380,7 @@
     "name": "Kuroto",
     "role": "Battle",
     "location": "Altverden Village",
-    "howToRecruit": "Speak to him on the west side of Altverden during or after 'The Watch Captain\\'s First Job', then defeat 3 Wild Boars on the world map.",
+    "howToRecruit": "Speak to him on the west side of Altverden during or after 'The Watch Captain's First Job', then defeat 3 Wild Boars on the world map.",
     "missable": false
   },
   {
@@ -388,7 +388,7 @@
     "name": "Clarke",
     "role": "Attendant",
     "location": "Ardinale (Plaza Fountain)",
-    "howToRecruit": "Speak to him near the fountain in Ardinale, purchase the 'Star-Cross\\'d Lovers' play script from the Ardinale general store, and deliver it.",
+    "howToRecruit": "Speak to him near the fountain in Ardinale, purchase the 'Star-Cross'd Lovers' play script from the Ardinale general store, and deliver it.",
     "missable": false
   },
   {
@@ -484,7 +484,7 @@
     "name": "Iugo",
     "role": "Battle",
     "location": "Eltisweiss (Tavern)",
-    "howToRecruit": "Enter the tavern in eastern Eltisweiss during 'The Watch Captain\\'s First Job' and speak with him to recruit him.",
+    "howToRecruit": "Enter the tavern in eastern Eltisweiss during 'The Watch Captain's First Job' and speak with him to recruit him.",
     "missable": false
   },
   {
@@ -540,7 +540,7 @@
     "name": "Falward",
     "role": "Battle",
     "location": "Altverden Village (Northwest House)",
-    "howToRecruit": "Speak to him inside the clinic in northwest Altverden during or after 'Reveal Harlan\\'s Schemes' and deliver 15 Healing Herbs.",
+    "howToRecruit": "Speak to him inside the clinic in northwest Altverden during or after 'Reveal Harlan's Schemes' and deliver 15 Healing Herbs.",
     "missable": false
   },
   {
@@ -596,7 +596,7 @@
     "name": "Francesca",
     "role": "Battle",
     "location": "Altverden Village",
-    "howToRecruit": "Walk up the left stairs in Altverden Village during 'The Watch Captain\\'s First Job' to trigger a cutscene defending her.",
+    "howToRecruit": "Walk up the left stairs in Altverden Village during 'The Watch Captain's First Job' to trigger a cutscene defending her.",
     "missable": false
   },
   {
@@ -628,7 +628,7 @@
     "name": "Mihlu",
     "role": "Battle",
     "location": "Castle HQ (Story)",
-    "howToRecruit": "Joins automatically at Castle HQ after completing both 'Shi\\'arcs of a Scale' and 'The Rune-Lens Research Laboratory'.",
+    "howToRecruit": "Joins automatically at Castle HQ after completing both 'Shi'arcs of a Scale' and 'The Rune-Lens Research Laboratory'.",
     "missable": false
   },
   {
@@ -876,7 +876,7 @@
     "name": "Skyd",
     "role": "Attendant",
     "location": "Impershi'arc (Story)",
-    "howToRecruit": "Joins automatically following the sandcraft race competition during 'Shi\\'arcs of a Scale'.",
+    "howToRecruit": "Joins automatically following the sandcraft race competition during 'Shi'arcs of a Scale'.",
     "missable": false
   },
   {
@@ -892,7 +892,7 @@
     "name": "Galdorf",
     "role": "Battle",
     "location": "Abandoned Mine (Entrance)",
-    "howToRecruit": "Speak to him at the Abandoned Mine entrance during or after 'Reveal Harlan\\'s Schemes'; bring him Palenight Mail armor (found in mine chest or crafted).",
+    "howToRecruit": "Speak to him at the Abandoned Mine entrance during or after 'Reveal Harlan's Schemes'; bring him Palenight Mail armor (found in mine chest or crafted).",
     "missable": false
   },
   {
