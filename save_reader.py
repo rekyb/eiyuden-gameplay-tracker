@@ -91,6 +91,8 @@ def read_save_summary(filepath: str) -> Dict[str, Any]:
         return {
             "file_exists": False,
             "recruited_ids": [],
+            "acquired_recipe_ids": [],
+            "acquired_recipe_count": 0,
             "playtime_seconds": 0.0,
             "playtime_formatted": "0h 0m 0s",
             "money": 0,
@@ -113,6 +115,35 @@ def read_save_summary(filepath: str) -> Dict[str, Any]:
         uid = u.get("_id")
         if isinstance(uid, int):
             recruited_ids.append(uid)
+
+    # Recipe & Restaurant Dishes extraction
+    acquired_recipe_ids_set = set()
+
+    # 1. From Restaurant CookableList
+    rest_data = save_data.get("_fortressTownRestaurantData", {})
+    cookable_list = rest_data.get("<CookableList>k__BackingField", [])
+    if isinstance(cookable_list, list):
+        for item in cookable_list:
+            if isinstance(item, dict):
+                cuisine_id = item.get("<Cuisine>k__BackingField")
+                if isinstance(cuisine_id, int) and 3000 <= cuisine_id <= 3092:
+                    acquired_recipe_ids_set.add(cuisine_id)
+
+    # 2. From Item Obtain Counters (recipe items in 8000s)
+    item_data = save_data.get("_itemObtainData", {})
+    counters = item_data.get("_counters", [])
+    if isinstance(counters, list):
+        for c in counters:
+            if isinstance(c, dict):
+                item_id = c.get("_key")
+                count = c.get("_value", 0)
+                if isinstance(item_id, int) and 8000 <= item_id <= 8201 and count > 0:
+                    # Convert item 80XX to dish 30XX
+                    dish_id = 3000 + (item_id % 1000)
+                    if 3000 <= dish_id <= 3092:
+                        acquired_recipe_ids_set.add(dish_id)
+
+    acquired_recipe_ids = sorted(list(acquired_recipe_ids_set))
 
     # Playtime
     seconds = float(save_data.get("_seconds", 0.0))
@@ -141,6 +172,8 @@ def read_save_summary(filepath: str) -> Dict[str, Any]:
     return {
         "file_exists": True,
         "recruited_ids": recruited_ids,
+        "acquired_recipe_ids": acquired_recipe_ids,
+        "acquired_recipe_count": len(acquired_recipe_ids),
         "playtime_seconds": seconds,
         "playtime_formatted": playtime_formatted,
         "money": money,

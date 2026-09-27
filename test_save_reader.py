@@ -98,6 +98,21 @@ class TestSaveReader(unittest.TestCase):
             sha_after = hashlib.sha256(f.read()).hexdigest()
         self.assertEqual(sha_before, sha_after)
 
+    def test_read_save_summary_extracts_recipes(self):
+        """Verify read_save_summary extracts acquired_recipe_ids from save fixture."""
+        summary = read_save_summary(FIXTURE_PATH)
+        self.assertIn("acquired_recipe_ids", summary)
+        self.assertIsInstance(summary["acquired_recipe_ids"], list)
+        self.assertIn("acquired_recipe_count", summary)
+        self.assertEqual(summary["acquired_recipe_count"], len(summary["acquired_recipe_ids"]))
+        self.assertGreater(len(summary["acquired_recipe_ids"]), 0)
+        # All extracted IDs must be in 3000..3092 range
+        for rid in summary["acquired_recipe_ids"]:
+            self.assertIsInstance(rid, int)
+            self.assertTrue(3000 <= rid <= 3092)
+        # Verify starter recipe (e.g. 3000 Poached Egg) is present
+        self.assertIn(3000, summary["acquired_recipe_ids"])
+
     def test_read_save_summary_nonexistent_file(self):
         """Verify read_save_summary gracefully handles non-existent file."""
         nonexistent_path = os.path.join(
@@ -107,6 +122,8 @@ class TestSaveReader(unittest.TestCase):
         self.assertIsInstance(summary, dict)
         self.assertFalse(summary.get("file_exists"))
         self.assertEqual(summary.get("recruited_ids"), [])
+        self.assertEqual(summary.get("acquired_recipe_ids"), [])
+        self.assertEqual(summary.get("acquired_recipe_count"), 0)
         self.assertEqual(summary.get("money"), 0)
         self.assertEqual(summary.get("town_level"), 0)
         self.assertEqual(summary.get("population"), 0)
