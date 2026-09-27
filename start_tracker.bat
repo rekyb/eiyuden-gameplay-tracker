@@ -2,9 +2,21 @@
 title Eiyuden Chronicle Save Tracker
 echo Starting Eiyuden Chronicle Save Tracker...
 echo.
-python server.py --open
-if errorlevel 1 (
-    echo.
-    echo Failed to start server. Make sure Python 3 is installed.
-    pause
+
+where python >nul 2>nul
+if %errorlevel% equ 0 (
+    python server.py --open
+    goto done
 )
+
+where py >nul 2>nul
+if %errorlevel% equ 0 (
+    py -3 server.py --open
+    goto done
+)
+
+echo.
+echo Failed to find Python. Please ensure Python 3 is installed and added to PATH.
+pause
+
+:done

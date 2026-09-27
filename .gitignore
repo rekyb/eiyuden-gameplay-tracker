@@ -4,3 +4,4 @@ __pycache__/
 backups/
 uploads/
 *.bak*
+UserData*.dat
