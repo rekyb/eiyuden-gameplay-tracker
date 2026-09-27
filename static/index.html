@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eiyuden Chronicle: Hundred Heroes — Save Tracker</title>
+  <meta name="description" content="Minimalist save file tracker and recruitment guide for Eiyuden Chronicle: Hundred Heroes.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header with App Title, Actions, and Save File Info -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <h1 class="app-title">Eiyuden Chronicle &mdash; Save Tracker</h1>
+        <p class="app-subtitle">Recruitment Guide &amp; Progress Dashboard</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="btn-sync" class="btn btn-primary" title="Re-read and synchronize with the active save file">Sync Save</button>
+        <button type="button" id="btn-backup" class="btn btn-secondary" title="Create a timestamped backup of the current save file">Backup Save</button>
+        <button type="button" id="btn-config" class="btn btn-secondary" title="Configure save file location or upload a new save">Settings</button>
+      </div>
+    </div>
+
+    <!-- Active Save Path Info -->
+    <div class="save-path-bar">
+      <span class="path-label">Save File:</span>
+      <code id="stat-save-path" class="path-value">UserData0.dat</code>
+    </div>
+
+    <!-- Save Summary Stats Section -->
+    <section class="stats-grid" aria-label="Playthrough overview statistics">
+      <div class="stat-card">
+        <span class="stat-label">Protagonist</span>
+        <span id="stat-protagonist" class="stat-value">&mdash;</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Playtime</span>
+        <span id="stat-playtime" class="stat-value">&mdash;</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Baqua (Money)</span>
+        <span id="stat-money" class="stat-value">&mdash;</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Headquarters</span>
+        <span id="stat-hq" class="stat-value">&mdash;</span>
+      </div>
+    </section>
+
+    <!-- Recruitment Progress Bar Section -->
+    <section class="progress-section" aria-label="Recruitment progress">
+      <div class="progress-header">
+        <span class="progress-title">Recruitment Progress</span>
+        <div class="progress-meta">
+          <span id="progress-count">0 / 121</span>
+          <span id="progress-text" class="progress-percent">(0.0%)</span>
+        </div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="121" aria-valuenow="0" aria-label="Character recruitment completion">
+        <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+      </div>
+    </section>
+  </header>
+
+  <!-- Main Content: Filters & Character Table -->
+  <main class="main-content">
+    <!-- Filters Toolbar (Sticky in UI) -->
+    <nav class="toolbar" aria-label="Character filters and search">
+      <div class="filter-group" role="tablist" aria-label="Filter character status">
+        <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+          All <span class="badge" id="count-all">121</span>
+        </button>
+        <button type="button" class="filter-tab" data-filter="recruited" role="tab" aria-selected="false">
+          Recruited <span class="badge" id="count-recruited">0</span>
+        </button>
+        <button type="button" class="filter-tab" data-filter="missing" role="tab" aria-selected="false">
+          Missing <span class="badge" id="count-missing">0</span>
+        </button>
+        <button type="button" class="filter-tab" data-filter="missable" role="tab" aria-selected="false">
+          Missable <span class="badge" id="count-missable">0</span>
+        </button>
+      </div>
+
+      <div class="search-filter-controls">
+        <label for="role-filter" class="sr-only">Filter by Role</label>
+        <select id="role-filter" class="select-input" aria-label="Filter by character role">
+          <option value="all">All Roles</option>
+          <option value="Battle">Battle</option>
+          <option value="Support">Support</option>
+          <option value="Attendant">Attendant</option>
+        </select>
+
+        <div class="search-box">
+          <label for="search-input" class="sr-only">Search characters</label>
+          <input type="search" id="search-input" class="search-input" placeholder="Search by name, location, requirements..." autocomplete="off">
+        </div>
+      </div>
+    </nav>
+
+    <!-- Character Table Section -->
+    <section class="table-section" aria-label="Recruitable characters list">
+      <div class="table-wrapper">
+        <table class="characters-table">
+          <thead>
+            <tr>
+              <th scope="col" class="col-status">Status</th>
+              <th scope="col" class="col-name">Hero</th>
+              <th scope="col" class="col-role">Role</th>
+              <th scope="col" class="col-location">Location</th>
+              <th scope="col" class="col-guide">How to Recruit</th>
+            </tr>
+          </thead>
+          <tbody id="characters-tbody">
+            <!-- Populated dynamically via static/app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state" hidden>
+        <p class="empty-title">No characters found</p>
+        <p class="empty-desc">No heroes match your active filter and search query.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Configuration Dialog (Modal) -->
+  <dialog id="config-dialog" class="config-dialog" aria-labelledby="config-title">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2 id="config-title" class="dialog-title">Save File Configuration</h2>
+        <button type="button" id="btn-close-config" class="btn-close" aria-label="Close configuration">&times;</button>
+      </div>
+
+      <div class="dialog-body">
+        <!-- Direct File Path Configuration -->
+        <div class="form-group">
+          <label for="config-path-input" class="form-label">Save File Absolute or Relative Path</label>
+          <div class="input-action-row">
+            <input type="text" id="config-path-input" class="text-input" placeholder="e.g. UserData0.dat or C:\path\to\UserData0.dat" spellcheck="false">
+            <button type="button" id="btn-save-path" class="btn btn-primary">Save Path</button>
+          </div>
+          <p class="form-hint">Points to the local save file on this machine.</p>
+        </div>
+
+        <!-- Auto-detect Steam Path -->
+        <div class="form-group">
+          <button type="button" id="btn-use-steam" class="btn btn-secondary">Detect Steam Save Path</button>
+          <p class="form-hint">Automatically checks default Steam AppData / LocalLow folders for UserData0.dat.</p>
+        </div>
+
+        <div class="divider" role="separator" aria-label="or"><span>OR</span></div>
+
+        <!-- Drag & Drop / File Input -->
+        <div class="form-group">
+          <label class="form-label">Upload Save File</label>
+          <div id="drop-zone" class="drop-zone" tabindex="0" role="region" aria-label="Drop zone for save file upload">
+            <p class="drop-prompt">Drag &amp; drop <strong>UserData0.dat</strong> here, or click to browse</p>
+            <input type="file" id="file-input" class="file-input" accept=".dat">
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Client JavaScript -->
+  <script src="app.js" defer></script>
+</body>
+</html>
