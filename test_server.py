@@ -310,6 +310,18 @@ class TestServerAPI(unittest.TestCase):
             content = resp.read().decode("utf-8")
             self.assertEqual(content, "sample static file")
 
+    def test_get_static_root_direct(self):
+        """GET /style.css or /app.js directly from root serves from static_dir."""
+        subfile = os.path.join(self.static_dir, "root_sample.css")
+        with open(subfile, "w", encoding="utf-8") as f:
+            f.write("body { color: red; }")
+
+        req = urllib.request.Request(self._url("/root_sample.css"), method="GET")
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            content = resp.read().decode("utf-8")
+            self.assertEqual(content, "body { color: red; }")
+
     def test_get_not_found(self):
         """GET /api/nonexistent returns 404."""
         req = urllib.request.Request(self._url("/api/nonexistent"), method="GET")

@@ -273,6 +273,13 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             self.serve_static(rel)
             return
 
+        # Check if requested path directly matches a file in static_dir (e.g. /style.css, /app.js)
+        clean_rel = path.lstrip("/")
+        candidate = os.path.join(self.server.static_dir, clean_rel)
+        if clean_rel and os.path.isfile(candidate):
+            self.serve_static(clean_rel)
+            return
+
         self.send_json({"error": "Not Found"}, status=404)
 
     def do_POST(self) -> None:
