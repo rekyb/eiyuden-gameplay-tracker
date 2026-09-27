@@ -68,5 +68,24 @@ class TestStyleCSS(unittest.TestCase):
         # Check responsive media query
         self.assertIn('@media', self.css)
 
+    def test_recipes_and_navigation_classes_present(self):
+        """Classes for navigation, recipe categories, and footer must be styled."""
+        required = [
+            'top-nav',
+            'nav-tab',
+            'recipes-hint',
+            'recipe-cat-appetizer',
+            'recipe-cat-main',
+            'recipe-cat-dessert',
+            'col-recipe-cooked',
+            'cooked-checkbox',
+            'app-footer',
+            'footer-link',
+        ]
+        for c in required:
+            pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
+            self.assertTrue(re.search(pattern, self.css), f"Required class missing in style.css: {c}")
+
+
 if __name__ == '__main__':
     unittest.main()
