@@ -20,10 +20,14 @@ import save_reader
 
 
 def detect_steam_save_path() -> Optional[str]:
-    """Auto-detect the default Steam save file path for Eiyuden Chronicle.
+    """Auto-detect the Steam save file path for Eiyuden Chronicle.
+
+    Searches standard Steam directories for save files matching UserData*.dat
+    (e.g. UserData0.dat, UserData1.dat, UserData999.dat, etc.) and returns the
+    path to the most recently modified save file.
 
     Returns:
-        The full path to the detected UserData0.dat file, or None if not found.
+        The full path to the latest save file, or None if not found.
     """
     patterns = []
 
@@ -38,7 +42,7 @@ def detect_steam_save_path() -> Optional[str]:
                 "EiyudenChronicle",
                 "*",
                 "SaveData",
-                "UserData0.dat",
+                "UserData*.dat",
             )
         )
 
@@ -53,7 +57,7 @@ def detect_steam_save_path() -> Optional[str]:
                 "EiyudenChronicle",
                 "*",
                 "SaveData",
-                "UserData0.dat",
+                "UserData*.dat",
             )
         )
 
@@ -77,15 +81,24 @@ def detect_steam_save_path() -> Optional[str]:
             "EiyudenChronicle",
             "*",
             "SaveData",
-            "UserData0.dat",
+            "UserData*.dat",
         )
     )
 
+    found_files = []
     for pat in patterns:
-        matches = glob.glob(pat)
-        for match in matches:
+        for match in glob.glob(pat):
             if os.path.isfile(match):
-                return os.path.abspath(match)
+                base_lower = os.path.basename(match).lower()
+                # Exclude metadata/system files that are not player saves
+                if base_lower in ("userdatainfo.dat", "systemdata.dat"):
+                    continue
+                found_files.append(os.path.abspath(match))
+
+    if found_files:
+        # Return the most recently modified save file across slots
+        return max(found_files, key=os.path.getmtime)
+
     return None
 
 
@@ -102,14 +115,18 @@ def load_config(config_path: str = "config.json") -> Dict[str, Any]:
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                if isinstance(data, dict) and "save_path" in data:
+                if isinstance(data, dict) and "save_path" in data and data["save_path"]:
                     return data
         except Exception:
             pass
 
-    # Fallback default: UserData0.dat in current folder if it exists
-    if os.path.isfile("UserData0.dat"):
-        return {"save_path": "UserData0.dat"}
+    # Fallback: check current directory for any UserData*.dat (newest first)
+    local_candidates = [
+        f for f in glob.glob("UserData*.dat")
+        if os.path.basename(f).lower() not in ("userdatainfo.dat", "systemdata.dat")
+    ]
+    if local_candidates:
+        return {"save_path": max(local_candidates, key=os.path.getmtime)}
 
     # Next check auto-detected Steam path
     steam_path = detect_steam_save_path()

@@ -387,7 +387,7 @@ async function handleFileUpload(file) {
   if (!file) return;
 
   if (!file.name.toLowerCase().endsWith('.dat')) {
-    showToast('Invalid file format. Please upload a .dat save file (e.g. UserData0.dat).', 'error');
+    showToast('Invalid file format. Please upload a .dat save file (e.g. UserData0.dat, UserData1.dat).', 'error');
     return;
   }
 

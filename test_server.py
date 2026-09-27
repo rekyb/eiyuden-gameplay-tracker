@@ -394,6 +394,45 @@ class TestConfigHelpers(unittest.TestCase):
         result = server.detect_steam_save_path()
         self.assertTrue(result is None or isinstance(result, str))
 
+    def test_detect_steam_save_path_picks_newest_slot_and_ignores_metadata(self):
+        """detect_steam_save_path should find UserData1.dat, UserData999.dat, and ignore UserDataInfo.dat."""
+        from unittest import mock
+        mock_files = [
+            os.path.join(self.temp_dir, "UserData1.dat"),
+            os.path.join(self.temp_dir, "UserData2.dat"),
+            os.path.join(self.temp_dir, "UserDataInfo.dat"),
+            os.path.join(self.temp_dir, "SystemData.dat"),
+        ]
+        for idx, f in enumerate(mock_files):
+            with open(f, "w") as fp:
+                fp.write("test")
+            # Set increasing mtime
+            os.utime(f, (1000 + idx * 10, 1000 + idx * 10))
+
+        with mock.patch("glob.glob", return_value=mock_files):
+            detected = server.detect_steam_save_path()
+            # UserData2.dat has higher mtime than UserData1.dat, while UserDataInfo is ignored
+            self.assertEqual(detected, os.path.abspath(mock_files[1]))
+
+    def test_load_config_picks_latest_slot(self):
+        """load_config selects newest UserData*.dat when config.json is absent."""
+        orig_cwd = os.getcwd()
+        try:
+            os.chdir(self.temp_dir)
+            f0 = os.path.join(self.temp_dir, "UserData0.dat")
+            f3 = os.path.join(self.temp_dir, "UserData3.dat")
+            with open(f0, "w") as fp:
+                fp.write("0")
+            with open(f3, "w") as fp:
+                fp.write("3")
+            os.utime(f0, (1000, 1000))
+            os.utime(f3, (2000, 2000))
+
+            cfg = server.load_config("nonexistent_config.json")
+            self.assertEqual(cfg.get("save_path"), "UserData3.dat")
+        finally:
+            os.chdir(orig_cwd)
+
 
 if __name__ == "__main__":
     unittest.main()

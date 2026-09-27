@@ -112,17 +112,17 @@
         <div class="form-group">
           <label for="config-path-input" class="form-label">Save File Location</label>
           <div class="input-action-row">
-            <input type="text" id="config-path-input" class="text-input" placeholder="e.g. C:\path\to\UserData0.dat" spellcheck="false">
+            <input type="text" id="config-path-input" class="text-input" placeholder="e.g. C:\path\to\UserData0.dat, UserData1.dat..." spellcheck="false">
             <button type="button" id="btn-browse-file" class="btn btn-secondary" title="Browse files on this computer">Browse...</button>
             <button type="button" id="btn-save-path" class="btn btn-primary">Save Path</button>
           </div>
-          <p class="form-hint">Browse or enter the path to UserData0.dat on this computer to use as the sync source.</p>
+          <p class="form-hint">Browse or enter the path to any save slot file (UserData0.dat, UserData1.dat, etc.) on this computer to use as the sync source.</p>
         </div>
 
         <!-- Auto-detect Steam Path -->
         <div class="form-group">
           <button type="button" id="btn-use-steam" class="btn btn-secondary">Use Detected Steam Path</button>
-          <p class="form-hint">Automatically checks default Steam AppData / LocalLow folders for UserData0.dat.</p>
+          <p class="form-hint">Automatically checks default Steam folders and selects your latest save slot (UserData*.dat).</p>
         </div>
       </div>
     </div>
