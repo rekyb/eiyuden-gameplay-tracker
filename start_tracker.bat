@@ -1,6 +1,6 @@
 @echo off
-title Eiyuden Chronicle Save Tracker
-echo Starting Eiyuden Chronicle Save Tracker...
+title Eiyuden Chronicle Gameplay Tracker
+echo Starting Eiyuden Chronicle Gameplay Tracker...
 echo.
 
 where python >nul 2>nul
