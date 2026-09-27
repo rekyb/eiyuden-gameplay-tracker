@@ -427,6 +427,7 @@ def main() -> None:
     parser.add_argument("--config", default="config.json", help="Path to config.json (default: config.json)")
     parser.add_argument("--characters", default="characters.json", help="Path to characters.json (default: characters.json)")
     parser.add_argument("--static", default="static", help="Path to static assets directory (default: static)")
+    parser.add_argument("--open", action="store_true", help="Automatically open browser on launch")
 
     args = parser.parse_args()
     server = create_server(
@@ -438,8 +439,13 @@ def main() -> None:
     )
 
     actual_port = server.server_address[1]
-    print(f"Eiyuden Save Tracker server running at http://{args.host}:{actual_port}")
+    url = f"http://{args.host}:{actual_port}"
+    print(f"Eiyuden Save Tracker server running at {url}")
     print(f"Loaded config: {args.config}")
+
+    if args.open:
+        import webbrowser, threading
+        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

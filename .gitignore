@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.superpowers/
+backups/
+uploads/
+*.bak*
