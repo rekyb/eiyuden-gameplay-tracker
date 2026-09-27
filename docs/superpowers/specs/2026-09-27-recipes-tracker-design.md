@@ -22,24 +22,37 @@ The **Recipes Tracker** extends the *Eiyuden Chronicle Gameplay Tracker* with a 
 
 ## 2. Navigation Architecture & View Management
 
-### 2.1 Top Navigation Bar
-A horizontal navigation bar sits directly beneath the app header:
+### 2.1 Top Header & Navigation Bar
+The top header is streamlined to contain only the app title and a dedicated **`[ ⚙ Settings ]`** button. The previous `[Sync Save]` and `[Backup Save]` buttons are relocated inside the Settings dialog under a dedicated **Save Actions** section.
+
 ```
-+--------------------------------------------------------------------------+
-|  Eiyuden Chronicle Gameplay Tracker              [Sync Save] [Settings]  |
-|                                                                          |
-|  [ Heroes (98/121) ]    [ Recipes (41/93) ]                              |
-+--------------------------------------------------------------------------+
++-------------------------------------------------------------------------------+
+|  Eiyuden Chronicle Gameplay Tracker                            [ ⚙ Settings ] |
+|                                                                               |
+|  [ Heroes (98/121) ]    [ Recipes (41/93) ]                                   |
++-------------------------------------------------------------------------------+
 ```
-- **Semantic Markup**: `<nav class="top-nav" role="tablist">` with buttons using `role="tab"` and `aria-selected="true|false"`.
+- **App Header**:
+  - Left: Title `Eiyuden Chronicle Gameplay Tracker`.
+  - Right: `[ ⚙ Settings ]` button with crisp minimalist SVG gear icon and text.
+- **Top Navigation Bar**: `<nav class="top-nav" role="tablist">` directly below the header.
 - **Progress Badges**: Both tabs display real-time progress numbers (`Heroes (98/121)`, `Recipes (41/93)`).
 - **Extensible**: New tabs can be added as simple `<button class="nav-tab">` elements without refactoring layout or styling.
 
 ### 2.2 View Switching
 - Two view containers: `#view-heroes` and `#view-recipes`.
 - Switching views updates the DOM container visibility (`hidden` attribute / `.view-active` class) instantaneously without page reload.
-- The shared header (`#stat-save-path`, `[Sync Save]`, and `[Settings]`) remains visible and shared across both views.
+- The shared header and `[ ⚙ Settings ]` remain accessible across all views.
 - Active view is saved in `localStorage['eiyuden_active_view']`, defaulting to `'heroes'`.
+
+### 2.3 Settings Modal (Unified Save Management)
+Inside `#config-dialog`:
+1. **Save File Location Section**:
+   - Location input + `[ Browse... ]` + `[ Save Path ]`
+   - `[ Use Detected Steam Path ]`
+2. **Save Actions Section**:
+   - `[ Sync Save Now ]`: Manually re-reads and decrypts save file to refresh active view.
+   - `[ Backup Save Now ]`: Generates a timestamped, byte-exact backup copy in `backups/`.
 
 ---
 
