@@ -22,6 +22,7 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             port=0,
             config_path=cls.config_file,
             characters_path="characters.json",
+            recipes_path="recipes.json",
             static_dir="static",
         )
         cls.port = cls.http_server.server_address[1]
@@ -98,6 +99,29 @@ class TestEndToEndSaveTracker(unittest.TestCase):
                 os.remove(backup_file)
             except OSError:
                 pass
+
+    def test_e2e_recipes_api_and_assets(self):
+        """93 recipes served, HTML has recipes view and navigation, footer attribution."""
+        # 93 recipes served
+        with urllib.request.urlopen(self._url("/api/recipes")) as resp:
+            self.assertEqual(resp.status, 200)
+            recipes = json.loads(resp.read().decode("utf-8"))
+            self.assertEqual(len(recipes), 93)
+
+        # HTML has recipes view and navigation
+        with urllib.request.urlopen(self._url("/")) as resp:
+            html = resp.read().decode("utf-8")
+            self.assertIn("tab-nav-heroes", html)
+            self.assertIn("tab-nav-recipes", html)
+            self.assertIn("recipes-tbody", html)
+            self.assertIn("Tracker created by Reky B.", html)
+
+        # app.js has recipe-related logic
+        with urllib.request.urlopen(self._url("/app.js")) as resp:
+            js = resp.read().decode("utf-8")
+            self.assertIn("switchView", js)
+            self.assertIn("renderRecipesTable", js)
+            self.assertIn("cookedRecipeIds", js)
 
 
 if __name__ == "__main__":

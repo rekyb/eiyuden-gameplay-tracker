@@ -12,13 +12,25 @@
 // =============================================================================
 
 const state = {
+  // --- Heroes ---
   characters: [],          // Array of 121 character definition objects
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
   searchQuery: '',         // Lowercase trimmed search string
+
+  // --- Recipes ---
+  recipes: [],                      // Array of 93 recipe definition objects
+  acquiredRecipeIds: new Set(),     // Set of acquired recipe IDs from save file
+  cookedRecipeIds: new Set(),       // Set of manually-marked cooked recipe IDs
+  activeRecipesFilter: 'all',       // 'all' | 'acquired' | 'not_acquired' | 'cooked' | 'not_cooked'
+  recipesSearchQuery: '',           // Lowercase trimmed recipes search string
+
+  // --- App ---
+  activeView: 'heroes',    // 'heroes' | 'recipes'
   saveConfig: null,        // Server config: { save_path, file_exists, detected_steam_path }
   saveStatus: null,        // Save summary: { file_exists, recruited_ids, playtime_formatted, money, ... }
 };
+
 
 // =============================================================================
 // DOM Elements Cache
@@ -34,6 +46,14 @@ const dom = {
   btnSavePath: null,
   btnUseSteam: null,
 
+  // Top Navigation Tabs
+  tabNavHeroes: null,
+  tabNavRecipes: null,
+
+  // View Panels
+  viewHeroes: null,
+  viewRecipes: null,
+
   // Stats Display
   statSavePath: null,
   statProtagonist: null,
@@ -41,25 +61,50 @@ const dom = {
   statMoney: null,
   statHq: null,
 
-  // Progress Bar
+  // Heroes Progress Bar
   progressCount: null,
   progressText: null,
   progressFill: null,
   progressTrack: null,
 
-  // Filter Counts & Tabs
+  // Heroes Filter Counts & Tabs
   filterTabs: [],
   countAll: null,
   countRecruited: null,
   countMissing: null,
   countMissable: null,
 
-  // Search Input
+  // Heroes Search Input
   searchInput: null,
 
-  // Table & Empty State
+  // Heroes Table & Empty State
   charactersTbody: null,
   emptyState: null,
+
+  // Recipes Progress
+  recipesProgressFill: null,
+  recipesProgressCount: null,
+  recipesProgressPercent: null,
+  recipesCookedCount: null,
+  recipesCookedPercent: null,
+  recipesProgressBar: null,
+
+  // Recipes Filter Tabs & Search
+  recipesFilterTabs: [],
+  countRecipesAll: null,
+  countRecipesAcquired: null,
+  countRecipesNotAcquired: null,
+  countRecipesCooked: null,
+  countRecipesNotCooked: null,
+  searchRecipesInput: null,
+
+  // Recipes Table & Empty State
+  recipesTbody: null,
+  recipesEmptyState: null,
+
+  // Navigation Badges
+  navCountHeroes: null,
+  navCountRecipes: null,
 
   // Configuration Dialog & Upload
   configDialog: null,
@@ -70,6 +115,7 @@ const dom = {
   // Toast Container
   toastContainer: null,
 };
+
 
 // =============================================================================
 // Utility Functions
@@ -292,6 +338,188 @@ function renderTable() {
 }
 
 // =============================================================================
+// View Switching
+// =============================================================================
+
+/**
+ * Switches the active top-level view (Heroes or Recipes).
+ * @param {'heroes'|'recipes'} viewName
+ */
+function switchView(viewName) {
+  state.activeView = viewName;
+
+  // Toggle view panels
+  if (dom.viewHeroes) dom.viewHeroes.hidden = (viewName !== 'heroes');
+  if (dom.viewRecipes) dom.viewRecipes.hidden = (viewName !== 'recipes');
+
+  // Toggle nav tab active state
+  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+    if (!tab) return;
+    const isActive = tab.dataset.view === viewName;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+  });
+
+  // Persist active view
+  try {
+    localStorage.setItem('eiyuden_active_view', viewName);
+  } catch (_) {}
+}
+
+// =============================================================================
+// Recipes Filtering, Rendering & Cooked Persistence
+// =============================================================================
+
+/**
+ * Debounced cooked IDs sync to backend.
+ */
+let _cookedSyncTimer = null;
+function scheduleCookedSync() {
+  clearTimeout(_cookedSyncTimer);
+  _cookedSyncTimer = setTimeout(async () => {
+    try {
+      await fetch('/api/recipes/cooked', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cooked_ids: Array.from(state.cookedRecipeIds) }),
+      });
+    } catch (_) {
+      // Non-critical — localStorage already saved
+    }
+  }, 800);
+}
+
+/**
+ * Filters a single recipe against the active tab filter and search query.
+ * @param {object} recipe
+ * @param {Set<number>} acquiredIds
+ * @param {Set<number>} cookedIds
+ * @param {string} activeFilter
+ * @param {string} searchQuery
+ * @returns {boolean}
+ */
+function filterRecipe(recipe, acquiredIds, cookedIds, activeFilter, searchQuery) {
+  const isAcquired = acquiredIds.has(recipe.id);
+  const isCooked = cookedIds.has(recipe.id);
+
+  if (activeFilter === 'acquired' && !isAcquired) return false;
+  if (activeFilter === 'not_acquired' && isAcquired) return false;
+  if (activeFilter === 'cooked' && !isCooked) return false;
+  if (activeFilter === 'not_cooked' && isCooked) return false;
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = (recipe.name || '').toLowerCase().includes(q);
+    const catMatch = (recipe.category || '').toLowerCase().includes(q);
+    const locMatch = (recipe.location || '').toLowerCase().includes(q);
+    const howMatch = (recipe.howToObtain || '').toLowerCase().includes(q);
+    if (!nameMatch && !catMatch && !locMatch && !howMatch) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Returns category badge HTML for a recipe.
+ * @param {string} category - 'Appetizer' | 'Main' | 'Dessert'
+ * @returns {string}
+ */
+function recipeCategoryBadge(category) {
+  const cls = {
+    'Appetizer': 'recipe-cat-appetizer',
+    'Main': 'recipe-cat-main',
+    'Dessert': 'recipe-cat-dessert',
+  }[category] || '';
+  return `<span class="recipe-cat-badge ${cls}">${escapeHtml(category)}</span>`;
+}
+
+/**
+ * Generates table row HTML for a recipe.
+ * @param {object} recipe
+ * @param {boolean} isAcquired
+ * @param {boolean} isCooked
+ * @returns {string}
+ */
+function createRecipeRowHtml(recipe, isAcquired, isCooked) {
+  const statusBadge = isAcquired
+    ? '<span class="status-badge status-recruited">Acquired</span>'
+    : '<span class="status-badge status-missing">Not Acquired</span>';
+
+  const checkedAttr = isCooked ? 'checked' : '';
+  const tooltip = 'Check manually when you\'ve cooked this dish at Kurtz\'s restaurant';
+
+  return `
+    <tr>
+      <td class="col-recipe-name">${escapeHtml(recipe.name)}</td>
+      <td class="col-recipe-cat">${recipeCategoryBadge(recipe.category)}</td>
+      <td class="col-recipe-loc">${escapeHtml(recipe.location || '—')}</td>
+      <td class="col-recipe-status">${statusBadge}</td>
+      <td class="col-recipe-cooked">
+        <input type="checkbox" class="cooked-checkbox" data-recipe-id="${recipe.id}"
+          ${checkedAttr} title="${tooltip}" aria-label="Mark ${escapeHtml(recipe.name)} as cooked">
+      </td>
+    </tr>
+  `;
+}
+
+/**
+ * Updates recipes progress bar and filter badge counts.
+ */
+function updateRecipesProgress() {
+  const total = state.recipes.length;
+  const acquired = state.acquiredRecipeIds.size;
+  const cooked = state.cookedRecipeIds.size;
+  const notAcquired = total - acquired;
+  const notCooked = total - cooked;
+  const pctAcquired = total > 0 ? (acquired / total) * 100 : 0;
+  const pctCooked = total > 0 ? (cooked / total) * 100 : 0;
+
+  if (dom.recipesProgressFill) dom.recipesProgressFill.style.width = `${pctAcquired}%`;
+  if (dom.recipesProgressBar) dom.recipesProgressBar.setAttribute('aria-valuenow', String(acquired));
+  if (dom.recipesProgressCount) dom.recipesProgressCount.textContent = `${acquired} / ${total}`;
+  if (dom.recipesProgressPercent) dom.recipesProgressPercent.textContent = `(${pctAcquired.toFixed(1)}%)`;
+  if (dom.recipesCookedCount) dom.recipesCookedCount.textContent = `${cooked} / ${total}`;
+  if (dom.recipesCookedPercent) dom.recipesCookedPercent.textContent = `(${pctCooked.toFixed(1)}%)`;
+
+  if (dom.countRecipesAll) dom.countRecipesAll.textContent = String(total);
+  if (dom.countRecipesAcquired) dom.countRecipesAcquired.textContent = String(acquired);
+  if (dom.countRecipesNotAcquired) dom.countRecipesNotAcquired.textContent = String(notAcquired);
+  if (dom.countRecipesCooked) dom.countRecipesCooked.textContent = String(cooked);
+  if (dom.countRecipesNotCooked) dom.countRecipesNotCooked.textContent = String(notCooked);
+
+  if (dom.navCountRecipes) dom.navCountRecipes.textContent = `${acquired}/93`;
+}
+
+/**
+ * Filters recipes and renders HTML table rows.
+ */
+function renderRecipesTable() {
+  if (!dom.recipesTbody) return;
+
+  const filtered = state.recipes.filter(r =>
+    filterRecipe(
+      r,
+      state.acquiredRecipeIds,
+      state.cookedRecipeIds,
+      state.activeRecipesFilter,
+      state.recipesSearchQuery
+    )
+  );
+
+  if (filtered.length === 0) {
+    dom.recipesTbody.innerHTML = '';
+    if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = false;
+  } else {
+    if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = true;
+    dom.recipesTbody.innerHTML = filtered
+      .map(r => createRecipeRowHtml(r, state.acquiredRecipeIds.has(r.id), state.cookedRecipeIds.has(r.id)))
+      .join('');
+  }
+
+  updateRecipesProgress();
+}
+
+// =============================================================================
 // API Actions & Data Syncing
 // =============================================================================
 
@@ -309,19 +537,23 @@ async function syncSave({ silent = false } = {}) {
     if (!res.ok) {
       state.saveStatus = data;
       state.recruitedIds = new Set();
+      state.acquiredRecipeIds = new Set();
       updateStats();
       updateProgress();
       renderTable();
+      renderRecipesTable();
       showToast(`Could not read save: ${data.error || res.statusText}`, 'error');
       return false;
     }
 
     state.saveStatus = data;
     state.recruitedIds = new Set(data.recruited_ids || []);
+    state.acquiredRecipeIds = new Set(data.acquired_recipe_ids || []);
 
     updateStats();
     updateProgress();
     renderTable();
+    renderRecipesTable();
 
     if (!data.file_exists) {
       if (!silent) {
@@ -343,6 +575,7 @@ async function syncSave({ silent = false } = {}) {
     return false;
   }
 }
+
 
 /**
  * Creates a timestamped backup of the current save file.
@@ -443,28 +676,67 @@ function cacheDomElements() {
   dom.btnSavePath = document.getElementById('btn-save-path');
   dom.btnUseSteam = document.getElementById('btn-use-steam');
 
+  // Top Navigation
+  dom.tabNavHeroes = document.getElementById('tab-nav-heroes');
+  dom.tabNavRecipes = document.getElementById('tab-nav-recipes');
+  dom.navCountHeroes = document.getElementById('nav-count-heroes');
+  dom.navCountRecipes = document.getElementById('nav-count-recipes');
+
+  // View Panels
+  dom.viewHeroes = document.getElementById('view-heroes');
+  dom.viewRecipes = document.getElementById('view-recipes');
+
+  // Stats Display
   dom.statSavePath = document.getElementById('stat-save-path');
   dom.statProtagonist = document.getElementById('stat-protagonist');
   dom.statPlaytime = document.getElementById('stat-playtime');
   dom.statMoney = document.getElementById('stat-money');
   dom.statHq = document.getElementById('stat-hq');
 
+  // Heroes Progress Bar
   dom.progressCount = document.getElementById('progress-count');
   dom.progressText = document.getElementById('progress-text');
   dom.progressFill = document.getElementById('progress-fill');
   dom.progressTrack = document.querySelector('.progress-track');
 
-  dom.filterTabs = Array.from(document.querySelectorAll('.filter-tab'));
+  // Heroes Filter Tabs & Counts
+  dom.filterTabs = Array.from(document.querySelectorAll('#view-heroes .filter-tab'));
   dom.countAll = document.getElementById('count-all');
   dom.countRecruited = document.getElementById('count-recruited');
   dom.countMissing = document.getElementById('count-missing');
   dom.countMissable = document.getElementById('count-missable');
 
+  // Heroes Search
   dom.searchInput = document.getElementById('search-input');
 
+  // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
   dom.emptyState = document.getElementById('empty-state');
 
+  // Recipes Progress
+  dom.recipesProgressFill = document.getElementById('recipes-progress-fill');
+  dom.recipesProgressBar = document.getElementById('recipes-progress-bar');
+  dom.recipesProgressCount = document.getElementById('recipes-progress-count');
+  dom.recipesProgressPercent = document.getElementById('recipes-progress-percent');
+  dom.recipesCookedCount = document.getElementById('recipes-cooked-count');
+  dom.recipesCookedPercent = document.getElementById('recipes-cooked-percent');
+
+  // Recipes Filter Tabs & Counts
+  dom.recipesFilterTabs = Array.from(document.querySelectorAll('#recipes-filter-tabs .filter-tab'));
+  dom.countRecipesAll = document.getElementById('count-recipes-all');
+  dom.countRecipesAcquired = document.getElementById('count-recipes-acquired');
+  dom.countRecipesNotAcquired = document.getElementById('count-recipes-not-acquired');
+  dom.countRecipesCooked = document.getElementById('count-recipes-cooked');
+  dom.countRecipesNotCooked = document.getElementById('count-recipes-not-cooked');
+
+  // Recipes Search
+  dom.searchRecipesInput = document.getElementById('search-recipes-input');
+
+  // Recipes Table
+  dom.recipesTbody = document.getElementById('recipes-tbody');
+  dom.recipesEmptyState = document.getElementById('recipes-empty-state');
+
+  // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
   dom.configPathInput = document.getElementById('config-path-input');
   dom.dropZone = document.getElementById('drop-zone');
@@ -472,6 +744,7 @@ function cacheDomElements() {
 
   dom.toastContainer = document.getElementById('toast-container');
 }
+
 
 /**
  * Registers all user interaction event listeners.
@@ -498,7 +771,15 @@ function setupEventListeners() {
     dom.btnBackup.addEventListener('click', createBackup);
   }
 
-  // Filter Status Tabs
+  // Top Navigation Tab Switching
+  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+    if (!tab) return;
+    tab.addEventListener('click', () => {
+      switchView(tab.dataset.view || 'heroes');
+    });
+  });
+
+  // Heroes Filter Status Tabs
   dom.filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       dom.filterTabs.forEach(t => {
@@ -511,6 +792,63 @@ function setupEventListeners() {
       renderTable();
     });
   });
+
+  // Recipes Filter Tabs
+  dom.recipesFilterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      dom.recipesFilterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      state.activeRecipesFilter = tab.dataset.filter || 'all';
+      renderRecipesTable();
+    });
+  });
+
+  // Recipes Search Input
+  if (dom.searchRecipesInput) {
+    dom.searchRecipesInput.addEventListener('input', (e) => {
+      state.recipesSearchQuery = e.target.value.trim().toLowerCase();
+      renderRecipesTable();
+    });
+
+    dom.searchRecipesInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.searchRecipesInput.value) {
+        dom.searchRecipesInput.value = '';
+        state.recipesSearchQuery = '';
+        renderRecipesTable();
+      }
+    });
+  }
+
+  // Cooked Checkbox — event delegation on recipes tbody
+  if (dom.recipesTbody) {
+    dom.recipesTbody.addEventListener('change', (e) => {
+      const checkbox = e.target.closest('.cooked-checkbox');
+      if (!checkbox) return;
+      const recipeId = parseInt(checkbox.dataset.recipeId, 10);
+      if (isNaN(recipeId)) return;
+
+      if (checkbox.checked) {
+        state.cookedRecipeIds.add(recipeId);
+      } else {
+        state.cookedRecipeIds.delete(recipeId);
+      }
+
+      // Persist to localStorage immediately
+      try {
+        localStorage.setItem('eiyuden_cooked_recipes', JSON.stringify(Array.from(state.cookedRecipeIds)));
+      } catch (_) {}
+
+      // Debounced sync to backend
+      scheduleCookedSync();
+
+      // Update counters without full re-render (checkbox already reflects state)
+      updateRecipesProgress();
+    });
+  }
 
   // Instant Search Input
   if (dom.searchInput) {
@@ -693,10 +1031,12 @@ async function init() {
   setupEventListeners();
 
   try {
-    // Fetch server configuration and character definitions in parallel
-    const [cfgRes, charRes] = await Promise.all([
+    // Fetch server configuration, characters, recipes, and cooked state in parallel
+    const [cfgRes, charRes, recipeRes, cookedRes] = await Promise.all([
       fetch('/api/config'),
       fetch('/api/characters'),
+      fetch('/api/recipes'),
+      fetch('/api/recipes/cooked'),
     ]);
 
     if (cfgRes.ok) {
@@ -711,7 +1051,35 @@ async function init() {
       showToast('Could not load characters catalog', 'error');
     }
 
-    // Attempt localStorage restore if server path doesn't exist but localStorage has one
+    if (recipeRes.ok) {
+      state.recipes = await recipeRes.json();
+    } else {
+      showToast('Could not load recipes catalog', 'error');
+    }
+
+    // Restore cooked IDs: merge localStorage + server config
+    const serverCookedIds = cookedRes.ok ? ((await cookedRes.json()).cooked_ids || []) : [];
+    let localCookedIds = [];
+    try {
+      const raw = localStorage.getItem('eiyuden_cooked_recipes');
+      if (raw) localCookedIds = JSON.parse(raw);
+    } catch (_) {}
+    const mergedCooked = new Set([...serverCookedIds, ...localCookedIds]);
+    state.cookedRecipeIds = mergedCooked;
+
+    // If merged differs from server, sync back
+    if (mergedCooked.size !== serverCookedIds.length) {
+      try {
+        await fetch('/api/recipes/cooked', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cooked_ids: Array.from(mergedCooked) }),
+        });
+        localStorage.setItem('eiyuden_cooked_recipes', JSON.stringify(Array.from(mergedCooked)));
+      } catch (_) {}
+    }
+
+    // Attempt localStorage restore of save path
     try {
       const savedLocalPath = localStorage.getItem('eiyuden_save_path');
       if (savedLocalPath && state.saveConfig && !state.saveConfig.file_exists && state.saveConfig.save_path !== savedLocalPath) {
@@ -731,14 +1099,27 @@ async function init() {
       // Ignore localStorage sync issues
     }
 
-    // Fetch active save status
+    // Fetch active save status (updates recruitedIds + acquiredRecipeIds)
     await syncSave({ silent: true });
+
+    // Restore saved active view
+    try {
+      const savedView = localStorage.getItem('eiyuden_active_view');
+      if (savedView === 'recipes') {
+        switchView('recipes');
+      } else {
+        switchView('heroes');
+      }
+    } catch (_) {
+      switchView('heroes');
+    }
   } catch (err) {
     showToast(`Initialization failed: ${err.message}`, 'error');
   } finally {
     updateStats();
     updateProgress();
     renderTable();
+    renderRecipesTable();
   }
 }
 
@@ -762,14 +1143,22 @@ if (typeof module !== 'undefined' && module.exports) {
     escapeHtml,
     showToast,
     filterCharacter,
+    filterRecipe,
     calculateProgress,
     createCharacterRowHtml,
+    createRecipeRowHtml,
+    recipeCategoryBadge,
     updateStats,
     updateProgress,
+    updateRecipesProgress,
     renderTable,
+    renderRecipesTable,
+    switchView,
+    scheduleCookedSync,
     syncSave,
     createBackup,
     handleFileUpload,
     init,
   };
 }
+
