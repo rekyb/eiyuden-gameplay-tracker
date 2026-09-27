@@ -15,7 +15,6 @@ const state = {
   characters: [],          // Array of 121 character definition objects
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
-  roleFilter: 'all',       // 'all' | 'Battle' | 'Support' | 'Attendant'
   searchQuery: '',         // Lowercase trimmed search string
   saveConfig: null,        // Server config: { save_path, file_exists, detected_steam_path }
   saveStatus: null,        // Save summary: { file_exists, recruited_ids, playtime_formatted, money, ... }
@@ -55,8 +54,7 @@ const dom = {
   countMissing: null,
   countMissable: null,
 
-  // Search & Role Dropdown
-  roleFilter: null,
+  // Search Input
   searchInput: null,
 
   // Table & Empty State
@@ -127,24 +125,20 @@ function showToast(message, type = 'info', duration = 4000) {
 }
 
 /**
- * Filters a single character based on status, role, and text search.
+ * Filters a single character based on status and text search.
  * @param {object} char - Character object from characters.json
  * @param {Set<number>} recruitedIds - Set of recruited character IDs
  * @param {string} activeFilter - 'all' | 'recruited' | 'missing' | 'missable'
- * @param {string} roleFilter - 'all' | 'Battle' | 'Support' | 'Attendant'
  * @param {string} searchQuery - Search query in lowercase
  * @returns {boolean} Whether character matches all criteria
  */
-function filterCharacter(char, recruitedIds, activeFilter, roleFilter, searchQuery) {
+function filterCharacter(char, recruitedIds, activeFilter, searchQuery) {
   const isRecruited = recruitedIds.has(char.id);
 
   // Status Filter Tab
   if (activeFilter === 'recruited' && !isRecruited) return false;
   if (activeFilter === 'missing' && isRecruited) return false;
   if (activeFilter === 'missable' && !char.missable) return false;
-
-  // Role Dropdown
-  if (roleFilter && roleFilter !== 'all' && char.role !== roleFilter) return false;
 
   // Instant Text Search (name, location, recruitment notes, ID)
   if (searchQuery) {
@@ -204,27 +198,23 @@ function calculateProgress(characters, recruitedIds) {
 function createCharacterRowHtml(char, isRecruited) {
   const statusBadge = isRecruited
     ? '<span class="status-badge status-recruited">Recruited</span>'
-    : '<span class="status-badge status-missing">Missing</span>';
+    : '<span class="status-badge status-missing">Not Recruited</span>';
 
   const missableBadge = char.missable
     ? '<span class="badge-missable">Missable</span>'
     : '';
 
-  const roleClass = (char.role || '').toLowerCase();
-  const roleBadge = `<span class="role-badge role-${roleClass}">${escapeHtml(char.role || '—')}</span>`;
-
   return `
     <tr class="${isRecruited ? 'is-recruited' : ''}">
-      <td class="col-status">${statusBadge}</td>
       <td class="col-name">
         <div class="hero-cell">
           <span class="hero-name">${escapeHtml(char.name)}</span>
           ${missableBadge}
         </div>
       </td>
-      <td class="col-role">${roleBadge}</td>
       <td class="col-location">${escapeHtml(char.location || '—')}</td>
       <td class="col-guide">${escapeHtml(char.howToRecruit || '—')}</td>
+      <td class="col-status">${statusBadge}</td>
     </tr>
   `;
 }
@@ -281,7 +271,6 @@ function renderTable() {
       char,
       state.recruitedIds,
       state.activeFilter,
-      state.roleFilter,
       state.searchQuery
     )
   );
@@ -471,7 +460,6 @@ function cacheDomElements() {
   dom.countMissing = document.getElementById('count-missing');
   dom.countMissable = document.getElementById('count-missable');
 
-  dom.roleFilter = document.getElementById('role-filter');
   dom.searchInput = document.getElementById('search-input');
 
   dom.charactersTbody = document.getElementById('characters-tbody');
@@ -523,14 +511,6 @@ function setupEventListeners() {
       renderTable();
     });
   });
-
-  // Role Dropdown Filter
-  if (dom.roleFilter) {
-    dom.roleFilter.addEventListener('change', (e) => {
-      state.roleFilter = e.target.value;
-      renderTable();
-    });
-  }
 
   // Instant Search Input
   if (dom.searchInput) {

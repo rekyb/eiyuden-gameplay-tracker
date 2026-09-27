@@ -490,30 +490,25 @@ body {
 }
 
 /* Table Column Widths & Alignments */
-.col-status {
-  width: 120px;
-  white-space: nowrap;
-}
-
 .col-name {
-  width: 170px;
+  width: 180px;
   font-weight: 600;
   white-space: nowrap;
 }
 
-.col-role {
-  width: 120px;
-  white-space: nowrap;
-}
-
 .col-location {
-  width: 200px;
+  width: 220px;
   color: var(--text-secondary);
 }
 
 .col-guide {
   line-height: 1.45;
   color: var(--text-primary);
+}
+
+.col-status {
+  width: 140px;
+  white-space: nowrap;
 }
 
 /* Hero cell and badges inside table */
