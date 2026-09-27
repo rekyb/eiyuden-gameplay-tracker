@@ -180,6 +180,14 @@ Inside `<section id="view-recipes" class="view-panel" hidden>`:
   - Main: Subtle amber/orange border and tint.
   - Dessert: Subtle purple/pink border and tint.
 
+### 6.3 Minimalist Footer (`static/index.html`)
+A clean, unobtrusive semantic `<footer>` placed at the bottom of the page:
+- **Left / Top**: Muted copyright and game trademark notice:
+  `"Eiyuden Chronicle: Hundred Heroes is a trademark of Rabbit & Bear Studios and 505 Games. Created for personal gameplay tracking."`
+- **Right / Bottom**: Link to GitHub repository:
+  `<a href="https://github.com/rekyb/eiyuden-gameplay-tracker" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Repository</a>`
+- Styled with muted typography (`--text-muted`), subtle top border, and comfortable padding.
+
 ---
 
 ## 7. Backend API Specification (`server.py`)
