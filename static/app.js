@@ -16,6 +16,7 @@ const state = {
   characters: [],          // Array of 121 character definition objects
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
+  activeChapterFilter: 'all', // 'all' | chapter arc name string
   searchQuery: '',         // Lowercase trimmed search string
 
   // --- Recipes ---
@@ -90,8 +91,9 @@ const dom = {
   countMissing: null,
   countMissable: null,
 
-  // Heroes Search Input
+  // Heroes Search & Chapter Filter Input
   searchInput: null,
+  chapterFilter: null,
 
   // Heroes Table & Empty State
   charactersTbody: null,
@@ -239,9 +241,10 @@ function showToast(message, type = 'info', duration = 4000) {
  * @param {Set<number>} recruitedIds - Set of recruited character IDs
  * @param {string} activeFilter - 'all' | 'recruited' | 'missing' | 'missable'
  * @param {string} searchQuery - Search query in lowercase
+ * @param {string} [activeChapterFilter='all'] - Chapter filter string or 'all'
  * @returns {boolean} Whether character matches all criteria
  */
-function filterCharacter(char, recruitedIds, activeFilter, searchQuery) {
+function filterCharacter(char, recruitedIds, activeFilter, searchQuery, activeChapterFilter = 'all') {
   const isRecruited = recruitedIds.has(char.id);
 
   // Status Filter Tab
@@ -249,15 +252,21 @@ function filterCharacter(char, recruitedIds, activeFilter, searchQuery) {
   if (activeFilter === 'missing' && isRecruited) return false;
   if (activeFilter === 'missable' && !char.missable) return false;
 
-  // Instant Text Search (name, location, recruitment notes, ID)
+  // Chapter Filter Dropdown
+  if (activeChapterFilter && activeChapterFilter !== 'all' && char.chapter !== activeChapterFilter) {
+    return false;
+  }
+
+  // Instant Text Search (name, location, recruitment notes, chapter, ID)
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     const nameMatch = (char.name || '').toLowerCase().includes(q);
     const locMatch = (char.location || '').toLowerCase().includes(q);
     const howMatch = (char.howToRecruit || '').toLowerCase().includes(q);
+    const chapterMatch = (char.chapter || '').toLowerCase().includes(q);
     const idMatch = String(char.id).includes(q);
 
-    if (!nameMatch && !locMatch && !howMatch && !idMatch) {
+    if (!nameMatch && !locMatch && !howMatch && !chapterMatch && !idMatch) {
       return false;
     }
   }
@@ -321,6 +330,9 @@ function createCharacterRowHtml(char, isRecruited) {
           ${missableBadge}
         </div>
       </td>
+      <td class="col-chapter">
+        <span class="chapter-badge">${escapeHtml(char.chapter || '—')}</span>
+      </td>
       <td class="col-location">${escapeHtml(char.location || '—')}</td>
       <td class="col-guide">${escapeHtml(char.howToRecruit || '—')}</td>
       <td class="col-status">${statusBadge}</td>
@@ -368,7 +380,8 @@ function renderTable() {
       char,
       state.recruitedIds,
       state.activeFilter,
-      state.searchQuery
+      state.searchQuery,
+      state.activeChapterFilter
     )
   );
 
@@ -1127,8 +1140,9 @@ function cacheDomElements() {
   dom.countMissing = document.getElementById('count-missing');
   dom.countMissable = document.getElementById('count-missable');
 
-  // Heroes Search
+  // Heroes Search & Chapter Filter
   dom.searchInput = document.getElementById('search-input');
+  dom.chapterFilter = document.getElementById('chapter-filter');
 
   // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
@@ -1532,6 +1546,14 @@ function setupEventListeners() {
       }
     }
   });
+
+  // Chapter Filter Dropdown
+  if (dom.chapterFilter) {
+    dom.chapterFilter.addEventListener('change', (e) => {
+      state.activeChapterFilter = e.target.value;
+      renderTable();
+    });
+  }
 
   // Instant Search Input
   if (dom.searchInput) {
