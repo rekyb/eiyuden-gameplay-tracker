@@ -947,7 +947,7 @@ function setupEventListeners() {
     });
   }
 
-  // Detect Steam Path Button
+  // Auto-Detect Save Path Button
   if (dom.btnUseSteam && dom.configPathInput) {
     dom.btnUseSteam.addEventListener('click', async () => {
       dom.btnUseSteam.disabled = true;
@@ -956,15 +956,15 @@ function setupEventListeners() {
         if (res.ok) {
           state.saveConfig = await res.json();
         }
-        const detected = state.saveConfig?.detected_steam_path;
+        const detected = state.saveConfig?.detected_save_path || state.saveConfig?.detected_steam_path;
         if (detected) {
           dom.configPathInput.value = detected;
-          showToast('Detected Steam save path applied to input', 'info');
+          showToast('Auto-detected save path applied to input', 'info');
         } else {
-          showToast('No Steam save path detected automatically', 'info');
+          showToast('No save file detected automatically (try Browse instead)', 'info');
         }
       } catch (err) {
-        showToast(`Error detecting Steam path: ${err.message}`, 'error');
+        showToast(`Error detecting save path: ${err.message}`, 'error');
       } finally {
         dom.btnUseSteam.disabled = false;
       }

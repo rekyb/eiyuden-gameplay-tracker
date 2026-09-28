@@ -66,6 +66,7 @@ class TestServerAPI(unittest.TestCase):
             data = json.loads(resp.read().decode("utf-8"))
             self.assertIn("save_path", data)
             self.assertIn("file_exists", data)
+            self.assertIn("detected_save_path", data)
             self.assertIn("detected_steam_path", data)
             self.assertTrue(data["file_exists"])
             self.assertEqual(data["save_path"], self.test_save_copy)
@@ -425,13 +426,14 @@ class TestConfigHelpers(unittest.TestCase):
         cfg = server.load_config(self.config_path)
         self.assertEqual(cfg["save_path"], "custom/path.dat")
 
-    def test_detect_steam_save_path(self):
+    def test_detect_save_path(self):
         # Should return str if path exists or None if not, without raising
-        result = server.detect_steam_save_path()
+        result = server.detect_save_path()
         self.assertTrue(result is None or isinstance(result, str))
+        self.assertEqual(server.detect_steam_save_path(), result)
 
-    def test_detect_steam_save_path_picks_newest_slot_and_ignores_metadata(self):
-        """detect_steam_save_path should find UserData1.dat, UserData999.dat, and ignore UserDataInfo.dat."""
+    def test_detect_save_path_picks_newest_slot_and_ignores_metadata(self):
+        """detect_save_path should find UserData1.dat, UserData999.dat, and ignore UserDataInfo.dat."""
         from unittest import mock
         mock_files = [
             os.path.join(self.temp_dir, "UserData1.dat"),
@@ -446,9 +448,11 @@ class TestConfigHelpers(unittest.TestCase):
             os.utime(f, (1000 + idx * 10, 1000 + idx * 10))
 
         with mock.patch("glob.glob", return_value=mock_files):
-            detected = server.detect_steam_save_path()
+            detected = server.detect_save_path()
             # UserData2.dat has higher mtime than UserData1.dat, while UserDataInfo is ignored
             self.assertEqual(detected, os.path.abspath(mock_files[1]))
+            # detect_steam_save_path returns identical result
+            self.assertEqual(server.detect_steam_save_path(), os.path.abspath(mock_files[1]))
 
     def test_load_config_picks_latest_slot(self):
         """load_config selects newest UserData*.dat when config.json is absent."""

@@ -19,22 +19,23 @@ from typing import Dict, Any, Optional
 import save_reader
 
 
-def detect_steam_save_path() -> Optional[str]:
-    """Auto-detect the Steam save file path for Eiyuden Chronicle.
+def detect_save_path() -> Optional[str]:
+    """Auto-detect the save file path for Eiyuden Chronicle across platforms.
 
-    Searches standard Steam directories for save files matching UserData*.dat
-    (e.g. UserData0.dat, UserData1.dat, UserData999.dat, etc.) and returns the
-    path to the most recently modified save file.
+    Searches standard directories for Steam, GOG, and PC Game Pass / Xbox app
+    for save files matching UserData*.dat (e.g. UserData0.dat, UserData1.dat, etc.)
+    and returns the path to the most recently modified save file.
 
     Returns:
         The full path to the latest save file, or None if not found.
     """
     patterns = []
 
-    # Windows LocalLow path
+    # Windows LocalLow path (Steam & GOG standard Unity paths)
     local_app_data = os.environ.get("LOCALAPPDATA")
     if local_app_data:
         locallow = os.path.join(os.path.dirname(local_app_data), "LocalLow")
+        # Steam & profile-based stores
         patterns.append(
             os.path.join(
                 locallow,
@@ -45,9 +46,48 @@ def detect_steam_save_path() -> Optional[str]:
                 "UserData*.dat",
             )
         )
+        patterns.append(
+            os.path.join(
+                locallow,
+                "505 Games S_p_A",
+                "EiyudenChronicle",
+                "*",
+                "UserData*.dat",
+            )
+        )
+        # GOG / direct without user-ID subfolder
+        patterns.append(
+            os.path.join(
+                locallow,
+                "505 Games S_p_A",
+                "EiyudenChronicle",
+                "SaveData",
+                "UserData*.dat",
+            )
+        )
+        patterns.append(
+            os.path.join(
+                locallow,
+                "505 Games S_p_A",
+                "EiyudenChronicle",
+                "UserData*.dat",
+            )
+        )
+        # Windows Xbox / PC Game Pass Packages folder
+        packages_dir = os.path.join(local_app_data, "Packages")
+        if os.path.isdir(packages_dir):
+            patterns.append(
+                os.path.join(
+                    packages_dir,
+                    "*EiyudenChronicle*",
+                    "**",
+                    "UserData*.dat",
+                )
+            )
 
     user_profile = os.environ.get("USERPROFILE")
     if user_profile:
+        # Steam & GOG in user profile AppData/LocalLow
         patterns.append(
             os.path.join(
                 user_profile,
@@ -57,6 +97,27 @@ def detect_steam_save_path() -> Optional[str]:
                 "EiyudenChronicle",
                 "*",
                 "SaveData",
+                "UserData*.dat",
+            )
+        )
+        patterns.append(
+            os.path.join(
+                user_profile,
+                "AppData",
+                "LocalLow",
+                "505 Games S_p_A",
+                "EiyudenChronicle",
+                "SaveData",
+                "UserData*.dat",
+            )
+        )
+        # Saved Games directory (GOG / DRM-free)
+        patterns.append(
+            os.path.join(
+                user_profile,
+                "Saved Games",
+                "EiyudenChronicle",
+                "**",
                 "UserData*.dat",
             )
         )
@@ -84,10 +145,27 @@ def detect_steam_save_path() -> Optional[str]:
             "UserData*.dat",
         )
     )
+    # GOG / Heroic / Lutris on Linux
+    patterns.append(
+        os.path.join(
+            home,
+            "Games",
+            "*",
+            "drive_c",
+            "users",
+            "*",
+            "AppData",
+            "LocalLow",
+            "505 Games S_p_A",
+            "EiyudenChronicle",
+            "**",
+            "UserData*.dat",
+        )
+    )
 
     found_files = []
     for pat in patterns:
-        for match in glob.glob(pat):
+        for match in glob.glob(pat, recursive=True):
             if os.path.isfile(match):
                 base_lower = os.path.basename(match).lower()
                 # Exclude metadata/system files that are not player saves
@@ -100,6 +178,10 @@ def detect_steam_save_path() -> Optional[str]:
         return max(found_files, key=os.path.getmtime)
 
     return None
+
+
+# Alias for backward compatibility
+detect_steam_save_path = detect_save_path
 
 
 def load_config(config_path: str = "config.json") -> Dict[str, Any]:
@@ -128,10 +210,10 @@ def load_config(config_path: str = "config.json") -> Dict[str, Any]:
     if local_candidates:
         return {"save_path": max(local_candidates, key=os.path.getmtime)}
 
-    # Next check auto-detected Steam path
-    steam_path = detect_steam_save_path()
-    if steam_path and os.path.isfile(steam_path):
-        return {"save_path": steam_path}
+    # Next check auto-detected platform save path
+    auto_path = detect_save_path()
+    if auto_path and os.path.isfile(auto_path):
+        return {"save_path": auto_path}
 
     return {"save_path": "UserData0.dat"}
 
@@ -300,10 +382,12 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
         if path == "/api/config":
             cfg = load_config(self.server.config_path)
             save_path = cfg.get("save_path", "UserData0.dat")
+            detected = detect_save_path()
             self.send_json({
                 "save_path": save_path,
                 "file_exists": os.path.isfile(save_path),
-                "detected_steam_path": detect_steam_save_path(),
+                "detected_save_path": detected,
+                "detected_steam_path": detected,
             })
             return
 
@@ -395,12 +479,14 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             cfg["save_path"] = new_save_path
             save_config(cfg, self.server.config_path)
 
+            detected = detect_save_path()
             self.send_json({
                 "success": True,
                 "config": {
                     "save_path": new_save_path,
                     "file_exists": os.path.isfile(new_save_path),
-                    "detected_steam_path": detect_steam_save_path(),
+                    "detected_save_path": detected,
+                    "detected_steam_path": detected,
                 },
             })
             return
@@ -435,9 +521,9 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             if current_path and os.path.isdir(os.path.dirname(current_path)):
                 initial_dir = os.path.dirname(os.path.abspath(current_path))
             else:
-                steam_path = detect_steam_save_path()
-                if steam_path and os.path.isfile(steam_path):
-                    initial_dir = os.path.dirname(steam_path)
+                auto_path = detect_save_path()
+                if auto_path and os.path.isfile(auto_path):
+                    initial_dir = os.path.dirname(auto_path)
 
             selected_path = open_native_file_browser(initial_dir)
             if not selected_path:
