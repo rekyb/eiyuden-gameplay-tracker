@@ -45,6 +45,42 @@ class TestBeigomaDatasets(unittest.TestCase):
         self.assertEqual(star_counts[3], 12)
         self.assertEqual(star_counts[4], 5)
 
+    def test_canonical_beigoma_rarities(self):
+        """Verify canonical rarities based on RPG Site guide."""
+        by_name = {b["name"]: b["rarity"] for b in self.beigoma}
+        # 4 Stars (Rainbow)
+        self.assertEqual(by_name["Devil of Destruction"], 4)
+        self.assertEqual(by_name["Neo Absolute Zero"], 4)
+        self.assertEqual(by_name["Infinity Force"], 4)
+        self.assertEqual(by_name["Elder Dragon"], 4)
+        self.assertEqual(by_name["Fenrir"], 4)
+
+        # 3 Stars (Gold)
+        self.assertEqual(by_name["Earthsmack"], 3)
+        self.assertEqual(by_name["Trinity Cyclone"], 3)
+        self.assertEqual(by_name["Azure Dragon"], 3)
+        self.assertEqual(by_name["Galactic Flame"], 3)
+        self.assertEqual(by_name["Seed Conqueror"], 3)
+        self.assertEqual(by_name["Corpse Rider"], 3)
+        self.assertEqual(by_name["Earth Dragon"], 3)
+        self.assertEqual(by_name["Azhdahag"], 3)
+
+        # 2 Stars (Silver)
+        self.assertEqual(by_name["Dragon Fang"], 2)
+        self.assertEqual(by_name["Gigas Fist"], 2)
+        self.assertEqual(by_name["Cheetalita"], 2)
+        self.assertEqual(by_name["Snakebite"], 2)
+        self.assertEqual(by_name["Hraesvelgr"], 2)
+        self.assertEqual(by_name["Rabbit Mage"], 2)
+        self.assertEqual(by_name["Titan Slug"], 2)
+        self.assertEqual(by_name["Xibalba"], 2)
+
+        # 1 Star (Bronze)
+        self.assertEqual(by_name["Plantvine"], 1)
+        self.assertEqual(by_name["Killer Fungus"], 1)
+        self.assertEqual(by_name["Sea Ghost"], 1)
+        self.assertEqual(by_name["Remora"], 1)
+
     def test_beigoma_trainers_json_exists_and_valid(self):
         filepath = os.path.join(DATA_DIR, "beigoma_trainers.json")
         self.assertTrue(

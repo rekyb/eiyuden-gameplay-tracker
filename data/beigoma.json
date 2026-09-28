@@ -32,7 +32,7 @@
   {
     "id": 6,
     "name": "Hraesvelgr",
-    "rarity": 1,
+    "rarity": 2,
     "whereToObtain": "Dropped by Hraesvelgr enemies in Redthroat Ridge."
   },
   {
@@ -44,13 +44,13 @@
   {
     "id": 8,
     "name": "Rabbit Mage",
-    "rarity": 1,
+    "rarity": 2,
     "whereToObtain": "Dropped by Rabbit Mage enemies in Abandoned Mine."
   },
   {
     "id": 9,
     "name": "Titan Slug",
-    "rarity": 1,
+    "rarity": 2,
     "whereToObtain": "Dropped by Titan Slug enemies in Abandoned Mine."
   },
   {
@@ -68,7 +68,7 @@
   {
     "id": 12,
     "name": "Killer Fungus",
-    "rarity": 2,
+    "rarity": 1,
     "whereToObtain": "Dropped by Killer Fungus enemies in The Greatwood."
   },
   {
@@ -80,7 +80,7 @@
   {
     "id": 14,
     "name": "Pawn Demon",
-    "rarity": 2,
+    "rarity": 3,
     "whereToObtain": "Dropped by Pawn Demon enemies in The Greatwood (South)."
   },
   {
@@ -104,13 +104,13 @@
   {
     "id": 18,
     "name": "Sea Ghost",
-    "rarity": 2,
+    "rarity": 1,
     "whereToObtain": "Dropped by Sea Ghost enemies in Hishahn Old Town."
   },
   {
     "id": 19,
     "name": "Remora",
-    "rarity": 2,
+    "rarity": 1,
     "whereToObtain": "Dropped by Remora enemies in Seaside Cavern."
   },
   {
@@ -176,25 +176,25 @@
   {
     "id": 30,
     "name": "Corpse Rider",
-    "rarity": 2,
+    "rarity": 3,
     "whereToObtain": "Dropped by Corpse Rider enemies in Athrabalt."
   },
   {
     "id": 31,
     "name": "Seed Conqueror",
-    "rarity": 2,
+    "rarity": 3,
     "whereToObtain": "Dropped by Seed Conqueror enemies in Dappled Forest."
   },
   {
     "id": 32,
     "name": "Earth Dragon",
-    "rarity": 2,
+    "rarity": 3,
     "whereToObtain": "Dropped by Earth Dragon enemies in Chelonian Goliath, Vilashnu."
   },
   {
     "id": 33,
     "name": "Azhdahag",
-    "rarity": 2,
+    "rarity": 3,
     "whereToObtain": "Dropped by Azhdahag enemies in Snowpeak Pass."
   },
   {
@@ -218,7 +218,7 @@
   {
     "id": 37,
     "name": "Xibalba",
-    "rarity": 3,
+    "rarity": 2,
     "whereToObtain": "Dropped by Xibalba enemies in Castle Harganthia."
   },
   {
@@ -254,25 +254,25 @@
   {
     "id": 500,
     "name": "Earthsmack",
-    "rarity": 4,
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Thudd in Arenside."
   },
   {
     "id": 501,
     "name": "Trinity Cyclone",
-    "rarity": 4,
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Zeph in The Treefolk Village."
   },
   {
     "id": 502,
     "name": "Azure Dragon",
-    "rarity": 4,
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Flowe in Hishahn."
   },
   {
     "id": 503,
     "name": "Galactic Flame",
-    "rarity": 4,
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Pyre in Impershi'arc."
   },
   {
@@ -284,49 +284,49 @@
   {
     "id": 505,
     "name": "Neo Absolute Zero",
-    "rarity": 3,
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Reid in the final battle at Headquarters (recruits Reid)."
   },
   {
     "id": 506,
     "name": "Infinity Force",
-    "rarity": 3,
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Dr. Corque in the secret room at Gardhaven Castle."
   },
   {
     "id": 507,
     "name": "Fenrir",
-    "rarity": 3,
+    "rarity": 4,
     "whereToObtain": "Reward for defeating the Beigoma Sage in Eltisweiss."
   },
   {
     "id": 508,
     "name": "Elder Dragon",
-    "rarity": 3,
+    "rarity": 4,
     "whereToObtain": "Reward for completing the Mythic Tablet at the Slate of Seals (collect the 6 required gold tops and speak to Dr. Corque)."
   },
   {
     "id": 600,
     "name": "Dragon Fang",
-    "rarity": 3,
+    "rarity": 2,
     "whereToObtain": "Reward for defeating Taq in Altverden Village."
   },
   {
     "id": 601,
     "name": "Gigas Fist",
-    "rarity": 3,
+    "rarity": 2,
     "whereToObtain": "Reward for defeating Fender in Kyshiri Village."
   },
   {
     "id": 602,
     "name": "Cheetalita",
-    "rarity": 3,
+    "rarity": 2,
     "whereToObtain": "Reward for defeating Celera in Werne Village."
   },
   {
     "id": 603,
     "name": "Snakebite",
-    "rarity": 3,
+    "rarity": 2,
     "whereToObtain": "Reward for defeating Venom in Daphan Village."
   },
   {
