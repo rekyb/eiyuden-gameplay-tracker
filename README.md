@@ -114,5 +114,5 @@ python -m unittest discover -s . -p "test_*.py" -v
 
 MIT License. Free to use and modify.
 
-Tracker created by Reky B. • Eiyuden Chronicle: Hundred Heroes is a trademark of Rabbit & Bear Studios and 505 Games.
+Made with love by Reky • Eiyuden Chronicle: Hundred Heroes is a trademark of Rabbit & Bear Studios and 505 Games.
 

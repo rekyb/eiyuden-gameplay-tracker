@@ -114,7 +114,7 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             self.assertIn("tab-nav-heroes", html)
             self.assertIn("tab-nav-recipes", html)
             self.assertIn("recipes-tbody", html)
-            self.assertIn("Tracker created by Reky B.", html)
+            self.assertIn("Made with love by Reky", html)
 
         # app.js has recipe-related logic
         with urllib.request.urlopen(self._url("/app.js")) as resp:
