@@ -408,10 +408,9 @@ function filterRecipe(recipe, acquiredIds, cookedIds, activeFilter, searchQuery)
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     const nameMatch = (recipe.name || '').toLowerCase().includes(q);
-    const catMatch = (recipe.category || '').toLowerCase().includes(q);
     const locMatch = (recipe.location || '').toLowerCase().includes(q);
     const howMatch = (recipe.howToObtain || '').toLowerCase().includes(q);
-    if (!nameMatch && !catMatch && !locMatch && !howMatch) return false;
+    if (!nameMatch && !locMatch && !howMatch) return false;
   }
 
   return true;

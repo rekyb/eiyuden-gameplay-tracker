@@ -175,3 +175,37 @@ test('updateSavePathButtonState keeps button disabled when candidate path is inv
   }
 });
 
+test('filterRecipe does not allow searching by category', () => {
+  const recipe = {
+    id: 3025,
+    name: 'Black Tea Cookies',
+    category: 'Dessert',
+    location: 'Twinhorne East',
+    howToObtain: 'Purchased at the Tool Shop.',
+  };
+
+  // Searching by dish name works
+  assert.strictEqual(app.filterRecipe(recipe, new Set(), new Set(), 'all', 'cookies'), true);
+
+  // Searching by category (Dessert) must NOT match
+  assert.strictEqual(app.filterRecipe(recipe, new Set(), new Set(), 'all', 'dessert'), false);
+  assert.strictEqual(app.filterRecipe(recipe, new Set(), new Set(), 'all', 'appetizer'), false);
+});
+
+test('filterCharacter does not allow searching by role', () => {
+  const character = {
+    id: 1,
+    name: 'Nowa',
+    role: 'Battle',
+    location: 'Eltisweiss',
+    howToRecruit: 'Joins automatically during the prologue.',
+  };
+
+  // Searching by name works
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'nowa'), true);
+
+  // Searching by role (Battle) must NOT match
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'battle'), false);
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'support'), false);
+});
+
