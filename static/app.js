@@ -567,8 +567,10 @@ function handleSaveFileStatus(statusData, { silent = false, statusTarget = null 
       'success'
     );
   } else if (!silent) {
+    const heroCount = (statusData.recruited_ids || []).length;
+    const recipeCount = (statusData.acquired_recipe_ids || []).length;
     showToast(
-      `Synchronized save file (${(statusData.recruited_ids || []).length} recruited)`,
+      `Synchronized save file (${heroCount} heroes, ${recipeCount} recipes)`,
       'success'
     );
   }
