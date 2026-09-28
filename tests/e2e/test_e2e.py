@@ -120,6 +120,20 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             self.assertIn("renderRecipesTable", js)
             self.assertIn("cookedRecipeIds", js)
 
+    def test_e2e_beigoma_html_elements(self):
+        """HTML contains Beigoma navigation, subnavigation, and table containers."""
+        with urllib.request.urlopen(self._url("/")) as resp:
+            html = resp.read().decode("utf-8")
+            self.assertIn("tab-nav-beigoma", html)
+            self.assertIn("view-beigoma", html)
+            self.assertIn("beigoma-subnav", html)
+            self.assertIn("subtab-beigoma-collection", html)
+            self.assertIn("subtab-beigoma-trainers", html)
+            self.assertIn("beigoma-table", html)
+            self.assertIn("beigoma-list", html)
+            self.assertIn("trainer-table", html)
+            self.assertIn("trainer-list", html)
+
     def test_e2e_save_upload_project_root(self):
         """POST /api/save/upload saves file under project root uploads/ directory."""
         from src.tracker.server import PROJECT_ROOT

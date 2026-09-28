@@ -40,6 +40,9 @@
     <button type="button" id="tab-nav-recipes" class="nav-tab" role="tab" aria-selected="false" data-view="recipes">
       Recipes <span class="nav-badge" id="nav-count-recipes">0/93</span>
     </button>
+    <button type="button" id="tab-nav-beigoma" class="nav-tab" role="tab" aria-selected="false" data-view="beigoma">
+      Beigoma <span class="nav-badge" id="nav-count-beigoma">0/60</span>
+    </button>
   </nav>
 
   <!-- Main Content Area -->
@@ -174,6 +177,125 @@
           <p class="empty-desc">No dishes match your active filter and search query.</p>
         </div>
       </section>
+    </div>
+
+    <!-- VIEW: BEIGOMA TRACKER -->
+    <div id="view-beigoma" class="view-panel" hidden>
+
+      <!-- Sub-Navigation Group (Collection vs Trainers) -->
+      <div class="subnav-wrapper">
+        <nav id="beigoma-subnav" class="subnav-tabs" role="tablist" aria-label="Beigoma sub-sections">
+          <button type="button" id="subtab-beigoma-collection" class="subnav-tab active" data-subview="collection" role="tab" aria-selected="true">
+            Beigoma Collection <span class="badge" id="subnav-count-beigoma">0/60</span>
+          </button>
+          <button type="button" id="subtab-beigoma-trainers" class="subnav-tab" data-subview="trainers" role="tab" aria-selected="false">
+            Trainers <span class="badge" id="subnav-count-trainers">0/44</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- SUB-PANEL 1: BEIGOMA COLLECTION -->
+      <div id="subview-beigoma-collection" class="subview-panel">
+        <nav class="toolbar" aria-label="Beigoma collection filters and search">
+          <div class="filter-group" role="tablist" id="beigoma-filter-tabs" aria-label="Filter beigoma status">
+            <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+              All <span class="badge" id="count-beigoma-all">60</span>
+            </button>
+            <button type="button" class="filter-tab" data-filter="obtained" role="tab" aria-selected="false">
+              Obtained <span class="badge" id="count-beigoma-obtained">0</span>
+            </button>
+            <button type="button" class="filter-tab" data-filter="missing" role="tab" aria-selected="false">
+              Not Obtained <span class="badge" id="count-beigoma-missing">0</span>
+            </button>
+          </div>
+
+          <div class="search-filter-controls">
+            <div class="search-box">
+              <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <label for="beigoma-search" class="sr-only">Search beigoma</label>
+              <input type="search" id="beigoma-search" class="search-input" placeholder="Search here" autocomplete="off">
+            </div>
+          </div>
+        </nav>
+
+        <section class="table-section" aria-label="Beigoma collection list">
+          <div class="table-wrapper">
+            <table id="beigoma-table" class="characters-table beigoma-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-beigoma-name">Beigoma Name</th>
+                  <th scope="col" class="col-beigoma-location">Where to Obtain</th>
+                  <th scope="col" class="col-beigoma-status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="beigoma-list">
+                <!-- Populated dynamically via static/app.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div id="beigoma-empty-state" class="empty-state" hidden>
+            <p class="empty-title">No beigoma found</p>
+            <p class="empty-desc">No tops match your active filter and search query.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- SUB-PANEL 2: BEIGOMA TRAINERS -->
+      <div id="subview-beigoma-trainers" class="subview-panel" hidden>
+        <nav class="toolbar" aria-label="Beigoma trainer filters and search">
+          <div class="filter-group" role="tablist" id="trainer-filter-tabs" aria-label="Filter trainer status">
+            <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+              All <span class="badge" id="count-trainer-all">44</span>
+            </button>
+            <button type="button" class="filter-tab" data-filter="defeated" role="tab" aria-selected="false">
+              Defeated <span class="badge" id="count-trainer-defeated">0</span>
+            </button>
+            <button type="button" class="filter-tab" data-filter="unbattled" role="tab" aria-selected="false">
+              Not Battled <span class="badge" id="count-trainer-unbattled">0</span>
+            </button>
+          </div>
+
+          <div class="search-filter-controls">
+            <div class="search-box">
+              <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <label for="trainer-search" class="sr-only">Search trainers</label>
+              <input type="search" id="trainer-search" class="search-input" placeholder="Search here" autocomplete="off">
+            </div>
+          </div>
+        </nav>
+
+        <section class="table-section" aria-label="Beigoma trainers list">
+          <div class="table-wrapper">
+            <table id="trainer-table" class="characters-table trainer-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-trainer-name">Trainer Name</th>
+                  <th scope="col" class="col-trainer-location">Location</th>
+                  <th scope="col" class="col-trainer-status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="trainer-list">
+                <!-- Populated dynamically via static/app.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div id="trainer-empty-state" class="empty-state" hidden>
+            <p class="empty-title">No trainers found</p>
+            <p class="empty-desc">No trainers match your active filter and search query.</p>
+          </div>
+        </section>
+      </div>
+
     </div>
   </main>
 
