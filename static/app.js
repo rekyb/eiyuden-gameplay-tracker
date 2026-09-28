@@ -878,9 +878,25 @@ function renderBeigoma() {
   if (filtered.length === 0) {
     dom.beigomaList.innerHTML = '';
     if (dom.beigomaEmptyState) dom.beigomaEmptyState.hidden = false;
+    if (dom.beigomaPagination) {
+      dom.beigomaPagination.innerHTML = '';
+      dom.beigomaPagination.hidden = true;
+    }
   } else {
     if (dom.beigomaEmptyState) dom.beigomaEmptyState.hidden = true;
-    dom.beigomaList.innerHTML = filtered
+
+    const paged = paginateItems({
+      container: dom.beigomaPagination,
+      items: filtered,
+      currentPage: state.beigomaPage || 1,
+      pageSize: PAGE_SIZE,
+      onPageChange: (newPage) => {
+        state.beigomaPage = newPage;
+        renderBeigoma();
+      },
+    });
+
+    dom.beigomaList.innerHTML = paged
       .map(top => createBeigomaRowHtml(top, collectedSet.has(top.id)))
       .join('');
   }
@@ -907,9 +923,25 @@ function renderTrainers() {
   if (filtered.length === 0) {
     dom.trainerList.innerHTML = '';
     if (dom.trainerEmptyState) dom.trainerEmptyState.hidden = false;
+    if (dom.trainerPagination) {
+      dom.trainerPagination.innerHTML = '';
+      dom.trainerPagination.hidden = true;
+    }
   } else {
     if (dom.trainerEmptyState) dom.trainerEmptyState.hidden = true;
-    dom.trainerList.innerHTML = filtered
+
+    const paged = paginateItems({
+      container: dom.trainerPagination,
+      items: filtered,
+      currentPage: state.trainerPage || 1,
+      pageSize: PAGE_SIZE,
+      onPageChange: (newPage) => {
+        state.trainerPage = newPage;
+        renderTrainers();
+      },
+    });
+
+    dom.trainerList.innerHTML = paged
       .map(trainer => createTrainerRowHtml(trainer, defeatedSet.has(trainer.id)))
       .join('');
   }
@@ -1486,6 +1518,7 @@ function setupEventListeners() {
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       state.beigomaFilter = tab.dataset.filter || 'all';
+      state.beigomaPage = 1;
       renderBeigoma();
     });
   });
@@ -1494,6 +1527,7 @@ function setupEventListeners() {
   if (dom.beigomaSearch) {
     dom.beigomaSearch.addEventListener('input', (e) => {
       state.beigomaSearch = e.target.value.trim().toLowerCase();
+      state.beigomaPage = 1;
       renderBeigoma();
     });
 
@@ -1501,6 +1535,7 @@ function setupEventListeners() {
       if (e.key === 'Escape' && dom.beigomaSearch.value) {
         dom.beigomaSearch.value = '';
         state.beigomaSearch = '';
+        state.beigomaPage = 1;
         renderBeigoma();
       }
     });
@@ -1516,6 +1551,7 @@ function setupEventListeners() {
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       state.trainerFilter = tab.dataset.filter || 'all';
+      state.trainerPage = 1;
       renderTrainers();
     });
   });
@@ -1524,6 +1560,7 @@ function setupEventListeners() {
   if (dom.trainerSearch) {
     dom.trainerSearch.addEventListener('input', (e) => {
       state.trainerSearch = e.target.value.trim().toLowerCase();
+      state.trainerPage = 1;
       renderTrainers();
     });
 
@@ -1531,6 +1568,7 @@ function setupEventListeners() {
       if (e.key === 'Escape' && dom.trainerSearch.value) {
         dom.trainerSearch.value = '';
         state.trainerSearch = '';
+        state.trainerPage = 1;
         renderTrainers();
       }
     });

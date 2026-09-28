@@ -849,6 +849,204 @@ test('renderRecipesTable onPageChange updates state.recipesPage and re-renders t
   assert.strictEqual((dummyRecipesTbody.innerHTML.match(/<tr/g) || []).length, 5);
 });
 
+test('renderBeigoma and renderTrainers paginate to 20 items per page', () => {
+  app.state.beigoma = Array.from({ length: 60 }, (_, i) => ({
+    id: i + 1,
+    name: `Beigoma ${i + 1}`,
+    whereToObtain: 'Drop Location',
+  }));
+  app.state.beigomaCollectedIds = [];
+  app.state.beigomaFilter = 'all';
+  app.state.beigomaSearch = '';
+  app.state.beigomaPage = 1;
+
+  const dummyBeigomaList = { innerHTML: '' };
+  const dummyBeigomaPagination = { innerHTML: '', hidden: true, querySelectorAll: () => [] };
+  const dummyBeigomaEmpty = { hidden: false };
+
+  app.dom.beigomaList = dummyBeigomaList;
+  app.dom.beigomaPagination = dummyBeigomaPagination;
+  app.dom.beigomaEmptyState = dummyBeigomaEmpty;
+
+  app.renderBeigoma();
+
+  // Exactly 20 rows on page 1 of 60 items
+  const rowMatches = (dummyBeigomaList.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatches, 20);
+  assert.strictEqual(dummyBeigomaPagination.hidden, false);
+  assert.ok(dummyBeigomaPagination.innerHTML.includes('Showing 1–20 of 60 items'));
+
+  // Switch to Page 2
+  app.state.beigomaPage = 2;
+  app.renderBeigoma();
+  const rowMatchesP2 = (dummyBeigomaList.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatchesP2, 20);
+  assert.ok(dummyBeigomaPagination.innerHTML.includes('Showing 21–40 of 60 items'));
+
+  // Switch to Page 3 (items 41-60)
+  app.state.beigomaPage = 3;
+  app.renderBeigoma();
+  const rowMatchesP3 = (dummyBeigomaList.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatchesP3, 20);
+  assert.ok(dummyBeigomaPagination.innerHTML.includes('Showing 41–60 of 60 items'));
+});
+
+test('renderTrainers paginates to 20 trainers per page', () => {
+  app.state.beigomaTrainers = Array.from({ length: 44 }, (_, i) => ({
+    id: 100 + i + 1,
+    name: `Trainer ${i + 1}`,
+    location: 'Test Location',
+  }));
+  app.state.beigomaDefeatedTrainerIds = [];
+  app.state.trainerFilter = 'all';
+  app.state.trainerSearch = '';
+  app.state.trainerPage = 1;
+
+  const dummyTrainerList = { innerHTML: '' };
+  const dummyTrainerPagination = { innerHTML: '', hidden: true, querySelectorAll: () => [] };
+  const dummyTrainerEmpty = { hidden: false };
+
+  app.dom.trainerList = dummyTrainerList;
+  app.dom.trainerPagination = dummyTrainerPagination;
+  app.dom.trainerEmptyState = dummyTrainerEmpty;
+
+  app.renderTrainers();
+
+  const rowMatches = (dummyTrainerList.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatches, 20);
+  assert.strictEqual(dummyTrainerPagination.hidden, false);
+  assert.ok(dummyTrainerPagination.innerHTML.includes('Showing 1–20 of 44 items'));
+});
+
+test('renderBeigoma hides pagination when no beigoma match filter', () => {
+  app.state.beigoma = [{ id: 1, name: 'Wind Sprout', whereToObtain: 'Drop Location' }];
+  app.state.beigomaCollectedIds = [];
+  app.state.beigomaFilter = 'all';
+  app.state.beigomaSearch = 'nonexistenttopxyz';
+  app.state.beigomaPage = 1;
+
+  const dummyBeigomaList = { innerHTML: '' };
+  const dummyBeigomaPagination = { innerHTML: 'prev pagination', hidden: false, querySelectorAll: () => [] };
+  const dummyBeigomaEmpty = { hidden: true };
+
+  app.dom.beigomaList = dummyBeigomaList;
+  app.dom.beigomaPagination = dummyBeigomaPagination;
+  app.dom.beigomaEmptyState = dummyBeigomaEmpty;
+
+  app.renderBeigoma();
+
+  assert.strictEqual(dummyBeigomaList.innerHTML, '');
+  assert.strictEqual(dummyBeigomaEmpty.hidden, false);
+  assert.strictEqual(dummyBeigomaPagination.hidden, true);
+  assert.strictEqual(dummyBeigomaPagination.innerHTML, '');
+});
+
+test('renderTrainers hides pagination when no trainers match filter', () => {
+  app.state.beigomaTrainers = [{ id: 101, name: 'Zeph', location: 'Altverden' }];
+  app.state.beigomaDefeatedTrainerIds = [];
+  app.state.trainerFilter = 'all';
+  app.state.trainerSearch = 'nonexistenttrainerxyz';
+  app.state.trainerPage = 1;
+
+  const dummyTrainerList = { innerHTML: '' };
+  const dummyTrainerPagination = { innerHTML: 'prev pagination', hidden: false, querySelectorAll: () => [] };
+  const dummyTrainerEmpty = { hidden: true };
+
+  app.dom.trainerList = dummyTrainerList;
+  app.dom.trainerPagination = dummyTrainerPagination;
+  app.dom.trainerEmptyState = dummyTrainerEmpty;
+
+  app.renderTrainers();
+
+  assert.strictEqual(dummyTrainerList.innerHTML, '');
+  assert.strictEqual(dummyTrainerEmpty.hidden, false);
+  assert.strictEqual(dummyTrainerPagination.hidden, true);
+  assert.strictEqual(dummyTrainerPagination.innerHTML, '');
+});
+
+test('renderBeigoma onPageChange updates state.beigomaPage and re-renders table', () => {
+  app.state.beigoma = Array.from({ length: 30 }, (_, i) => ({
+    id: i + 1,
+    name: `Beigoma ${i + 1}`,
+    whereToObtain: 'Drop Location',
+  }));
+  app.state.beigomaCollectedIds = [];
+  app.state.beigomaFilter = 'all';
+  app.state.beigomaSearch = '';
+  app.state.beigomaPage = 1;
+
+  let pageChangeHandler = null;
+  const dummyBeigomaList = { innerHTML: '' };
+  const mockButton = {
+    dataset: { page: '2' },
+    disabled: false,
+    addEventListener: (evt, fn) => { if (evt === 'click') pageChangeHandler = fn; },
+  };
+  const dummyBeigomaPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: (sel) => sel === '.page-btn' ? [mockButton] : [],
+  };
+  const dummyBeigomaEmpty = { hidden: false };
+
+  app.dom.beigomaList = dummyBeigomaList;
+  app.dom.beigomaPagination = dummyBeigomaPagination;
+  app.dom.beigomaEmptyState = dummyBeigomaEmpty;
+
+  app.renderBeigoma();
+  assert.strictEqual(app.state.beigomaPage, 1);
+  assert.strictEqual((dummyBeigomaList.innerHTML.match(/<tr/g) || []).length, 20);
+
+  // Trigger page 2 click
+  assert.ok(pageChangeHandler);
+  pageChangeHandler({ preventDefault: () => {} });
+
+  assert.strictEqual(app.state.beigomaPage, 2);
+  assert.strictEqual((dummyBeigomaList.innerHTML.match(/<tr/g) || []).length, 10);
+});
+
+test('renderTrainers onPageChange updates state.trainerPage and re-renders table', () => {
+  app.state.beigomaTrainers = Array.from({ length: 25 }, (_, i) => ({
+    id: 100 + i + 1,
+    name: `Trainer ${i + 1}`,
+    location: 'Test Location',
+  }));
+  app.state.beigomaDefeatedTrainerIds = [];
+  app.state.trainerFilter = 'all';
+  app.state.trainerSearch = '';
+  app.state.trainerPage = 1;
+
+  let pageChangeHandler = null;
+  const dummyTrainerList = { innerHTML: '' };
+  const mockButton = {
+    dataset: { page: '2' },
+    disabled: false,
+    addEventListener: (evt, fn) => { if (evt === 'click') pageChangeHandler = fn; },
+  };
+  const dummyTrainerPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: (sel) => sel === '.page-btn' ? [mockButton] : [],
+  };
+  const dummyTrainerEmpty = { hidden: false };
+
+  app.dom.trainerList = dummyTrainerList;
+  app.dom.trainerPagination = dummyTrainerPagination;
+  app.dom.trainerEmptyState = dummyTrainerEmpty;
+
+  app.renderTrainers();
+  assert.strictEqual(app.state.trainerPage, 1);
+  assert.strictEqual((dummyTrainerList.innerHTML.match(/<tr/g) || []).length, 20);
+
+  // Trigger page 2 click
+  assert.ok(pageChangeHandler);
+  pageChangeHandler({ preventDefault: () => {} });
+
+  assert.strictEqual(app.state.trainerPage, 2);
+  assert.strictEqual((dummyTrainerList.innerHTML.match(/<tr/g) || []).length, 5);
+});
+
+
 
 
 
