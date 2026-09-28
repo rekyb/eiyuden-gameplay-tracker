@@ -634,4 +634,221 @@ test('paginateItems uses singular item label when total items is 1', () => {
   assert.ok(!dummyContainer.innerHTML.includes('1 items'));
 });
 
+test('renderTable renders at most 20 heroes per page with pagination bar', () => {
+  // Setup 50 dummy characters
+  app.state.characters = Array.from({ length: 50 }, (_, i) => ({
+    id: i + 1,
+    name: `Hero ${i + 1}`,
+    location: 'Test Location',
+    howToRecruit: 'Test Guide',
+    missable: false,
+  }));
+  app.state.recruitedIds = new Set();
+  app.state.activeFilter = 'all';
+  app.state.searchQuery = '';
+  app.state.heroesPage = 1;
+
+  const dummyTbody = { innerHTML: '' };
+  const dummyPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: () => [],
+  };
+  const dummyEmpty = { hidden: false };
+
+  app.dom.charactersTbody = dummyTbody;
+  app.dom.heroesPagination = dummyPagination;
+  app.dom.emptyState = dummyEmpty;
+
+  app.renderTable();
+
+  // Page 1 should contain 20 rows
+  const rowMatches = (dummyTbody.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatches, 20);
+  assert.strictEqual(dummyPagination.hidden, false);
+  assert.ok(dummyPagination.innerHTML.includes('Showing 1–20 of 50 items'));
+
+  // Switch to Page 2
+  app.state.heroesPage = 2;
+  app.renderTable();
+  const rowMatchesP2 = (dummyTbody.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatchesP2, 20);
+  assert.ok(dummyPagination.innerHTML.includes('Showing 21–40 of 50 items'));
+
+  // Switch to Page 3 (remaining 10)
+  app.state.heroesPage = 3;
+  app.renderTable();
+  const rowMatchesP3 = (dummyTbody.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatchesP3, 10);
+  assert.ok(dummyPagination.innerHTML.includes('Showing 41–50 of 50 items'));
+});
+
+test('renderTable hides pagination and clears content when no heroes match filter', () => {
+  app.state.characters = [{ id: 1, name: 'Nowa', location: 'Here', howToRecruit: 'Start', missable: false }];
+  app.state.recruitedIds = new Set();
+  app.state.activeFilter = 'all';
+  app.state.searchQuery = 'nonexistenthero12345';
+  app.state.heroesPage = 1;
+
+  const dummyTbody = { innerHTML: '' };
+  const dummyPagination = { innerHTML: 'previous pagination', hidden: false, querySelectorAll: () => [] };
+  const dummyEmpty = { hidden: true };
+
+  app.dom.charactersTbody = dummyTbody;
+  app.dom.heroesPagination = dummyPagination;
+  app.dom.emptyState = dummyEmpty;
+
+  app.renderTable();
+
+  assert.strictEqual(dummyTbody.innerHTML, '');
+  assert.strictEqual(dummyEmpty.hidden, false);
+  assert.strictEqual(dummyPagination.hidden, true);
+  assert.strictEqual(dummyPagination.innerHTML, '');
+});
+
+test('renderRecipesTable renders at most 20 recipes per page with pagination bar', () => {
+  app.state.recipes = Array.from({ length: 45 }, (_, i) => ({
+    id: 3000 + i + 1,
+    name: `Recipe ${i + 1}`,
+    location: 'Test Kitchen',
+    howToObtain: 'Test Chef',
+  }));
+  app.state.acquiredRecipeIds = new Set();
+  app.state.cookedRecipeIds = new Set();
+  app.state.activeRecipesFilter = 'all';
+  app.state.recipesSearchQuery = '';
+  app.state.recipesPage = 1;
+
+  const dummyRecipesTbody = { innerHTML: '' };
+  const dummyRecipesPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: () => [],
+  };
+  const dummyRecipesEmpty = { hidden: false };
+
+  app.dom.recipesTbody = dummyRecipesTbody;
+  app.dom.recipesPagination = dummyRecipesPagination;
+  app.dom.recipesEmptyState = dummyRecipesEmpty;
+
+  app.renderRecipesTable();
+
+  const rowMatches = (dummyRecipesTbody.innerHTML.match(/<tr/g) || []).length;
+  assert.strictEqual(rowMatches, 20);
+  assert.strictEqual(dummyRecipesPagination.hidden, false);
+  assert.ok(dummyRecipesPagination.innerHTML.includes('Showing 1–20 of 45 items'));
+});
+
+test('renderRecipesTable hides pagination when no recipes match filter', () => {
+  app.state.recipes = [{ id: 3001, name: 'Pancake', location: 'Kitchen', howToObtain: 'Chef' }];
+  app.state.acquiredRecipeIds = new Set();
+  app.state.cookedRecipeIds = new Set();
+  app.state.activeRecipesFilter = 'all';
+  app.state.recipesSearchQuery = 'nonexistentdishxyz';
+  app.state.recipesPage = 1;
+
+  const dummyRecipesTbody = { innerHTML: '' };
+  const dummyRecipesPagination = { innerHTML: 'prev pagination', hidden: false, querySelectorAll: () => [] };
+  const dummyRecipesEmpty = { hidden: true };
+
+  app.dom.recipesTbody = dummyRecipesTbody;
+  app.dom.recipesPagination = dummyRecipesPagination;
+  app.dom.recipesEmptyState = dummyRecipesEmpty;
+
+  app.renderRecipesTable();
+
+  assert.strictEqual(dummyRecipesTbody.innerHTML, '');
+  assert.strictEqual(dummyRecipesEmpty.hidden, false);
+  assert.strictEqual(dummyRecipesPagination.hidden, true);
+  assert.strictEqual(dummyRecipesPagination.innerHTML, '');
+});
+
+test('renderTable onPageChange updates state.heroesPage and re-renders table', () => {
+  app.state.characters = Array.from({ length: 30 }, (_, i) => ({
+    id: i + 1,
+    name: `Hero ${i + 1}`,
+    location: 'Loc',
+    howToRecruit: 'Guide',
+    missable: false,
+  }));
+  app.state.recruitedIds = new Set();
+  app.state.activeFilter = 'all';
+  app.state.searchQuery = '';
+  app.state.heroesPage = 1;
+
+  let pageChangeHandler = null;
+  const dummyTbody = { innerHTML: '' };
+  const mockButton = {
+    dataset: { page: '2' },
+    disabled: false,
+    addEventListener: (evt, fn) => { if (evt === 'click') pageChangeHandler = fn; },
+  };
+  const dummyPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: (sel) => sel === '.page-btn' ? [mockButton] : [],
+  };
+  const dummyEmpty = { hidden: false };
+
+  app.dom.charactersTbody = dummyTbody;
+  app.dom.heroesPagination = dummyPagination;
+  app.dom.emptyState = dummyEmpty;
+
+  app.renderTable();
+  assert.strictEqual(app.state.heroesPage, 1);
+  assert.strictEqual((dummyTbody.innerHTML.match(/<tr/g) || []).length, 20);
+
+  // Trigger page 2 click via attached listener
+  assert.ok(pageChangeHandler);
+  pageChangeHandler({ preventDefault: () => {} });
+
+  assert.strictEqual(app.state.heroesPage, 2);
+  assert.strictEqual((dummyTbody.innerHTML.match(/<tr/g) || []).length, 10);
+});
+
+test('renderRecipesTable onPageChange updates state.recipesPage and re-renders table', () => {
+  app.state.recipes = Array.from({ length: 25 }, (_, i) => ({
+    id: 3000 + i + 1,
+    name: `Recipe ${i + 1}`,
+    location: 'Kitchen',
+    howToObtain: 'Chef',
+  }));
+  app.state.acquiredRecipeIds = new Set();
+  app.state.cookedRecipeIds = new Set();
+  app.state.activeRecipesFilter = 'all';
+  app.state.recipesSearchQuery = '';
+  app.state.recipesPage = 1;
+
+  let pageChangeHandler = null;
+  const dummyRecipesTbody = { innerHTML: '' };
+  const mockButton = {
+    dataset: { page: '2' },
+    disabled: false,
+    addEventListener: (evt, fn) => { if (evt === 'click') pageChangeHandler = fn; },
+  };
+  const dummyRecipesPagination = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: (sel) => sel === '.page-btn' ? [mockButton] : [],
+  };
+  const dummyRecipesEmpty = { hidden: false };
+
+  app.dom.recipesTbody = dummyRecipesTbody;
+  app.dom.recipesPagination = dummyRecipesPagination;
+  app.dom.recipesEmptyState = dummyRecipesEmpty;
+
+  app.renderRecipesTable();
+  assert.strictEqual(app.state.recipesPage, 1);
+  assert.strictEqual((dummyRecipesTbody.innerHTML.match(/<tr/g) || []).length, 20);
+
+  // Trigger page 2 click
+  assert.ok(pageChangeHandler);
+  pageChangeHandler({ preventDefault: () => {} });
+
+  assert.strictEqual(app.state.recipesPage, 2);
+  assert.strictEqual((dummyRecipesTbody.innerHTML.match(/<tr/g) || []).length, 5);
+});
+
+
+
 

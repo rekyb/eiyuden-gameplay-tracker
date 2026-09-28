@@ -476,11 +476,27 @@ function renderTable() {
     if (dom.emptyState) {
       dom.emptyState.hidden = false;
     }
+    if (dom.heroesPagination) {
+      dom.heroesPagination.innerHTML = '';
+      dom.heroesPagination.hidden = true;
+    }
   } else {
     if (dom.emptyState) {
       dom.emptyState.hidden = true;
     }
-    const htmlRows = filtered
+
+    const paged = paginateItems({
+      container: dom.heroesPagination,
+      items: filtered,
+      currentPage: state.heroesPage || 1,
+      pageSize: PAGE_SIZE,
+      onPageChange: (newPage) => {
+        state.heroesPage = newPage;
+        renderTable();
+      },
+    });
+
+    const htmlRows = paged
       .map(char => createCharacterRowHtml(char, state.recruitedIds.has(char.id)))
       .join('');
     dom.charactersTbody.innerHTML = htmlRows;
@@ -655,9 +671,25 @@ function renderRecipesTable() {
   if (filtered.length === 0) {
     dom.recipesTbody.innerHTML = '';
     if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = false;
+    if (dom.recipesPagination) {
+      dom.recipesPagination.innerHTML = '';
+      dom.recipesPagination.hidden = true;
+    }
   } else {
     if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = true;
-    dom.recipesTbody.innerHTML = filtered
+
+    const paged = paginateItems({
+      container: dom.recipesPagination,
+      items: filtered,
+      currentPage: state.recipesPage || 1,
+      pageSize: PAGE_SIZE,
+      onPageChange: (newPage) => {
+        state.recipesPage = newPage;
+        renderRecipesTable();
+      },
+    });
+
+    dom.recipesTbody.innerHTML = paged
       .map(r => createRecipeRowHtml(r, state.acquiredRecipeIds.has(r.id), state.cookedRecipeIds.has(r.id)))
       .join('');
   }
@@ -1514,6 +1546,7 @@ function setupEventListeners() {
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       state.activeFilter = tab.dataset.filter || 'all';
+      state.heroesPage = 1;
       renderTable();
     });
   });
@@ -1528,6 +1561,7 @@ function setupEventListeners() {
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       state.activeRecipesFilter = tab.dataset.filter || 'all';
+      state.recipesPage = 1;
       renderRecipesTable();
     });
   });
@@ -1536,6 +1570,7 @@ function setupEventListeners() {
   if (dom.searchRecipesInput) {
     dom.searchRecipesInput.addEventListener('input', (e) => {
       state.recipesSearchQuery = e.target.value.trim().toLowerCase();
+      state.recipesPage = 1;
       renderRecipesTable();
     });
 
@@ -1543,6 +1578,7 @@ function setupEventListeners() {
       if (e.key === 'Escape' && dom.searchRecipesInput.value) {
         dom.searchRecipesInput.value = '';
         state.recipesSearchQuery = '';
+        state.recipesPage = 1;
         renderRecipesTable();
       }
     });
@@ -1625,6 +1661,7 @@ function setupEventListeners() {
   if (dom.searchInput) {
     dom.searchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value.trim().toLowerCase();
+      state.heroesPage = 1;
       renderTable();
     });
 
@@ -1632,6 +1669,7 @@ function setupEventListeners() {
       if (e.key === 'Escape' && dom.searchInput.value) {
         dom.searchInput.value = '';
         state.searchQuery = '';
+        state.heroesPage = 1;
         renderTable();
       }
     });
