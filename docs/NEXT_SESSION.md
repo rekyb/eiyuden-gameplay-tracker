@@ -1,16 +1,15 @@
 # Next Session Handover & Context
 
-- **Current Branch:** `fix/content-errors`
-- **Base Branch:** `feat/beigoma-tracker`
-- **Working Tree:** Clean (all commits up to date)
-- **Status:** Content error fixes, story arc chapter tracking & filtering, canonical Beigoma rarity alignment, and Beigoma rarity filter dropdown completed. All tests passing (103 Python tests + 32 Node.js tests). Ready for PR and merge.
+- **Current Branch:** `master`
+- **Working Tree:** Clean (all commits up to date with origin/master)
+- **Status:** All content fixes (character recruitment & story arc chapters, canonical Beigoma rarities, Chapter and Rarity dropdown filters) merged into `master`. All tests passing (103 Python tests + 32 Node.js tests).
 
 ---
 
 ## 1. Quick Resume Instructions for Next Session
 
 To continue in the next session, instruct the agent:
-> *"Resume from `docs/NEXT_SESSION.md`. All content fixes (character recruitment & story arc chapters, canonical Beigoma rarities, Chapter and Rarity dropdown filters) are complete and tested on branch `fix/content-errors` (103 Python + 32 Node tests passing). Proceed to merge `fix/content-errors`."*
+> *"Resume from `docs/NEXT_SESSION.md`. Master branch is clean, up to date, and verified with all tests passing (103 Python + 32 Node tests)."*
 
 ---
 
