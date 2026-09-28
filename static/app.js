@@ -844,9 +844,10 @@ function applyProgress(data) {
  * @param {object} [options]
  * @param {boolean} [options.silent=false] - Whether to suppress toast notifications
  * @param {HTMLElement} [options.statusTarget=null] - Optional DOM element for inline status
+ * @param {object} [options.prevCounts=null] - Snapshot of counts before sync (for delta toast)
  * @returns {{ ok: boolean, reason: string }}
  */
-function handleSaveFileStatus(statusData, { silent = false, statusTarget = null } = {}) {
+function handleSaveFileStatus(statusData, { silent = false, statusTarget = null, prevCounts = null } = {}) {
   const savePath = state.saveConfig?.save_path || 'UserData0.dat';
 
   if (!statusData || !statusData.file_exists) {
@@ -882,22 +883,88 @@ function handleSaveFileStatus(statusData, { silent = false, statusTarget = null 
     return { ok: false, reason: 'error' };
   }
 
+  // Build sync message — inline status bar uses simple totals, toast uses delta copy.
+  const heroCount = (statusData.recruited_ids || []).length;
+  const recipeCount = (statusData.acquired_recipe_ids || []).length;
+  const beigomaCount = (statusData.beigoma_collected_ids || []).length;
+  const trainerCount = (statusData.beigoma_defeated_trainer_ids || []).length;
+
   if (statusTarget) {
     setDialogStatus(
       statusTarget,
-      `Save synchronized (${(statusData.recruited_ids || []).length} heroes, ${(statusData.acquired_recipe_ids || []).length} recipes)`,
+      `Save synchronized · ${heroCount} heroes · ${recipeCount} recipes · ${beigomaCount}/60 tops · ${trainerCount}/44 trainers`,
       'success'
     );
   } else if (!silent) {
-    const heroCount = (statusData.recruited_ids || []).length;
-    const recipeCount = (statusData.acquired_recipe_ids || []).length;
-    showToast(
-      `Synchronized save file (${heroCount} heroes, ${recipeCount} recipes)`,
-      'success'
-    );
+    showToast(buildSyncToast(prevCounts, { heroCount, recipeCount, beigomaCount, trainerCount }), 'success');
   }
 
   return { ok: true, reason: 'synced' };
+}
+
+/**
+ * Tracker definitions for delta-aware sync toast.
+ * Add a new entry here when a new tracker category is introduced (fish, chests, runes, etc.).
+ * Each entry: { label: singular, labelPlural: plural, key: key in newCounts }
+ */
+const SYNC_TRACKERS = [
+  { label: 'hero',    labelPlural: 'heroes',           key: 'heroCount' },
+  { label: 'recipe',  labelPlural: 'recipes',           key: 'recipeCount' },
+  { label: 'beigoma', labelPlural: 'beigoma',           key: 'beigomaCount' },
+  { label: 'trainer', labelPlural: 'trainers defeated', key: 'trainerCount' },
+];
+
+/**
+ * Builds a human-friendly sync toast message.
+ *
+ * When prevCounts is provided and deltas are detected, emits delta copy:
+ *   "Synced · +2 heroes · +5 beigoma"
+ * When nothing changed, emits totals copy:
+ *   "Save up to date · 23 heroes · 23 beigoma · 14 trainers defeated"
+ * When prevCounts is unavailable (first sync), emits totals only:
+ *   "Save synced · 23 heroes · 45 recipes · 23 beigoma · 14 trainers defeated"
+ *
+ * Designed to be extended: add entries to SYNC_TRACKERS for fish, chests, runes, etc.
+ *
+ * @param {object|null} prevCounts - Snapshot before applyProgress (keys match SYNC_TRACKERS)
+ * @param {object} newCounts - Current counts after applyProgress
+ * @returns {string}
+ */
+function buildSyncToast(prevCounts, newCounts) {
+  if (prevCounts) {
+    const deltas = SYNC_TRACKERS
+      .map(t => {
+        const delta = (newCounts[t.key] || 0) - (prevCounts[t.key] || 0);
+        if (delta <= 0) return null;
+        const word = delta === 1 ? t.label : t.labelPlural;
+        return `+${delta} ${word}`;
+      })
+      .filter(Boolean);
+
+    if (deltas.length > 0) {
+      return `Synced · ${deltas.join(' · ')}`;
+    }
+
+    // Nothing new — show totals as "up to date" confirmation
+    const totals = SYNC_TRACKERS
+      .map(t => {
+        const count = newCounts[t.key] || 0;
+        if (count === 0) return null;
+        return `${count} ${count === 1 ? t.label : t.labelPlural}`;
+      })
+      .filter(Boolean);
+    return `Save up to date · ${totals.join(' · ')}`;
+  }
+
+  // No snapshot available — first sync or upload; show totals
+  const totals = SYNC_TRACKERS
+    .map(t => {
+      const count = newCounts[t.key] || 0;
+      if (count === 0) return null;
+      return `${count} ${count === 1 ? t.label : t.labelPlural}`;
+    })
+    .filter(Boolean);
+  return totals.length > 0 ? `Save synced · ${totals.join(' · ')}` : 'Save synced';
 }
 
 /**
@@ -919,6 +986,14 @@ async function syncSave({ silent = false, statusTarget = null } = {}) {
 
     state.saveStatus = data;
 
+    // Snapshot counts before applying new progress (for delta toast)
+    const prevCounts = {
+      heroCount:    state.recruitedIds.size,
+      recipeCount:  state.acquiredRecipeIds.size,
+      beigomaCount: state.beigomaCollectedIds.length,
+      trainerCount: state.beigomaDefeatedTrainerIds.length,
+    };
+
     if (!data.file_exists || data.corrupted || !res.ok) {
       applyProgress({
         file_exists: false,
@@ -931,7 +1006,7 @@ async function syncSave({ silent = false, statusTarget = null } = {}) {
       applyProgress(data);
     }
 
-    const handled = handleSaveFileStatus(data, { silent, statusTarget });
+    const handled = handleSaveFileStatus(data, { silent, statusTarget, prevCounts });
     return handled.ok;
   } catch (err) {
     applyProgress({
@@ -1004,7 +1079,12 @@ async function handleFileUpload(file) {
       dom.configDialog.close();
     }
 
-    showToast(`Save file uploaded successfully (${state.recruitedIds.size} recruited)`, 'success');
+    showToast(buildSyncToast(null, {
+      heroCount:    state.recruitedIds.size,
+      recipeCount:  state.acquiredRecipeIds.size,
+      beigomaCount: state.beigomaCollectedIds.length,
+      trainerCount: state.beigomaDefeatedTrainerIds.length,
+    }), 'success');
   } catch (err) {
     showToast(`Upload failed: ${err.message}`, 'error');
   }
