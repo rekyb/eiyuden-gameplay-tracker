@@ -76,7 +76,7 @@
     "name": "Hamburg Steak",
     "category": "Main",
     "location": "Eastern Desert",
-    "howToObtain": "Open the treasure chest guarded by a gimmick battle in the eastern section of the Eastern Desert.",
+    "howToObtain": "Found in a gimmick battle treasure chest during random encounters in the Eastern Desert (destroy the chest before combat ends).",
     "recipeItemId": 8009
   },
   {
@@ -108,7 +108,7 @@
     "name": "Tlayuda",
     "category": "Main",
     "location": "Altverden Village — Tool Shop",
-    "howToObtain": "Buy from the Tool Shop in Altverden Village — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the Tool Shop in Altverden Village (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8013
   },
   {
@@ -140,7 +140,7 @@
     "name": "Cold Pasta",
     "category": "Main",
     "location": "Dabavin — General Store",
-    "howToObtain": "Buy from the General Store in Dabavin — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in Dabavin (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8017
   },
   {
@@ -148,7 +148,7 @@
     "name": "Scallop Lunch Set",
     "category": "Main",
     "location": "Bounty Hill",
-    "howToObtain": "Open the treasure chest in the deeper section of Bounty Hill, accessible after progressing further into the dungeon.",
+    "howToObtain": "Found in a treasure chest in the deeper section of Bounty Hill, at the junction where the east and west paths converge.",
     "recipeItemId": 8018
   },
   {
@@ -156,7 +156,7 @@
     "name": "Bang Bang Ji",
     "category": "Main",
     "location": "Skriss Village — General Store",
-    "howToObtain": "Buy from the General Store in Skriss Village — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in Skriss Village (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8019
   },
   {
@@ -172,7 +172,7 @@
     "name": "Chopan Salad",
     "category": "Appetizer",
     "location": "The Eldroad",
-    "howToObtain": "Open the treasure chest guarded by a gimmick battle in the northern section of The Eldroad.",
+    "howToObtain": "Found in a gimmick battle treasure chest during combat encounters near the bridge along The Eldroad.",
     "recipeItemId": 8021
   },
   {
@@ -180,7 +180,7 @@
     "name": "Gazpacho",
     "category": "Appetizer",
     "location": "Dabavin",
-    "howToObtain": "Speak to the NPC in the south-central area of Dabavin, near the town fountain.",
+    "howToObtain": "Speak to NPC Hikaribaya XVIII in the southern-central area of Dabavin, or defeat a gimmick battle treasure chest in The Greatwood - South.",
     "recipeItemId": 8022
   },
   {
@@ -220,7 +220,7 @@
     "name": "Jelly Beans",
     "category": "Dessert",
     "location": "Impershi'arc — General Store",
-    "howToObtain": "Buy from the General Store in Impershi'arc — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in Impershi'arc (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8027
   },
   {
@@ -236,7 +236,7 @@
     "name": "Steamed Bread",
     "category": "Dessert",
     "location": "Athrabalt — Tool Shop",
-    "howToObtain": "Buy from the Tool Shop in Athrabalt — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the Tool Shop in Athrabalt (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8029
   },
   {
@@ -276,7 +276,7 @@
     "name": "Colorful Macarons",
     "category": "Dessert",
     "location": "Twinhorne West — Tool Shop",
-    "howToObtain": "Buy from the Tool Shop in Twinhorne West — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the Tool Shop in Twinhorne West (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8034
   },
   {
@@ -316,7 +316,7 @@
     "name": "Tomato Sandwich",
     "category": "Main",
     "location": "Kyshiri Village",
-    "howToObtain": "Speak to the NPC inside the house on the right side of Kyshiri Village (east of the well).",
+    "howToObtain": "Speak to the woman inside the first house past the Inn in Kyshiri Village (available after the Impershi'arc events).",
     "recipeItemId": 8039
   },
   {
@@ -324,7 +324,7 @@
     "name": "Vegetable Milk Soup",
     "category": "Appetizer",
     "location": "Dappled Forest",
-    "howToObtain": "Open the treasure chest in the middle section of Dappled Forest — needed as part of Foxiel's recruitment quest.",
+    "howToObtain": "Found in a treasure chest at the easternmost dead end of the Dappled Forest (this recipe is required to recruit Foxiel in Athrabalt).",
     "recipeItemId": 8040
   },
   {
@@ -363,16 +363,16 @@
     "id": 3045,
     "name": "Tom Yam Kung",
     "category": "Main",
-    "location": "Rune-Lens Research Laboratory",
-    "howToObtain": "Open the treasure chest in the upper floors of the Rune-Lens Research Laboratory.",
+    "location": "Rune-Lens Research Laboratory — UG Passage",
+    "howToObtain": "Found in a treasure chest in the Rune-Lens Research Laboratory (UG Passage): head north from the main hall, then turn right into the side room.",
     "recipeItemId": 8045
   },
   {
     "id": 3046,
     "name": "Herb Chicken",
     "category": "Main",
-    "location": "Arenside — Item Shop",
-    "howToObtain": "Buy from the Item Shop in Arenside — appears as a rotating star item in the shop stock.",
+    "location": "Arenside — General Store",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in Arenside (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8046
   },
   {
@@ -404,7 +404,7 @@
     "name": "Mee Siam",
     "category": "Main",
     "location": "Daphan Village — General Store",
-    "howToObtain": "Buy from the General Store in Daphan Village — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in Daphan Village (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8050
   },
   {
@@ -428,7 +428,7 @@
     "name": "Avocado Sushi",
     "category": "Main",
     "location": "Den of the Dunes",
-    "howToObtain": "Open the treasure chest in the deeper area of the Den of the Dunes dungeon.",
+    "howToObtain": "Found in a treasure chest in The Den of the Dunes, just to the east of the sand sinkhole in the closed-off eastern area.",
     "recipeItemId": 8053
   },
   {
@@ -579,8 +579,8 @@
     "id": 3072,
     "name": "Pineapple Pork",
     "category": "Main",
-    "location": "Werne Village — Item Shop",
-    "howToObtain": "Buy directly from the Item Shop in Werne Village.",
+    "location": "Werne Village — General Store (Inn)",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store inside the Inn in Werne Village (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8072
   },
   {
@@ -620,7 +620,7 @@
     "name": "Fruit Parfait",
     "category": "Dessert",
     "location": "The Treefolk Village — General Store",
-    "howToObtain": "Buy from the General Store in The Treefolk Village — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the General Store in The Treefolk Village (~10% rotation chance; shop refreshes every 30 min of playtime).",
     "recipeItemId": 8077
   },
   {
@@ -691,8 +691,8 @@
     "id": 3086,
     "name": "Dragon Doria",
     "category": "Main",
-    "location": "The Eldroad",
-    "howToObtain": "Open the treasure chest in the northern stretch of The Eldroad.",
+    "location": "The Eldroad — Chandra's Nest",
+    "howToObtain": "Found in a treasure chest beside Chandra's nest along the northern fork of The Eldroad (open after defeating the dragon boss Chandra).",
     "recipeItemId": 8086
   },
   {
@@ -708,7 +708,7 @@
     "name": "Galactic Meat",
     "category": "Main",
     "location": "Fort Xialuke",
-    "howToObtain": "Speak to the NPC inside Fort Xialuke while the story objective is to retake Eltisweiss.",
+    "howToObtain": "Speak to the beastman NPC with crossed arms inside Fort Xialuke (available late-game when preparing to retake Eltisweiss).",
     "recipeItemId": 8088
   },
   {
@@ -723,8 +723,8 @@
     "id": 3090,
     "name": "Osechi",
     "category": "Main",
-    "location": "Gardhaven Castle",
-    "howToObtain": "Open the treasure chest on the 2nd floor of Gardhaven Castle.",
+    "location": "Gardhaven Castle — 2F",
+    "howToObtain": "Found in a treasure chest in the corner of the 1st Parlor on the 2nd floor of Gardhaven Castle.",
     "recipeItemId": 8090
   },
   {
@@ -732,7 +732,7 @@
     "name": "Cherry Pie",
     "category": "Dessert",
     "location": "Eltisweiss — Tool Shop",
-    "howToObtain": "Buy from the Tool Shop in Eltisweiss — appears as a rotating star item in the shop stock.",
+    "howToObtain": "Purchased as a Rare Find (Star Item) at the Tool Shop in Eltisweiss (only available after Eltisweiss is liberated, ~10% rotation chance).",
     "recipeItemId": 8091
   },
   {
