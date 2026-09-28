@@ -319,9 +319,7 @@ def open_native_file_browser(initial_dir: str = "") -> str:
         from tkinter import filedialog
         root = tkinter.Tk()
         root.withdraw()
-        root.lift()
         root.attributes("-topmost", True)
-        root.focus_force()
         filepath = filedialog.askopenfilename(
             parent=root,
             title="Select Eiyuden Chronicle Save File",
@@ -329,8 +327,7 @@ def open_native_file_browser(initial_dir: str = "") -> str:
             filetypes=[("Save Files (*.dat)", "*.dat"), ("All Files (*.*)", "*.*")],
         )
         root.destroy()
-        if filepath:
-            return filepath
+        return filepath or ""
     except Exception as exc:
         print(f"Tkinter file picker error, attempting Windows fallback: {exc}")
 
@@ -339,19 +336,19 @@ def open_native_file_browser(initial_dir: str = "") -> str:
         try:
             import subprocess
             target_dir = initial_dir if initial_dir and os.path.isdir(initial_dir) else os.getcwd()
+            # Escaping single quotes in dir
             safe_dir = target_dir.replace("'", "''")
             ps_script = (
-                "Add-Type -AssemblyName System.Windows.Forms; "
-                "$form = New-Object System.Windows.Forms.Form; "
-                "$form.TopMost = $true; "
+                "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
                 "$dialog = New-Object System.Windows.Forms.OpenFileDialog; "
                 "$dialog.Title = 'Select Eiyuden Chronicle Save File'; "
                 "$dialog.Filter = 'Save Files (*.dat)|*.dat|All Files (*.*)|*.*'; "
                 f"$dialog.InitialDirectory = '{safe_dir}'; "
-                "if ($dialog.ShowDialog($form) -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::WriteLine($dialog.FileName) }"
+                "$dialog.TopMost = $true; "
+                "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $dialog.FileName }"
             )
             res = subprocess.run(
-                ["powershell", "-NoProfile", "-Command", ps_script],
+                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
                 capture_output=True,
                 text=True,
                 timeout=120,
@@ -647,16 +644,8 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/save/browse":
-            try:
-                payload = json.loads(body.decode("utf-8")) if body else {}
-            except Exception:
-                payload = {}
-
-            current_path = payload.get("current_path", "").strip() if isinstance(payload, dict) else ""
-            if not current_path:
-                cfg = load_config(self.server.config_path)
-                current_path = cfg.get("save_path", "")
-
+            cfg = load_config(self.server.config_path)
+            current_path = cfg.get("save_path", "")
             initial_dir = ""
             if current_path and os.path.isdir(os.path.dirname(current_path)):
                 initial_dir = os.path.dirname(os.path.abspath(current_path))
