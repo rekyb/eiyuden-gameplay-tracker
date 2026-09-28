@@ -22,7 +22,12 @@ from src.tracker.config.detector import (
     find_any_save_file,
 )
 from src.tracker.config.manager import ConfigManager
-from src.tracker.core.models import load_characters, load_recipes
+from src.tracker.core.models import (
+    load_characters,
+    load_recipes,
+    load_beigoma,
+    load_beigoma_trainers,
+)
 from src.tracker.core.save_reader import (
     decrypt_save,
     read_save_summary,
@@ -31,6 +36,8 @@ from src.tracker.core.save_reader import (
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATIC_DIR = PROJECT_ROOT / "static"
 DEFAULT_UPLOADS_DIR = PROJECT_ROOT / "uploads"
+BEIGOMA_FILE = PROJECT_ROOT / "data" / "beigoma.json"
+BEIGOMA_TRAINERS_FILE = PROJECT_ROOT / "data" / "beigoma_trainers.json"
 
 
 def detect_save_path() -> Optional[str]:
@@ -145,6 +152,14 @@ def validate_save_file(filepath: Optional[Union[str, Path]]) -> Dict[str, Any]:
         return {"valid": False, "exists": True, "error": "File decrypted, but does not contain Eiyuden Chronicle save data.", "summary": None}
 
     summary = read_save_summary(clean_path)
+    try:
+        summary["beigoma_total_count"] = len(load_beigoma())
+    except Exception:
+        summary["beigoma_total_count"] = 60
+    try:
+        summary["beigoma_total_trainers"] = len(load_beigoma_trainers())
+    except Exception:
+        summary["beigoma_total_trainers"] = 44
     return {
         "valid": True,
         "exists": True,
@@ -367,15 +382,73 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             self.send_json({"cooked_ids": cooked})
             return
 
-        if path == "/api/save/status":
+        if path == "/api/beigoma":
+            if getattr(self.server, "beigoma_path", None) is not None:
+                if os.path.isfile(self.server.beigoma_path):
+                    try:
+                        with open(self.server.beigoma_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.send_json(data)
+                        return
+                    except Exception as exc:
+                        self.send_json({"error": f"Failed reading beigoma: {exc}"}, status=500)
+                        return
+                else:
+                    self.send_json([], status=200)
+                    return
+            try:
+                data = load_beigoma()
+                self.send_json(data)
+                return
+            except Exception as exc:
+                self.send_json({"error": f"Failed reading beigoma: {exc}"}, status=500)
+                return
+
+        if path in ("/api/beigoma/trainers", "/api/beigoma-trainers"):
+            if getattr(self.server, "beigoma_trainers_path", None) is not None:
+                if os.path.isfile(self.server.beigoma_trainers_path):
+                    try:
+                        with open(self.server.beigoma_trainers_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.send_json(data)
+                        return
+                    except Exception as exc:
+                        self.send_json({"error": f"Failed reading beigoma trainers: {exc}"}, status=500)
+                        return
+                else:
+                    self.send_json([], status=200)
+                    return
+            try:
+                data = load_beigoma_trainers()
+                self.send_json(data)
+                return
+            except Exception as exc:
+                self.send_json({"error": f"Failed reading beigoma trainers: {exc}"}, status=500)
+                return
+
+        if path in ("/api/save/status", "/api/progress"):
             cfg = self.server.config_manager.get_config()
             save_path = cfg.get("save_path", "")
             if not save_path:
                 detected = find_any_save_file()
                 save_path = detected or "UserData0.dat"
 
+            beigoma_file = getattr(self.server, "beigoma_path", None) or BEIGOMA_FILE
+            trainers_file = getattr(self.server, "beigoma_trainers_path", None) or BEIGOMA_TRAINERS_FILE
+            try:
+                total_beigoma = len(load_beigoma(beigoma_file))
+            except Exception:
+                total_beigoma = 60
+
+            try:
+                total_trainers = len(load_beigoma_trainers(trainers_file))
+            except Exception:
+                total_trainers = 44
+
             try:
                 summary = read_save_summary(save_path)
+                summary["beigoma_total_count"] = total_beigoma
+                summary["beigoma_total_trainers"] = total_trainers
                 self.send_json(summary, status=200)
             except Exception as exc:
                 self.send_json({
@@ -384,6 +457,12 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                     "recruited_ids": [],
                     "acquired_recipe_ids": [],
                     "acquired_recipe_count": 0,
+                    "beigoma_collected_ids": [],
+                    "beigoma_collected_count": 0,
+                    "beigoma_total_count": total_beigoma,
+                    "beigoma_defeated_trainer_ids": [],
+                    "beigoma_defeated_trainer_count": 0,
+                    "beigoma_total_trainers": total_trainers,
                     "playtime_seconds": 0.0,
                     "playtime_formatted": "0h 0m 0s",
                     "money": 0,
@@ -592,6 +671,8 @@ class SaveTrackerServer(ThreadingHTTPServer):
         config_path: Optional[Union[str, Path]] = None,
         characters_path: Optional[Union[str, Path]] = None,
         recipes_path: Optional[Union[str, Path]] = None,
+        beigoma_path: Optional[Union[str, Path]] = None,
+        beigoma_trainers_path: Optional[Union[str, Path]] = None,
         uploads_dir: Optional[Union[str, Path]] = None,
     ):
         super().__init__(server_address, RequestHandlerClass)
@@ -607,6 +688,8 @@ class SaveTrackerServer(ThreadingHTTPServer):
         self.uploads_dir = str(uploads_dir) if uploads_dir is not None else str(DEFAULT_UPLOADS_DIR)
         self.characters_path = str(characters_path) if characters_path is not None else None
         self.recipes_path = str(recipes_path) if recipes_path is not None else None
+        self.beigoma_path = str(beigoma_path) if beigoma_path is not None else None
+        self.beigoma_trainers_path = str(beigoma_trainers_path) if beigoma_trainers_path is not None else None
 
 
 def create_server(
@@ -617,6 +700,8 @@ def create_server(
     config_path: Optional[Union[str, Path]] = None,
     characters_path: Optional[Union[str, Path]] = None,
     recipes_path: Optional[Union[str, Path]] = None,
+    beigoma_path: Optional[Union[str, Path]] = None,
+    beigoma_trainers_path: Optional[Union[str, Path]] = None,
     uploads_dir: Optional[Union[str, Path]] = None,
 ) -> SaveTrackerServer:
     """Create a configured SaveTrackerServer instance.
@@ -629,6 +714,8 @@ def create_server(
         config_path: Optional path to config JSON file (legacy/convenience).
         characters_path: Optional path to characters JSON file (legacy/convenience).
         recipes_path: Optional path to recipes JSON file (legacy/convenience).
+        beigoma_path: Optional path to beigoma JSON file (legacy/convenience).
+        beigoma_trainers_path: Optional path to beigoma_trainers JSON file (legacy/convenience).
         uploads_dir: Optional directory for uploaded save files (default: uploads/).
 
     Returns:
@@ -642,6 +729,8 @@ def create_server(
         config_path=config_path,
         characters_path=characters_path,
         recipes_path=recipes_path,
+        beigoma_path=beigoma_path,
+        beigoma_trainers_path=beigoma_trainers_path,
         uploads_dir=uploads_dir,
     )
 
@@ -653,6 +742,10 @@ def run_server(
     static_dir: Optional[Union[str, Path]] = None,
     config_manager: Optional[ConfigManager] = None,
     uploads_dir: Optional[Union[str, Path]] = None,
+    characters_path: Optional[Union[str, Path]] = None,
+    recipes_path: Optional[Union[str, Path]] = None,
+    beigoma_path: Optional[Union[str, Path]] = None,
+    beigoma_trainers_path: Optional[Union[str, Path]] = None,
 ) -> None:
     """Run the Save Tracker HTTP API server until interrupted.
 
@@ -663,6 +756,10 @@ def run_server(
         static_dir: Optional path to frontend static directory.
         config_manager: Optional ConfigManager instance.
         uploads_dir: Optional path to uploads directory.
+        characters_path: Optional path to characters JSON file.
+        recipes_path: Optional path to recipes JSON file.
+        beigoma_path: Optional path to beigoma JSON file.
+        beigoma_trainers_path: Optional path to beigoma_trainers JSON file.
     """
     server = create_server(
         host=host,
@@ -670,6 +767,10 @@ def run_server(
         static_dir=static_dir,
         config_manager=config_manager,
         uploads_dir=uploads_dir,
+        characters_path=characters_path,
+        recipes_path=recipes_path,
+        beigoma_path=beigoma_path,
+        beigoma_trainers_path=beigoma_trainers_path,
     )
 
     actual_port = server.server_address[1]
@@ -698,6 +799,8 @@ def main() -> None:
     parser.add_argument("--config", default=None, help="Path to config.json (default: config/config.json)")
     parser.add_argument("--characters", default=None, help="Path to characters.json (default: data/characters.json)")
     parser.add_argument("--recipes", default=None, help="Path to recipes.json (default: data/recipes.json)")
+    parser.add_argument("--beigoma", default=None, help="Path to beigoma.json (default: data/beigoma.json)")
+    parser.add_argument("--beigoma-trainers", default=None, help="Path to beigoma_trainers.json (default: data/beigoma_trainers.json)")
     parser.add_argument("--static", default=None, help="Path to static assets directory (default: static)")
     parser.add_argument("--open", action="store_true", help="Automatically open browser on launch")
 
@@ -709,6 +812,10 @@ def main() -> None:
         open_browser=args.open,
         static_dir=args.static,
         config_manager=cm,
+        characters_path=args.characters,
+        recipes_path=args.recipes,
+        beigoma_path=args.beigoma,
+        beigoma_trainers_path=args.beigoma_trainers,
     )
 
 
