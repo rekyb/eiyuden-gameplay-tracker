@@ -10,21 +10,18 @@ The tracker reads and decrypts your game save files (`UserData*.dat`) directly t
 
 ### Heroes Tracker
 - **Complete 121 Character Catalog**: Detailed locations, recruitment conditions, and missable warnings (e.g. Leene).
-- **Automatic Save Synchronization**: Reads and decrypts game saves (`UserData0.dat`, `UserData1.dat`, `UserData999.dat`, etc.) in-memory via TripleDES-CBC. 100% read-only and non-destructive—your save file is never modified or overwritten.
-- **Smart Save Detection**: Automatically locates default save folders across platforms (Steam, GOG, PC Game Pass) and verifies save file integrity before saving.
-- **Native File Browser**: Easily browse and pick any save slot on your computer via the Settings menu with one click.
-- **Instant Search & Filters**: Live search across hero names, locations, and recruitment notes (search excludes roles to prevent false positives). Filter by *All*, *Recruited*, *Not Recruited*, and *Missable*.
+- **Save Synchronization**: In-memory decryption of game saves (`UserData*.dat`) via TripleDES-CBC. 100% read-only and non-destructive.
+- **Smart Save Detection**: Automatically locates default save folders across platforms (Steam, GOG, PC Game Pass) with native file browser support.
+- **Search & Filters**: Search across hero names, locations, and recruitment notes. Filter by *All*, *Recruited*, *Not Recruited*, and *Missable*.
 
 ### Recipes Tracker
-- **Complete 93-Recipe Database**: All dishes available at Kurtz's restaurant (HQ), with detailed acquisition and cooking guides.
-- **Acquired Detection**: Reads your save file to automatically detect which recipe items you've collected in your inventory, key items, or restaurant menu.
-- **Manual Cooked Tracking**: Check dishes off as you cook them at Kurtz's restaurant to track progress toward the **Gourmand Hero** achievement (cook all 93 dishes). Cooked state persists across sessions via `localStorage` and server-side `config.json`.
-- **Filter & Search**: Filter by *All*, *Acquired*, *Not Acquired*, *Cooked*, *Not Cooked*, with live search across dish name, location, and source (excludes categories to keep search results precise).
+- **Complete 93-Recipe Database**: Full catalog of dishes available at Kurtz's restaurant (HQ), with detailed acquisition and cooking guides.
+- **Acquired Status Detection**: Automatically detects collected recipes from your save data.
+- **Manual Cooked Tracking**: Interactive checklist to track dishes cooked for the **Gourmand Hero** achievement. Cooked states persist locally and server-side.
+- **Search & Filters**: Search across dishes, locations, and source guides. Filter by *All*, *Acquired*, *Not Acquired*, *Cooked*, and *Not Cooked*.
 
-### General
-- **Top Navigation**: Switch between Heroes and Recipes views with a clean tab bar showing live counts.
-- **One-Click Header Sync**: Prominent **Sync Save** button right in the header with an animated 3-second loading indicator and detailed toast feedback.
-- **Lightweight & Fast**: Zero framework bloat. Pure semantic HTML, clean responsive CSS, and native ES6 JavaScript served via a lightweight Python local server.
+### Fast & Lightweight
+- Zero framework overhead: built with pure HTML, CSS, and modern JavaScript backed by a lightweight Python local server.
 
 ---
 
@@ -62,17 +59,17 @@ The tracker will launch and automatically open `http://localhost:8000` in your d
 ## How to Use
 
 ### Heroes View
-1. **Select Save File**: Open **⚙ Settings** in the header, then click **Auto-detect** or the folder icon (📁) to browse for your `UserData*.dat` file, then click **Save Path**.
-2. **Sync Progress**: Click **Sync Save** in the top header anytime you save your game. An animated loading indicator will spin for 3 seconds while verifying and refreshing your progress.
-3. **Search & Filter**: Use the search bar ("Search here") or filter tabs (**All**, **Recruited**, **Not Recruited**, **Missable**) to find heroes and recruitment steps.
+1. **Select Save File**: Open **⚙ Settings**, click **Auto-detect** or browse (📁) for your `UserData*.dat` file, then click **Save Path**.
+2. **Sync Progress**: Click **Sync Save** anytime you save your game to update your recruitment progress.
+3. **Search & Filter**: Search by hero name or location, or filter by status (**All**, **Recruited**, **Not Recruited**, **Missable**).
 
 ### Recipes View
 1. **Switch to Recipes**: Click the **Recipes** tab in the top navigation.
-2. **Acquired Detection**: Sync your save to automatically mark which recipes your party has obtained in the world or restaurant.
-3. **Track Cooked Dishes**: Check the **Cooked** checkbox manually each time you cook a dish at Kurtz's restaurant. Click the **ⓘ** icon on the Cooked column header for details.
-4. **Filter & Search**: Filter by acquisition or cooked status, or search by dish name, location, or guide.
+2. **Acquired Detection**: Sync your save to automatically mark which recipes your party has acquired.
+3. **Track Cooked Dishes**: Check the **Cooked** checkbox manually as you cook dishes at Kurtz's restaurant for the Gourmand Hero achievement.
+4. **Search & Filter**: Filter by acquisition/cooked status or search by recipe name and source.
 
-> **Tip:** The Cooked column is entirely manual — the save file does not record individual cooking history. Check dishes off as you cook them in-game.
+> **Tip:** The Cooked status is tracked manually because the save file does not store individual restaurant cooking history. Cooked selections are saved automatically.
 
 ---
 
