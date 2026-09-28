@@ -1,0 +1,222 @@
+[
+  {
+    "id": 1000,
+    "name": "Reid",
+    "location": "Eltisweiss"
+  },
+  {
+    "id": 3,
+    "name": "Reid",
+    "location": "Headquarters"
+  },
+  {
+    "id": 4,
+    "name": "Reid",
+    "location": "Headquarters"
+  },
+  {
+    "id": 22,
+    "name": "Reid",
+    "location": "Headquarters"
+  },
+  {
+    "id": 5,
+    "name": "Taq",
+    "location": "Altverden Village"
+  },
+  {
+    "id": 6,
+    "name": "Fender",
+    "location": "Werne Village"
+  },
+  {
+    "id": 7,
+    "name": "Celera",
+    "location": "Kyshiri Village"
+  },
+  {
+    "id": 8,
+    "name": "Venom",
+    "location": "Daphan Village"
+  },
+  {
+    "id": 9,
+    "name": "Thudd",
+    "location": "Arenside"
+  },
+  {
+    "id": 10,
+    "name": "Zeph",
+    "location": "The Treefolk Village"
+  },
+  {
+    "id": 11,
+    "name": "Flowe",
+    "location": "Hishahn"
+  },
+  {
+    "id": 12,
+    "name": "Pyre",
+    "location": "Impershi'arc"
+  },
+  {
+    "id": 13,
+    "name": "Crash",
+    "location": "Ardinale City"
+  },
+  {
+    "id": 2,
+    "name": "Dr. Corque",
+    "location": "Headquarters"
+  },
+  {
+    "id": 101,
+    "name": "Villager",
+    "location": "Arenside"
+  },
+  {
+    "id": 102,
+    "name": "Traveler",
+    "location": "Arenside"
+  },
+  {
+    "id": 103,
+    "name": "Girl",
+    "location": "Fort Xialuke"
+  },
+  {
+    "id": 104,
+    "name": "Citizen",
+    "location": "Eltisweiss"
+  },
+  {
+    "id": 105,
+    "name": "Elder",
+    "location": "Eltisweiss"
+  },
+  {
+    "id": 106,
+    "name": "Villager",
+    "location": "Altverden Village"
+  },
+  {
+    "id": 107,
+    "name": "Boy",
+    "location": "Werne Village"
+  },
+  {
+    "id": 108,
+    "name": "Villager",
+    "location": "Werne Village"
+  },
+  {
+    "id": 109,
+    "name": "Citizen",
+    "location": "Kyshiri Village"
+  },
+  {
+    "id": 110,
+    "name": "Boy",
+    "location": "Kyshiri Village"
+  },
+  {
+    "id": 111,
+    "name": "Elder",
+    "location": "The Treefolk Village"
+  },
+  {
+    "id": 112,
+    "name": "Girl",
+    "location": "Hishahn"
+  },
+  {
+    "id": 113,
+    "name": "Soldier",
+    "location": "Hishahn"
+  },
+  {
+    "id": 114,
+    "name": "Dr. Felix",
+    "location": "Impershi'arc"
+  },
+  {
+    "id": 115,
+    "name": "Noble",
+    "location": "Impershi'arc"
+  },
+  {
+    "id": 116,
+    "name": "Ishiyama",
+    "location": "Ardinale City"
+  },
+  {
+    "id": 117,
+    "name": "Villager",
+    "location": "Ardinale City"
+  },
+  {
+    "id": 118,
+    "name": "Boy",
+    "location": "Ardinale City"
+  },
+  {
+    "id": 119,
+    "name": "Citizen",
+    "location": "Ardinale City"
+  },
+  {
+    "id": 120,
+    "name": "Typhoon",
+    "location": "Athrabalt"
+  },
+  {
+    "id": 121,
+    "name": "Boy",
+    "location": "Athrabalt"
+  },
+  {
+    "id": 122,
+    "name": "Citizen",
+    "location": "Athrabalt"
+  },
+  {
+    "id": 123,
+    "name": "Traveling Merchant",
+    "location": "Daphan Village"
+  },
+  {
+    "id": 124,
+    "name": "Noble",
+    "location": "Dabavin"
+  },
+  {
+    "id": 125,
+    "name": "Traveler",
+    "location": "Twinhorne East"
+  },
+  {
+    "id": 126,
+    "name": "Traveler",
+    "location": "Twinhorne West"
+  },
+  {
+    "id": 127,
+    "name": "Beigoma Sage",
+    "location": "Eltisweiss"
+  },
+  {
+    "id": 301,
+    "name": "Resident",
+    "location": "Headquarters"
+  },
+  {
+    "id": 302,
+    "name": "Resident",
+    "location": "Headquarters"
+  },
+  {
+    "id": 303,
+    "name": "Resident",
+    "location": "Headquarters"
+  }
+]

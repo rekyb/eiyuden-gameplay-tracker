@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "name": "Plantvine",
+    "whereToObtain": "Grum County (North) — Plantvine enemy drop"
+  },
+  {
+    "id": 2,
+    "name": "Rabbit Knight",
+    "whereToObtain": "Grum County (North) — Rabbit Knight enemy drop"
+  },
+  {
+    "id": 3,
+    "name": "Huge Mite",
+    "whereToObtain": "Northern Forest — Huge Mite enemy drop"
+  },
+  {
+    "id": 4,
+    "name": "Lizard",
+    "whereToObtain": "Grum County — Lizard enemy drop"
+  },
+  {
+    "id": 5,
+    "name": "Wild Boar",
+    "whereToObtain": "Redthroat Ridge — Wild Boar enemy drop"
+  },
+  {
+    "id": 6,
+    "name": "Hraesvelgr",
+    "whereToObtain": "Redthroat Ridge — Hraesvelgr enemy drop"
+  },
+  {
+    "id": 7,
+    "name": "Cockatrice (Hatchling)",
+    "whereToObtain": "Mountain Path Homeward — Cockatrice (Hatchling) enemy drop"
+  },
+  {
+    "id": 8,
+    "name": "Rabbit Mage",
+    "whereToObtain": "Abandoned Mine — Rabbit Mage enemy drop"
+  },
+  {
+    "id": 9,
+    "name": "Titan Slug",
+    "whereToObtain": "Abandoned Mine — Titan Slug enemy drop"
+  },
+  {
+    "id": 10,
+    "name": "Angry Bat",
+    "whereToObtain": "Abandoned Mine — Angry Bat enemy drop"
+  },
+  {
+    "id": 11,
+    "name": "Wyvern",
+    "whereToObtain": "Around Headquarters — Wyvern enemy drop"
+  },
+  {
+    "id": 12,
+    "name": "Killer Fungus",
+    "whereToObtain": "The Greatwood — Killer Fungus enemy drop"
+  },
+  {
+    "id": 13,
+    "name": "Hellhound",
+    "whereToObtain": "The Greatwood — Hellhound enemy drop"
+  },
+  {
+    "id": 14,
+    "name": "Pawn Demon",
+    "whereToObtain": "The Greatwood (South) — Pawn Demon enemy drop"
+  },
+  {
+    "id": 15,
+    "name": "Bear Rider",
+    "whereToObtain": "Bounty Hill — Bear Rider enemy drop"
+  },
+  {
+    "id": 16,
+    "name": "Sahagin",
+    "whereToObtain": "Euchrisse — Sahagin enemy drop"
+  },
+  {
+    "id": 17,
+    "name": "Cactus Predator",
+    "whereToObtain": "Great Sandy Sea — Cactus Predator enemy drop"
+  },
+  {
+    "id": 18,
+    "name": "Sea Ghost",
+    "whereToObtain": "Hishahn Old Town — Sea Ghost enemy drop"
+  },
+  {
+    "id": 19,
+    "name": "Remora",
+    "whereToObtain": "Seaside Cavern — Remora enemy drop"
+  },
+  {
+    "id": 20,
+    "name": "Desert Serval",
+    "whereToObtain": "Great Sandy Sea — Desert Serval enemy drop"
+  },
+  {
+    "id": 21,
+    "name": "Desert Crab",
+    "whereToObtain": "The Den of the Dunes — Desert Crab enemy drop"
+  },
+  {
+    "id": 22,
+    "name": "Scorpion Assassin",
+    "whereToObtain": "The Den of the Dunes — Scorpion Assassin enemy drop"
+  },
+  {
+    "id": 23,
+    "name": "Gigas",
+    "whereToObtain": "Chelonian Goliath, Vilashnu — Gigas enemy drop"
+  },
+  {
+    "id": 24,
+    "name": "Sandfish",
+    "whereToObtain": "Great Sandy Sea — Sandfish enemy drop"
+  },
+  {
+    "id": 25,
+    "name": "Cockatrice (Adult)",
+    "whereToObtain": "The Eldroad — Cockatrice (Adult) enemy drop"
+  },
+  {
+    "id": 26,
+    "name": "Tyrant Tortoise",
+    "whereToObtain": "The Eldroad — Tyrant Tortoise enemy drop"
+  },
+  {
+    "id": 27,
+    "name": "Dragon Viper",
+    "whereToObtain": "The Eldroad — Dragon Viper enemy drop"
+  },
+  {
+    "id": 28,
+    "name": "Grimeoid",
+    "whereToObtain": "The Ice Cave — Grimeoid enemy drop"
+  },
+  {
+    "id": 29,
+    "name": "Carbuncle",
+    "whereToObtain": "The Ice Cave — Carbuncle enemy drop"
+  },
+  {
+    "id": 30,
+    "name": "Corpse Rider",
+    "whereToObtain": "Athrabalt — Corpse Rider enemy drop"
+  },
+  {
+    "id": 31,
+    "name": "Seed Conqueror",
+    "whereToObtain": "Dappled Forest — Seed Conqueror enemy drop"
+  },
+  {
+    "id": 32,
+    "name": "Earth Dragon",
+    "whereToObtain": "Chelonian Goliath, Vilashnu — Earth Dragon enemy drop"
+  },
+  {
+    "id": 33,
+    "name": "Azhdahag",
+    "whereToObtain": "Snowpeak Pass — Azhdahag enemy drop"
+  },
+  {
+    "id": 34,
+    "name": "Nidhoggr",
+    "whereToObtain": "Snowpeak Pass — Nidhoggr enemy drop"
+  },
+  {
+    "id": 35,
+    "name": "Snow Boxer",
+    "whereToObtain": "Snowpeak Pass — Snow Boxer enemy drop"
+  },
+  {
+    "id": 36,
+    "name": "Assault Tiger",
+    "whereToObtain": "Castle Harganthia — Assault Tiger enemy drop"
+  },
+  {
+    "id": 37,
+    "name": "Xibalba",
+    "whereToObtain": "Castle Harganthia — Xibalba enemy drop"
+  },
+  {
+    "id": 38,
+    "name": "Petit Gargoyle",
+    "whereToObtain": "Castle Harganthia — Petit Gargoyle enemy drop"
+  },
+  {
+    "id": 39,
+    "name": "Hellflower",
+    "whereToObtain": "Gardhaven Castle — Hellflower enemy drop"
+  },
+  {
+    "id": 40,
+    "name": "Balor",
+    "whereToObtain": "Gardhaven Castle — Balor enemy drop"
+  },
+  {
+    "id": 41,
+    "name": "Soul Reaper",
+    "whereToObtain": "Gardhaven Castle — Soul Reaper enemy drop"
+  },
+  {
+    "id": 42,
+    "name": "Arch-Demon",
+    "whereToObtain": "Gardhaven Castle — Arch-Demon enemy drop"
+  },
+  {
+    "id": 500,
+    "name": "Earthsmack",
+    "whereToObtain": "Reward for defeating Thudd (Arenside)"
+  },
+  {
+    "id": 501,
+    "name": "Trinity Cyclone",
+    "whereToObtain": "Reward for defeating Zeph (The Treefolk Village)"
+  },
+  {
+    "id": 502,
+    "name": "Azure Dragon",
+    "whereToObtain": "Reward for defeating Flowe (Hishahn)"
+  },
+  {
+    "id": 503,
+    "name": "Galactic Flame",
+    "whereToObtain": "Reward for defeating Pyre (Impershi'arc)"
+  },
+  {
+    "id": 504,
+    "name": "Devil of Destruction",
+    "whereToObtain": "Reward for defeating Crash (Ardinale City)"
+  },
+  {
+    "id": 505,
+    "name": "Neo Absolute Zero",
+    "whereToObtain": "Reward for defeating Reid (Headquarters rematch)"
+  },
+  {
+    "id": 506,
+    "name": "Infinity Force",
+    "whereToObtain": "Reward for defeating Dr. Corque (Headquarters)"
+  },
+  {
+    "id": 507,
+    "name": "Fenrir",
+    "whereToObtain": "Reward for defeating Beigoma Sage (Eltisweiss)"
+  },
+  {
+    "id": 508,
+    "name": "Elder Dragon",
+    "whereToObtain": "Reward for completing the Mythic Tablet (Slate of Seals)"
+  },
+  {
+    "id": 600,
+    "name": "Dragon Fang",
+    "whereToObtain": "Reward for defeating Taq (Altverden Village)"
+  },
+  {
+    "id": 601,
+    "name": "Gigas Fist",
+    "whereToObtain": "Reward for defeating Fender (Werne Village)"
+  },
+  {
+    "id": 602,
+    "name": "Cheetalita",
+    "whereToObtain": "Reward for defeating Celera (Kyshiri Village)"
+  },
+  {
+    "id": 603,
+    "name": "Snakebite",
+    "whereToObtain": "Reward for defeating Venom (Daphan Village)"
+  },
+  {
+    "id": 995,
+    "name": "Fire Beigoma",
+    "whereToObtain": "Starting top received during Reid's introduction quest in Eltisweiss"
+  },
+  {
+    "id": 996,
+    "name": "Water Beigoma",
+    "whereToObtain": "Starting top received during Reid's introduction quest in Eltisweiss"
+  },
+  {
+    "id": 997,
+    "name": "Wind Beigoma",
+    "whereToObtain": "Starting top received during Reid's introduction quest in Eltisweiss"
+  },
+  {
+    "id": 998,
+    "name": "Practice Beigoma",
+    "whereToObtain": "Starter top provided by Reid upon unlocking Beigoma"
+  },
+  {
+    "id": 999,
+    "name": "Practice Beigoma",
+    "whereToObtain": "Starter top provided by Reid upon unlocking Beigoma"
+  }
+]
