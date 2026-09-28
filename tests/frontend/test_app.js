@@ -444,3 +444,194 @@ test('buildSyncToast generates proper delta and up-to-date messages', () => {
   assert.strictEqual(noChangeMsg, 'Save up to date');
 });
 
+test('PAGE_SIZE is defined as 20', () => {
+  assert.strictEqual(app.PAGE_SIZE, 20);
+});
+
+test('state initializes pagination page properties to 1', () => {
+  assert.strictEqual(app.state.heroesPage, 1);
+  assert.strictEqual(app.state.recipesPage, 1);
+  assert.strictEqual(app.state.beigomaPage, 1);
+  assert.strictEqual(app.state.trainerPage, 1);
+});
+
+test('paginateItems returns empty array and hides container when items is empty', () => {
+  const dummyContainer = { innerHTML: '', hidden: false };
+  const sliced = app.paginateItems({
+    container: dummyContainer,
+    items: [],
+    currentPage: 1,
+    pageSize: 20,
+    onPageChange: () => {},
+  });
+
+  assert.deepStrictEqual(sliced, []);
+  assert.strictEqual(dummyContainer.hidden, true);
+  assert.strictEqual(dummyContainer.innerHTML, '');
+});
+
+test('paginateItems correctly slices first page, middle page, and last page', () => {
+  const items = Array.from({ length: 45 }, (_, i) => ({ id: i + 1 }));
+  const dummyContainer = {
+    innerHTML: '',
+    hidden: true,
+    addEventListener: () => {},
+    querySelectorAll: () => [],
+  };
+
+  // Page 1 (items 1..20)
+  const page1 = app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: 1,
+    pageSize: 20,
+  });
+  assert.strictEqual(page1.length, 20);
+  assert.strictEqual(page1[0].id, 1);
+  assert.strictEqual(page1[19].id, 20);
+  assert.strictEqual(dummyContainer.hidden, false);
+  assert.ok(dummyContainer.innerHTML.includes('Showing 1–20 of 45 items'));
+
+  // Page 2 (items 21..40)
+  const page2 = app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: 2,
+    pageSize: 20,
+  });
+  assert.strictEqual(page2.length, 20);
+  assert.strictEqual(page2[0].id, 21);
+  assert.strictEqual(page2[19].id, 40);
+  assert.ok(dummyContainer.innerHTML.includes('Showing 21–40 of 45 items'));
+
+  // Page 3 (items 41..45)
+  const page3 = app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: 3,
+    pageSize: 20,
+  });
+  assert.strictEqual(page3.length, 5);
+  assert.strictEqual(page3[0].id, 41);
+  assert.strictEqual(page3[4].id, 45);
+  assert.ok(dummyContainer.innerHTML.includes('Showing 41–45 of 45 items'));
+});
+
+test('paginateItems clamps out-of-range currentPage', () => {
+  const items = Array.from({ length: 25 }, (_, i) => ({ id: i + 1 }));
+  const dummyContainer = { innerHTML: '', hidden: true, querySelectorAll: () => [] };
+
+  // currentPage 99 should clamp to page 2 (last page)
+  const pageHigh = app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: 99,
+    pageSize: 20,
+  });
+  assert.strictEqual(pageHigh.length, 5);
+  assert.strictEqual(pageHigh[0].id, 21);
+  assert.ok(dummyContainer.innerHTML.includes('Showing 21–25 of 25 items'));
+
+  // currentPage 0 or negative should clamp to page 1
+  const pageLow = app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: -1,
+    pageSize: 20,
+  });
+  assert.strictEqual(pageLow.length, 20);
+  assert.strictEqual(pageLow[0].id, 1);
+});
+
+test('paginateItems attaches onPageChange listeners for numbered and nav buttons', () => {
+  const items = Array.from({ length: 45 }, (_, i) => ({ id: i + 1 }));
+  const calls = [];
+  const mockButtons = [];
+
+  const createMockButton = (dataset, disabled = false) => {
+    let clickHandler = null;
+    const btn = {
+      dataset,
+      disabled,
+      addEventListener: (evt, fn) => {
+        if (evt === 'click') clickHandler = fn;
+      },
+      click: () => {
+        if (clickHandler) clickHandler({ preventDefault: () => {} });
+      },
+    };
+    mockButtons.push(btn);
+    return btn;
+  };
+
+  const btnPrev = createMockButton({ action: 'prev' }, false);
+  const btnPage1 = createMockButton({ page: '1' }, false);
+  const btnPage2 = createMockButton({ page: '2' }, false);
+  const btnPage3 = createMockButton({ page: '3' }, false);
+  const btnNext = createMockButton({ action: 'next' }, false);
+
+  const dummyContainer = {
+    innerHTML: '',
+    hidden: true,
+    querySelectorAll: (selector) => {
+      if (selector === '.page-btn') return mockButtons;
+      return [];
+    },
+  };
+
+  app.paginateItems({
+    container: dummyContainer,
+    items,
+    currentPage: 2,
+    pageSize: 20,
+    onPageChange: (newPage) => calls.push(newPage),
+  });
+
+  // Clicking page 3
+  btnPage3.click();
+  assert.deepStrictEqual(calls, [3]);
+
+  // Clicking current page (page 2) should NOT trigger callback
+  btnPage2.click();
+  assert.deepStrictEqual(calls, [3]);
+
+  // Clicking prev (from page 2 -> 1)
+  btnPrev.click();
+  assert.deepStrictEqual(calls, [3, 1]);
+
+  // Clicking next (from page 2 -> 3)
+  btnNext.click();
+  assert.deepStrictEqual(calls, [3, 1, 3]);
+
+  // Disabled button should not trigger
+  const disabledBtn = createMockButton({ page: '1' }, true);
+  disabledBtn.click();
+  assert.deepStrictEqual(calls, [3, 1, 3]);
+});
+
+test('paginateItems returns sliced items when container is null', () => {
+  const items = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  const sliced = app.paginateItems({
+    container: null,
+    items,
+    currentPage: 1,
+    pageSize: 2,
+  });
+  assert.strictEqual(sliced.length, 2);
+  assert.strictEqual(sliced[0].id, 1);
+  assert.strictEqual(sliced[1].id, 2);
+});
+
+test('paginateItems uses singular item label when total items is 1', () => {
+  const dummyContainer = { innerHTML: '', hidden: false, querySelectorAll: () => [] };
+  app.paginateItems({
+    container: dummyContainer,
+    items: [{ id: 1 }],
+    currentPage: 1,
+    pageSize: 20,
+  });
+  assert.ok(dummyContainer.innerHTML.includes('Showing 1–1 of 1 item'));
+  assert.ok(!dummyContainer.innerHTML.includes('1 items'));
+});
+
+

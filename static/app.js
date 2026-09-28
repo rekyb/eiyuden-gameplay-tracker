@@ -7,6 +7,8 @@
 
 'use strict';
 
+const PAGE_SIZE = 20;
+
 // =============================================================================
 // Application State
 // =============================================================================
@@ -17,6 +19,7 @@ const state = {
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
   searchQuery: '',         // Lowercase trimmed search string
+  heroesPage: 1,
 
   // --- Recipes ---
   recipes: [],                      // Array of 93 recipe definition objects
@@ -24,6 +27,7 @@ const state = {
   cookedRecipeIds: new Set(),       // Set of manually-marked cooked recipe IDs
   activeRecipesFilter: 'all',       // 'all' | 'acquired' | 'not_acquired' | 'cooked' | 'not_cooked'
   recipesSearchQuery: '',           // Lowercase trimmed recipes search string
+  recipesPage: 1,
 
   // --- Beigoma & Trainers ---
   beigoma: [],                      // Array of 60 collectible top objects
@@ -31,8 +35,10 @@ const state = {
   beigomaSubView: 'collection',     // 'collection' | 'trainers'
   beigomaFilter: 'all',             // 'all' | 'obtained' | 'missing'
   beigomaSearch: '',                // Lowercase trimmed beigoma search string
+  beigomaPage: 1,
   trainerFilter: 'all',             // 'all' | 'defeated' | 'unbattled'
   trainerSearch: '',                // Lowercase trimmed trainer search string
+  trainerPage: 1,
   beigomaCollectedIds: [],          // Array of collected beigoma IDs from save file
   beigomaDefeatedTrainerIds: [],    // Array of defeated trainer IDs from save file
 
@@ -95,6 +101,7 @@ const dom = {
 
   // Heroes Table & Empty State
   charactersTbody: null,
+  heroesPagination: null,
   emptyState: null,
 
   // Recipes Filter Tabs & Search
@@ -108,6 +115,7 @@ const dom = {
 
   // Recipes Table & Empty State
   recipesTbody: null,
+  recipesPagination: null,
   recipesEmptyState: null,
   btnCookedHint: null,
   cookedPopover: null,
@@ -134,6 +142,7 @@ const dom = {
   beigomaSearch: null,
   beigomaTable: null,
   beigomaList: null,
+  beigomaPagination: null,
   beigomaEmptyState: null,
 
   // Beigoma Trainers Subview
@@ -145,6 +154,7 @@ const dom = {
   trainerSearch: null,
   trainerTable: null,
   trainerList: null,
+  trainerPagination: null,
   trainerEmptyState: null,
 
   // Configuration Dialog & Upload
@@ -162,6 +172,95 @@ const dom = {
 // =============================================================================
 // Utility Functions
 // =============================================================================
+
+/**
+ * Renders pagination controls into a container and returns sliced items for display.
+ *
+ * @param {object} options
+ * @param {HTMLElement|null} options.container - Container element for pagination controls
+ * @param {Array} options.items - Full array of filtered items
+ * @param {number} [options.currentPage=1] - Current active page (1-indexed)
+ * @param {number} [options.pageSize=PAGE_SIZE] - Number of items per page
+ * @param {function} [options.onPageChange] - Callback receiving new page number
+ * @returns {Array} Sliced items for the current page
+ */
+function paginateItems({ container, items, currentPage = 1, pageSize = PAGE_SIZE, onPageChange }) {
+  if (!items || items.length === 0) {
+    if (container) {
+      container.innerHTML = '';
+      container.hidden = true;
+    }
+    return [];
+  }
+
+  const totalItems = items.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const safePage = Math.max(1, Math.min(currentPage, totalPages));
+
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const slicedItems = items.slice(startIndex, endIndex);
+
+  if (!container) return slicedItems;
+
+  container.hidden = false;
+
+  const itemLabel = totalItems === 1 ? 'item' : 'items';
+  const infoText = `Showing ${startIndex + 1}–${endIndex} of ${totalItems} ${itemLabel}`;
+
+  // Build button HTML
+  let controlsHtml = '<div class="pagination-controls">';
+
+  // Prev button
+  const prevDisabled = safePage <= 1 ? 'disabled' : '';
+  controlsHtml += `<button type="button" class="page-btn page-btn-nav page-btn-prev" data-action="prev" ${prevDisabled} aria-label="Previous page">Prev</button>`;
+
+  // Numbered page buttons
+  for (let p = 1; p <= totalPages; p++) {
+    const isActive = p === safePage;
+    const activeClass = isActive ? ' active' : '';
+    const ariaCurrent = isActive ? ' aria-current="page"' : '';
+    controlsHtml += `<button type="button" class="page-btn page-btn-num${activeClass}" data-page="${p}"${ariaCurrent} aria-label="Page ${p}">${p}</button>`;
+  }
+
+  // Next button
+  const nextDisabled = safePage >= totalPages ? 'disabled' : '';
+  controlsHtml += `<button type="button" class="page-btn page-btn-nav page-btn-next" data-action="next" ${nextDisabled} aria-label="Next page">Next</button>`;
+  controlsHtml += '</div>';
+
+  container.innerHTML = `
+    <div class="pagination-info">${infoText}</div>
+    ${controlsHtml}
+  `;
+
+  // Attach event listener via delegation if callback provided
+  if (typeof onPageChange === 'function' && typeof container.querySelectorAll === 'function') {
+    const buttons = container.querySelectorAll('.page-btn');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (e && typeof e.preventDefault === 'function') {
+          e.preventDefault();
+        }
+        if (btn.disabled) return;
+        const pageAttr = btn.dataset?.page;
+        const actionAttr = btn.dataset?.action;
+
+        if (pageAttr) {
+          const targetPage = parseInt(pageAttr, 10);
+          if (targetPage !== safePage) {
+            onPageChange(targetPage);
+          }
+        } else if (actionAttr === 'prev' && safePage > 1) {
+          onPageChange(safePage - 1);
+        } else if (actionAttr === 'next' && safePage < totalPages) {
+          onPageChange(safePage + 1);
+        }
+      });
+    });
+  }
+
+  return slicedItems;
+}
 
 /**
  * Escapes HTML characters to prevent XSS vulnerabilities.
@@ -1117,6 +1216,7 @@ function cacheDomElements() {
 
   // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
+  dom.heroesPagination = document.getElementById('heroes-pagination');
   dom.emptyState = document.getElementById('empty-state');
 
   // Recipes Filter Tabs & Counts
@@ -1132,6 +1232,7 @@ function cacheDomElements() {
 
   // Recipes Table
   dom.recipesTbody = document.getElementById('recipes-tbody');
+  dom.recipesPagination = document.getElementById('recipes-pagination');
   dom.recipesEmptyState = document.getElementById('recipes-empty-state');
   dom.btnCookedHint = document.getElementById('btn-cooked-hint');
   dom.cookedPopover = document.getElementById('cooked-popover');
@@ -1153,6 +1254,7 @@ function cacheDomElements() {
   dom.beigomaSearch = document.getElementById('beigoma-search');
   dom.beigomaTable = document.getElementById('beigoma-table');
   dom.beigomaList = document.getElementById('beigoma-list');
+  dom.beigomaPagination = document.getElementById('beigoma-pagination');
   dom.beigomaEmptyState = document.getElementById('beigoma-empty-state');
 
   // Beigoma Trainers Subview
@@ -1164,6 +1266,7 @@ function cacheDomElements() {
   dom.trainerSearch = document.getElementById('trainer-search');
   dom.trainerTable = document.getElementById('trainer-table');
   dom.trainerList = document.getElementById('trainer-list');
+  dom.trainerPagination = document.getElementById('trainer-pagination');
   dom.trainerEmptyState = document.getElementById('trainer-empty-state');
 
   // Config Dialog & Upload
@@ -1883,6 +1986,8 @@ if (typeof document !== 'undefined') {
 // Export for Node.js test environments
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    PAGE_SIZE,
+    paginateItems,
     state,
     appState,
     dom,
