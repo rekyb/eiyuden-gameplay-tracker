@@ -147,11 +147,43 @@ class TestSaveReader(unittest.TestCase):
                 backup_bytes = bf.read()
             self.assertEqual(backup_bytes, self.fixture_bytes)
 
-    def test_backup_save_nonexistent_file(self):
-        """Verify backup_save raises FileNotFoundError for non-existent source."""
+    def test_read_save_summary_none_and_empty_path(self):
+        """Verify read_save_summary handles None and empty string paths safely."""
+        summary_none = read_save_summary(None)
+        self.assertIsInstance(summary_none, dict)
+        self.assertFalse(summary_none.get("file_exists"))
+        self.assertEqual(summary_none.get("recruited_ids"), [])
+
+        summary_empty = read_save_summary("")
+        self.assertIsInstance(summary_empty, dict)
+        self.assertFalse(summary_empty.get("file_exists"))
+        self.assertEqual(summary_empty.get("recruited_ids"), [])
+
+    def test_read_save_summary_corrupted_file(self):
+        """Verify read_save_summary does not crash on empty or corrupted file."""
+        with tempfile.NamedTemporaryFile(suffix=".dat", delete=False) as tf:
+            tf.write(b"this is completely invalid save data 12345")
+            corrupt_path = tf.name
+
+        try:
+            summary = read_save_summary(corrupt_path)
+            self.assertIsInstance(summary, dict)
+            self.assertTrue(summary.get("file_exists"))
+            self.assertTrue(summary.get("corrupted"))
+            self.assertIn("error", summary)
+            self.assertEqual(summary.get("recruited_ids"), [])
+            self.assertEqual(summary.get("acquired_recipe_ids"), [])
+        finally:
+            if os.path.exists(corrupt_path):
+                os.remove(corrupt_path)
+
+    def test_backup_save_none_and_empty_path(self):
+        """Verify backup_save raises FileNotFoundError for None or empty paths without TypeError."""
         with tempfile.TemporaryDirectory() as tmp_dir:
             with self.assertRaises(FileNotFoundError):
-                backup_save("non_existent_file_98765.dat", backup_dir=tmp_dir)
+                backup_save(None, backup_dir=tmp_dir)
+            with self.assertRaises(FileNotFoundError):
+                backup_save("", backup_dir=tmp_dir)
 
 
 if __name__ == "__main__":

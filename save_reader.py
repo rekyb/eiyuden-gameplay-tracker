@@ -75,11 +75,13 @@ def encrypt_save(data: Dict[str, Any]) -> bytes:
     return encryptor.update(padded_data) + encryptor.finalize()
 
 
-def read_save_summary(filepath: str) -> Dict[str, Any]:
+def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
     """Read and extract key game progress indicators from a save file.
 
     Extracts recruited character IDs, playtime, money, town level,
     population, protagonist, and timestamp without modifying the source file.
+    Safely handles edge cases like missing paths, deleted files, unreadable files,
+    or corrupted data without raising unhandled exceptions.
 
     Args:
         filepath: Path to the save file.
@@ -87,26 +89,49 @@ def read_save_summary(filepath: str) -> Dict[str, Any]:
     Returns:
         Dictionary with save summary fields, including `file_exists` status.
     """
-    if not os.path.isfile(filepath):
+    empty_summary = {
+        "file_exists": False,
+        "recruited_ids": [],
+        "acquired_recipe_ids": [],
+        "acquired_recipe_count": 0,
+        "playtime_seconds": 0.0,
+        "playtime_formatted": "0h 0m 0s",
+        "money": 0,
+        "town_level": 0,
+        "population": 0,
+        "protagonist_id": 0,
+        "protagonist": "",
+        "save_timestamp": None,
+    }
+
+    if not filepath or not isinstance(filepath, (str, os.PathLike)):
+        return {**empty_summary, "error": "No save file path provided."}
+
+    try:
+        if not os.path.isfile(filepath):
+            return {**empty_summary, "error": f"Save file not found at: {filepath}"}
+    except Exception as exc:
+        return {**empty_summary, "error": f"Invalid path: {exc}"}
+
+    try:
+        with open(filepath, "rb") as f:
+            ciphertext = f.read()
+    except OSError as exc:
         return {
-            "file_exists": False,
-            "recruited_ids": [],
-            "acquired_recipe_ids": [],
-            "acquired_recipe_count": 0,
-            "playtime_seconds": 0.0,
-            "playtime_formatted": "0h 0m 0s",
-            "money": 0,
-            "town_level": 0,
-            "population": 0,
-            "protagonist_id": 0,
-            "protagonist": "",
-            "save_timestamp": None,
+            **empty_summary,
+            "file_exists": True,
+            "error": f"Failed to read save file: {exc}",
         }
 
-    with open(filepath, "rb") as f:
-        ciphertext = f.read()
-
-    save_data = decrypt_save(ciphertext)
+    try:
+        save_data = decrypt_save(ciphertext)
+    except Exception as exc:
+        return {
+            **empty_summary,
+            "file_exists": True,
+            "corrupted": True,
+            "error": f"Failed to decrypt or parse save file: {exc}",
+        }
 
     # Recruited character IDs
     raw_units = save_data.get("_unitData", {}).get("_units", [])
@@ -185,7 +210,7 @@ def read_save_summary(filepath: str) -> Dict[str, Any]:
     }
 
 
-def backup_save(filepath: str, backup_dir: str = "backups") -> str:
+def backup_save(filepath: Optional[str], backup_dir: str = "backups") -> str:
     """Create a timestamped, byte-exact copy of the save file.
 
     Args:
@@ -196,10 +221,16 @@ def backup_save(filepath: str, backup_dir: str = "backups") -> str:
         Destination path of the created backup file.
 
     Raises:
-        FileNotFoundError: If the source save file does not exist.
+        FileNotFoundError: If the source save file does not exist or filepath is invalid.
     """
-    if not os.path.isfile(filepath):
-        raise FileNotFoundError(f"Source save file not found: {filepath}")
+    if not filepath or not isinstance(filepath, (str, os.PathLike)):
+        raise FileNotFoundError("Source save file path is not specified or invalid.")
+
+    try:
+        if not os.path.isfile(filepath):
+            raise FileNotFoundError(f"Source save file not found: {filepath}")
+    except TypeError:
+        raise FileNotFoundError(f"Source save file path is invalid: {filepath}")
 
     os.makedirs(backup_dir, exist_ok=True)
 

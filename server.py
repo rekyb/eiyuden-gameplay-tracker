@@ -165,17 +165,30 @@ def detect_save_path() -> Optional[str]:
 
     found_files = []
     for pat in patterns:
-        for match in glob.glob(pat, recursive=True):
-            if os.path.isfile(match):
-                base_lower = os.path.basename(match).lower()
-                # Exclude metadata/system files that are not player saves
-                if base_lower in ("userdatainfo.dat", "systemdata.dat"):
-                    continue
-                found_files.append(os.path.abspath(match))
+        try:
+            matches = glob.glob(pat, recursive=True)
+        except (OSError, Exception):
+            continue
+        for match in matches:
+            try:
+                if os.path.isfile(match):
+                    base_lower = os.path.basename(match).lower()
+                    # Exclude metadata/system files that are not player saves
+                    if base_lower in ("userdatainfo.dat", "systemdata.dat"):
+                        continue
+                    found_files.append(os.path.abspath(match))
+            except (OSError, Exception):
+                continue
 
     if found_files:
+        def _safe_mtime(f: str) -> float:
+            try:
+                return os.path.getmtime(f)
+            except OSError:
+                return 0.0
+
         # Return the most recently modified save file across slots
-        return max(found_files, key=os.path.getmtime)
+        return max(found_files, key=_safe_mtime)
 
     return None
 
@@ -203,12 +216,22 @@ def load_config(config_path: str = "config.json") -> Dict[str, Any]:
             pass
 
     # Fallback: check current directory for any UserData*.dat (newest first)
-    local_candidates = [
-        f for f in glob.glob("UserData*.dat")
-        if os.path.basename(f).lower() not in ("userdatainfo.dat", "systemdata.dat")
-    ]
+    local_candidates = []
+    try:
+        for f in glob.glob("UserData*.dat"):
+            if os.path.basename(f).lower() not in ("userdatainfo.dat", "systemdata.dat"):
+                local_candidates.append(f)
+    except (OSError, Exception):
+        pass
+
     if local_candidates:
-        return {"save_path": max(local_candidates, key=os.path.getmtime)}
+        def _safe_mtime_local(f: str) -> float:
+            try:
+                return os.path.getmtime(f)
+            except OSError:
+                return 0.0
+
+        return {"save_path": max(local_candidates, key=_safe_mtime_local)}
 
     # Next check auto-detected platform save path
     auto_path = detect_save_path()
@@ -383,9 +406,16 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             cfg = load_config(self.server.config_path)
             save_path = cfg.get("save_path", "UserData0.dat")
             detected = detect_save_path()
+            file_exists = False
+            try:
+                if save_path and os.path.isfile(save_path):
+                    file_exists = True
+            except Exception:
+                file_exists = False
+
             self.send_json({
-                "save_path": save_path,
-                "file_exists": os.path.isfile(save_path),
+                "save_path": save_path or "UserData0.dat",
+                "file_exists": file_exists,
                 "detected_save_path": detected,
                 "detected_steam_path": detected,
             })
@@ -428,9 +458,23 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             save_path = cfg.get("save_path", "UserData0.dat")
             try:
                 summary = save_reader.read_save_summary(save_path)
-                self.send_json(summary)
+                self.send_json(summary, status=200)
             except Exception as exc:
-                self.send_json({"error": str(exc), "file_exists": True}, status=400)
+                self.send_json({
+                    "file_exists": False,
+                    "error": str(exc),
+                    "recruited_ids": [],
+                    "acquired_recipe_ids": [],
+                    "acquired_recipe_count": 0,
+                    "playtime_seconds": 0.0,
+                    "playtime_formatted": "0h 0m 0s",
+                    "money": 0,
+                    "town_level": 0,
+                    "population": 0,
+                    "protagonist_id": 0,
+                    "protagonist": "",
+                    "save_timestamp": None,
+                }, status=200)
             return
 
         if path in ("/", "/index.html"):
@@ -480,15 +524,25 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             save_config(cfg, self.server.config_path)
 
             detected = detect_save_path()
-            self.send_json({
+            file_exists = False
+            try:
+                if new_save_path and os.path.isfile(new_save_path):
+                    file_exists = True
+            except Exception:
+                file_exists = False
+
+            response_data = {
                 "success": True,
                 "config": {
                     "save_path": new_save_path,
-                    "file_exists": os.path.isfile(new_save_path),
+                    "file_exists": file_exists,
                     "detected_save_path": detected,
                     "detected_steam_path": detected,
                 },
-            })
+            }
+            if not file_exists:
+                response_data["warning"] = f"Save file not found at: {new_save_path}"
+            self.send_json(response_data)
             return
 
         if path == "/api/recipes/cooked":
@@ -546,7 +600,14 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             cfg = load_config(self.server.config_path)
             save_path = cfg.get("save_path", "UserData0.dat")
 
-            if not os.path.isfile(save_path):
+            file_exists = False
+            try:
+                if save_path and os.path.isfile(save_path):
+                    file_exists = True
+            except Exception:
+                file_exists = False
+
+            if not file_exists:
                 self.send_json(
                     {"error": f"Save file does not exist at '{save_path}'"},
                     status=404,

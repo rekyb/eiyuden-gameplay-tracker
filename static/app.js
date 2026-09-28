@@ -514,54 +514,118 @@ function renderRecipesTable() {
 // =============================================================================
 
 /**
+ * Handles edge cases when interacting with a save file:
+ * - Missing or non-existent file (e.g. deleted or moved)
+ * - Corrupted or unreadable file data (e.g. partial write)
+ * - Error reading save file
+ * - Successful synchronization
+ *
+ * @param {object} statusData - Result from /api/save/status or read_save_summary
+ * @param {object} [options]
+ * @param {boolean} [options.silent=false] - Whether to suppress toast notifications
+ * @param {HTMLElement} [options.statusTarget=null] - Optional DOM element for inline status
+ * @returns {{ ok: boolean, reason: string }}
+ */
+function handleSaveFileStatus(statusData, { silent = false, statusTarget = null } = {}) {
+  const savePath = state.saveConfig?.save_path || 'UserData0.dat';
+
+  if (!statusData || !statusData.file_exists) {
+    const hintMsg = `Save file not found at: ${savePath}`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, hintMsg, 'error');
+    }
+    if (!silent) {
+      showToast(`Save file not found at "${savePath}". Open Settings to select or auto-detect your save file.`, 'info');
+    }
+    return { ok: false, reason: 'not_found' };
+  }
+
+  if (statusData.corrupted) {
+    const errMsg = `Save file is corrupted or unreadable (${statusData.error || 'decryption failed'})`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, errMsg, 'error');
+    }
+    if (!silent) {
+      showToast(errMsg, 'error');
+    }
+    return { ok: false, reason: 'corrupted' };
+  }
+
+  if (statusData.error) {
+    const errMsg = `Save file error: ${statusData.error}`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, errMsg, 'error');
+    }
+    if (!silent) {
+      showToast(errMsg, 'error');
+    }
+    return { ok: false, reason: 'error' };
+  }
+
+  if (statusTarget) {
+    setDialogStatus(
+      statusTarget,
+      `Save synchronized (${(statusData.recruited_ids || []).length} heroes, ${(statusData.acquired_recipe_ids || []).length} recipes)`,
+      'success'
+    );
+  } else if (!silent) {
+    showToast(
+      `Synchronized save file (${(statusData.recruited_ids || []).length} recruited)`,
+      'success'
+    );
+  }
+
+  return { ok: true, reason: 'synced' };
+}
+
+/**
  * Synchronizes save file status from the backend API.
+ * Handles edge cases safely:
+ * - Missing/deleted save file
+ * - Corrupted save file data
+ * - Network or server errors
+ *
  * @param {object} [options]
  * @param {boolean} [options.silent=false] - Suppress success toast if true
+ * @param {HTMLElement} [options.statusTarget=null] - Inline status element
  * @returns {Promise<boolean>} Success status
  */
-async function syncSave({ silent = false } = {}) {
+async function syncSave({ silent = false, statusTarget = null } = {}) {
   try {
     const res = await fetch('/api/save/status');
     const data = await res.json();
 
-    if (!res.ok) {
-      state.saveStatus = data;
+    state.saveStatus = data;
+
+    if (!data.file_exists || data.corrupted || !res.ok) {
       state.recruitedIds = new Set();
       state.acquiredRecipeIds = new Set();
-      updateStats();
-      updateProgress();
-      renderTable();
-      renderRecipesTable();
-      showToast(`Could not read save: ${data.error || res.statusText}`, 'error');
-      return false;
+    } else {
+      state.recruitedIds = new Set(data.recruited_ids || []);
+      state.acquiredRecipeIds = new Set(data.acquired_recipe_ids || []);
     }
-
-    state.saveStatus = data;
-    state.recruitedIds = new Set(data.recruited_ids || []);
-    state.acquiredRecipeIds = new Set(data.acquired_recipe_ids || []);
 
     updateStats();
     updateProgress();
     renderTable();
     renderRecipesTable();
 
-    if (!data.file_exists) {
-      if (!silent) {
-        showToast(
-          `Save file not found at "${state.saveConfig?.save_path || 'UserData0.dat'}". Open Settings to configure.`,
-          'info'
-        );
-      }
-    } else if (!silent) {
-      showToast(
-        `Synchronized save file (${state.recruitedIds.size} recruited)`,
-        'success'
-      );
-    }
-
-    return true;
+    const handled = handleSaveFileStatus(data, { silent, statusTarget });
+    return handled.ok;
   } catch (err) {
-    showToast(`Network error syncing save: ${err.message}`, 'error');
+    state.recruitedIds = new Set();
+    state.acquiredRecipeIds = new Set();
+    updateStats();
+    updateProgress();
+    renderTable();
+    renderRecipesTable();
+
+    if (statusTarget) {
+      setDialogStatus(statusTarget, `Network error syncing save: ${err.message}`, 'error');
+    }
+    if (!silent) {
+      showToast(`Network error syncing save: ${err.message}`, 'error');
+    }
     return false;
   }
 }
@@ -750,24 +814,13 @@ function setupEventListeners() {
         if (cfgRes.ok) {
           state.saveConfig = await cfgRes.json();
         }
-        const success = await syncSave({ silent: true });
-        if (dom.configDialog && dom.configDialog.open) {
-          if (success && state.saveStatus?.file_exists) {
-            setDialogStatus(
-              dom.saveActionsStatusHint,
-              `Save synchronized (${state.recruitedIds.size} heroes, ${state.acquiredRecipeIds.size} recipes)`,
-              'success'
-            );
-          } else {
-            setDialogStatus(
-              dom.saveActionsStatusHint,
-              `Save file not found at: ${state.saveConfig?.save_path || 'UserData0.dat'}`,
-              'error'
-            );
-          }
-        } else if (success && state.saveStatus?.file_exists) {
-          showToast(`Synchronized save file (${state.recruitedIds.size} recruited)`, 'success');
-        }
+        const isDialogOpen = Boolean(dom.configDialog && dom.configDialog.open);
+        await syncSave({
+          silent: isDialogOpen,
+          statusTarget: isDialogOpen ? dom.saveActionsStatusHint : null,
+        });
+      } catch (err) {
+        showToast(`Sync error: ${err.message}`, 'error');
       } finally {
         dom.btnSync.disabled = false;
       }
@@ -991,7 +1044,11 @@ function setupEventListeners() {
           dom.configDialog.close();
         }
 
-        showToast('Save path updated successfully', 'success');
+        if (data.config && !data.config.file_exists) {
+          showToast(`Path saved, but no save file was found at "${newPath}".`, 'info');
+        } else {
+          showToast('Save path updated successfully', 'success');
+        }
         await syncSave({ silent: false });
       } catch (err) {
         showToast(`Error updating path: ${err.message}`, 'error');
@@ -1016,7 +1073,11 @@ function setupEventListeners() {
           dom.configPathInput.value = detected;
           setDialogStatus(dom.detectStatusHint, 'Save file detected and filled above', 'success');
         } else {
-          setDialogStatus(dom.detectStatusHint, 'No save file found in standard locations.', 'error');
+          setDialogStatus(
+            dom.detectStatusHint,
+            'Could not find save file automatically. Please use Browse (📁) to locate your save file.',
+            'error'
+          );
         }
       } catch (err) {
         setDialogStatus(dom.detectStatusHint, `Error detecting save path: ${err.message}`, 'error');
@@ -1157,7 +1218,13 @@ async function init() {
     }
 
     // Fetch active save status (updates recruitedIds + acquiredRecipeIds)
-    await syncSave({ silent: true });
+    const hasSave = await syncSave({ silent: true });
+    if (!hasSave && state.saveConfig && !state.saveConfig.file_exists) {
+      showToast(
+        `No save file found at "${state.saveConfig.save_path || 'UserData0.dat'}". Open Settings to configure.`,
+        'info'
+      );
+    }
 
     // Restore saved active view
     try {
@@ -1200,6 +1267,7 @@ if (typeof module !== 'undefined' && module.exports) {
     escapeHtml,
     showToast,
     setDialogStatus,
+    handleSaveFileStatus,
     filterCharacter,
     filterRecipe,
     calculateProgress,

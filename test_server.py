@@ -221,6 +221,43 @@ class TestServerAPI(unittest.TestCase):
         ) as resp:
             self.assertEqual(resp.status, 200)
 
+    def test_get_save_status_corrupted_file(self):
+        """GET /api/save/status handles corrupted save files gracefully without 500 error."""
+        corrupt_path = os.path.join(self.temp_dir, "corrupt_save.dat")
+        with open(corrupt_path, "wb") as f:
+            f.write(b"not a valid encrypted save file at all")
+
+        # Point config to corrupt file
+        with urllib.request.urlopen(
+            urllib.request.Request(
+                self._url("/api/config"),
+                data=json.dumps({"save_path": corrupt_path}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+        ) as resp:
+            self.assertEqual(resp.status, 200)
+
+        req_status = urllib.request.Request(self._url("/api/save/status"), method="GET")
+        with urllib.request.urlopen(req_status) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertTrue(data.get("file_exists"))
+            self.assertTrue(data.get("corrupted"))
+            self.assertIn("error", data)
+            self.assertEqual(data.get("recruited_ids"), [])
+
+        # Reset config back
+        with urllib.request.urlopen(
+            urllib.request.Request(
+                self._url("/api/config"),
+                data=json.dumps({"save_path": self.test_save_copy}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+        ) as resp:
+            self.assertEqual(resp.status, 200)
+
     def test_post_save_backup(self):
         """POST /api/save/backup creates backup file and returns path."""
         req = urllib.request.Request(
