@@ -426,7 +426,7 @@ function createRecipeRowHtml(recipe, isAcquired, isCooked) {
     <tr>
       <td class="col-recipe-name">${escapeHtml(recipe.name)}</td>
       <td class="col-recipe-cat">${recipeCategoryBadge(recipe.category)}</td>
-      <td class="col-recipe-loc">${escapeHtml(recipe.location || '—')}</td>
+      <td class="col-recipe-loc">${escapeHtml(recipe.howToObtain || recipe.location || '—')}</td>
       <td class="col-recipe-status">${statusBadge}</td>
       <td class="col-recipe-cooked">
         <input type="checkbox" class="cooked-checkbox" data-recipe-id="${recipe.id}"
