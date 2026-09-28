@@ -27,8 +27,9 @@ To continue in the next session, instruct the agent:
 | UI | Remove Subtitle from Header | ✅ Done (tested) | `bbfd007` |
 | Data | Descriptive Trainer Locations & Reid Battle Notes | ✅ Done (tested) | `b429834` |
 | Format | Remove Em Dashes to Match Heroes/Recipes Format | ✅ Done (tested) | `854f107` |
+| Fix | Enable Save Path Button on Changing/Selecting Save File | ✅ Done (tested) | `68d78a2` |
 
-- **All tests passing:** 100 Python (`python -m unittest discover tests`) + 20 Node (`node --test tests/frontend/test_app.js`)
+- **All tests passing:** 100 Python (`python -m unittest discover tests`) + 21 Node (`node --test tests/frontend/test_app.js`)
 - **Live Save File Verified:** Exactly 23/60 Beigoma tops obtained, 14/44 opponent trainers defeated.
 
 ---
