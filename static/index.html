@@ -4,120 +4,226 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eiyuden Chronicle: Hundred Heroes — Gameplay Tracker</title>
-  <meta name="description" content="Minimalist save file tracker and recruitment guide for Eiyuden Chronicle: Hundred Heroes.">
+  <meta name="description" content="Minimalist save file tracker, recruitment guide, and recipes checklist for Eiyuden Chronicle: Hundred Heroes.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Header with App Title, Actions, and Save File Info -->
+  <!-- Header with App Title and Settings Action -->
   <header class="app-header">
     <div class="header-top">
       <div class="brand">
         <h1 class="app-title">Eiyuden Chronicle Gameplay Tracker</h1>
-        <p class="app-subtitle">Recruitment Guide &amp; Progress Dashboard</p>
+        <p class="app-subtitle">Recruitment Guide, Recipes &amp; Progress Dashboard</p>
       </div>
       <div class="header-actions">
-        <button type="button" id="btn-sync" class="btn btn-primary" title="Re-read and synchronize with the active save file">Sync Save</button>
-        <button type="button" id="btn-backup" class="btn btn-secondary" title="Create a timestamped backup of the current save file">Backup Save</button>
-        <button type="button" id="btn-config" class="btn btn-secondary" title="Configure save file location or upload a new save">Settings</button>
+        <button type="button" id="btn-sync" class="btn btn-primary btn-sync" title="Re-read and synchronize with the active save file">
+          <svg class="icon icon-sync" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+          <span class="btn-text">Sync Save</span>
+        </button>
+        <button type="button" id="btn-config" class="btn btn-secondary btn-settings" aria-label="Open settings" title="Settings">
+          <svg class="icon icon-gear" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
       </div>
     </div>
-
-    <!-- Recruitment Progress Bar Section -->
-    <section class="progress-section" aria-label="Recruitment progress">
-      <div class="progress-header">
-        <span class="progress-title">Recruitment Progress</span>
-        <div class="progress-meta">
-          <span id="progress-count">0 / 121</span>
-          <span id="progress-text" class="progress-percent">(0.0%)</span>
-        </div>
-      </div>
-      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="121" aria-valuenow="0" aria-label="Character recruitment completion">
-        <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
-      </div>
-    </section>
   </header>
 
-  <!-- Main Content: Filters & Character Table -->
+  <!-- Top Navigation Bar (Tabs for Features) -->
+  <nav class="top-nav" role="tablist" aria-label="Tracker Sections">
+    <button type="button" id="tab-nav-heroes" class="nav-tab active" role="tab" aria-selected="true" data-view="heroes">
+      Heroes <span class="nav-badge" id="nav-count-heroes">0/121</span>
+    </button>
+    <button type="button" id="tab-nav-recipes" class="nav-tab" role="tab" aria-selected="false" data-view="recipes">
+      Recipes <span class="nav-badge" id="nav-count-recipes">0/93</span>
+    </button>
+  </nav>
+
+  <!-- Main Content Area -->
   <main class="main-content">
-    <!-- Filters Toolbar (Sticky in UI) -->
-    <nav class="toolbar" aria-label="Character filters and search">
-      <div class="filter-group" role="tablist" aria-label="Filter character status">
-        <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
-          All <span class="badge" id="count-all">121</span>
-        </button>
-        <button type="button" class="filter-tab" data-filter="recruited" role="tab" aria-selected="false">
-          Recruited <span class="badge" id="count-recruited">0</span>
-        </button>
-        <button type="button" class="filter-tab" data-filter="missing" role="tab" aria-selected="false">
-          Not Recruited <span class="badge" id="count-missing">0</span>
-        </button>
-        <button type="button" class="filter-tab" data-filter="missable" role="tab" aria-selected="false">
-          Missable <span class="badge" id="count-missable">0</span>
-        </button>
-      </div>
+    <!-- VIEW: HEROES RECRUITMENT TRACKER -->
+    <div id="view-heroes" class="view-panel">
 
-      <div class="search-filter-controls">
-        <div class="search-box">
-          <label for="search-input" class="sr-only">Search characters</label>
-          <input type="search" id="search-input" class="search-input" placeholder="Search by name, location, requirements..." autocomplete="off">
+      <!-- Filters Toolbar -->
+      <nav class="toolbar" aria-label="Character filters and search">
+        <div class="filter-group" role="tablist" aria-label="Filter character status">
+          <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+            All <span class="badge" id="count-all">121</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="recruited" role="tab" aria-selected="false">
+            Recruited <span class="badge" id="count-recruited">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="missing" role="tab" aria-selected="false">
+            Not Recruited <span class="badge" id="count-missing">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="missable" role="tab" aria-selected="false">
+            Missable <span class="badge" id="count-missable">0</span>
+          </button>
         </div>
-      </div>
-    </nav>
 
-    <!-- Character Table Section -->
-    <section class="table-section" aria-label="Recruitable characters list">
-      <div class="table-wrapper">
-        <table class="characters-table">
-          <thead>
-            <tr>
-              <th scope="col" class="col-name">Name</th>
-              <th scope="col" class="col-location">Location</th>
-              <th scope="col" class="col-guide">How to Recruit</th>
-              <th scope="col" class="col-status">Status</th>
-            </tr>
-          </thead>
-          <tbody id="characters-tbody">
-            <!-- Populated dynamically via static/app.js -->
-          </tbody>
-        </table>
-      </div>
+        <div class="search-filter-controls">
+          <div class="search-box">
+            <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <label for="search-input" class="sr-only">Search characters</label>
+            <input type="search" id="search-input" class="search-input" placeholder="Search here" autocomplete="off">
+          </div>
+        </div>
+      </nav>
 
-      <!-- Empty State -->
-      <div id="empty-state" class="empty-state" hidden>
-        <p class="empty-title">No characters found</p>
-        <p class="empty-desc">No heroes match your active filter and search query.</p>
-      </div>
-    </section>
+      <!-- Character Table Section -->
+      <section class="table-section" aria-label="Recruitable characters list">
+        <div class="table-wrapper">
+          <table class="characters-table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-name">Name</th>
+                <th scope="col" class="col-location">Location</th>
+                <th scope="col" class="col-guide">How to Recruit</th>
+                <th scope="col" class="col-status">Status</th>
+              </tr>
+            </thead>
+            <tbody id="characters-tbody">
+              <!-- Populated dynamically via static/app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" hidden>
+          <p class="empty-title">No characters found</p>
+          <p class="empty-desc">No heroes match your active filter and search query.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW: RECIPES TRACKER -->
+    <div id="view-recipes" class="view-panel" hidden>
+
+      <!-- Recipes Controls: Filter Tabs & Search -->
+      <nav class="toolbar" aria-label="Recipe filters and search">
+        <div class="filter-group" role="tablist" id="recipes-filter-tabs" aria-label="Filter recipe status">
+          <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+            All <span class="badge" id="count-recipes-all">93</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="acquired" role="tab" aria-selected="false">
+            Acquired <span class="badge" id="count-recipes-acquired">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="not_acquired" role="tab" aria-selected="false">
+            Not Acquired <span class="badge" id="count-recipes-not-acquired">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="cooked" role="tab" aria-selected="false">
+            Cooked <span class="badge" id="count-recipes-cooked">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="not_cooked" role="tab" aria-selected="false">
+            Not Cooked <span class="badge" id="count-recipes-not-cooked">0</span>
+          </button>
+        </div>
+
+        <div class="search-filter-controls">
+          <div class="search-box">
+            <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <label for="search-recipes-input" class="sr-only">Search recipes</label>
+            <input type="search" id="search-recipes-input" class="search-input" placeholder="Search here" autocomplete="off">
+          </div>
+        </div>
+      </nav>
+
+      <!-- Recipes Table Section -->
+      <section class="table-section" aria-label="Cooking recipes list">
+        <div class="table-wrapper">
+          <table class="characters-table recipes-table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-recipe-name">Name</th>
+                <th scope="col" class="col-recipe-loc">How to Obtain</th>
+                <th scope="col" class="col-recipe-status">Status</th>
+                <th scope="col" class="col-recipe-cooked">
+                  <span>Cooked</span>
+                  <button type="button" id="btn-cooked-hint" class="hint-icon-btn" aria-label="Cooked tracking information" title="Click for info">
+                    <span class="hint-icon" aria-hidden="true">ⓘ</span>
+                  </button>
+                  <div id="cooked-popover" class="cooked-popover" role="dialog" aria-label="Cooked dishes guidance" hidden>
+                    <div class="cooked-popover-arrow"></div>
+                    <div class="cooked-popover-header">
+                      <span class="cooked-popover-title">Cooked Tracking</span>
+                      <button type="button" id="btn-close-cooked-popover" class="cooked-popover-close" aria-label="Close tooltip">&times;</button>
+                    </div>
+                    <p class="cooked-popover-text">Tip: Check off dishes manually in the <strong>Cooked</strong> column as you prepare them at Kurtz's restaurant to track your progress toward the <em>Gourmand Hero</em> achievement.</p>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="recipes-tbody">
+              <!-- Populated dynamically via static/app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="recipes-empty-state" class="empty-state" hidden>
+          <p class="empty-title">No recipes found</p>
+          <p class="empty-desc">No dishes match your active filter and search query.</p>
+        </div>
+      </section>
+    </div>
   </main>
 
   <!-- Configuration Dialog (Modal) -->
   <dialog id="config-dialog" class="config-dialog" aria-labelledby="config-title">
     <div class="dialog-content">
       <div class="dialog-header">
-        <h2 id="config-title" class="dialog-title">Save File Configuration</h2>
+        <h2 id="config-title" class="dialog-title">Settings</h2>
         <button type="button" id="btn-close-config" class="btn-close" aria-label="Close configuration">&times;</button>
       </div>
 
       <div class="dialog-body">
-        <!-- Direct File Path Configuration & Browse -->
+        <!-- Direct File Path Configuration, Browse & Auto-detect -->
         <div class="form-group">
           <label for="config-path-input" class="form-label">Save File Location</label>
           <div class="input-action-row">
             <input type="text" id="config-path-input" class="text-input" placeholder="e.g. C:\path\to\UserData0.dat, UserData1.dat..." spellcheck="false">
-            <button type="button" id="btn-browse-file" class="btn btn-secondary" title="Browse files on this computer">Browse...</button>
-            <button type="button" id="btn-save-path" class="btn btn-primary">Save Path</button>
+            <button type="button" id="btn-browse-file" class="btn btn-secondary btn-icon-only" aria-label="Browse files on this computer" title="Browse files on this computer">
+              <svg class="icon icon-folder" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+            <button type="button" id="btn-use-steam" class="btn btn-secondary">Auto-detect</button>
           </div>
-          <p class="form-hint">Browse or enter the path to any save slot file (UserData0.dat, UserData1.dat, etc.) on this computer to use as the sync source.</p>
+          <p id="detect-status-hint" class="dialog-status-hint" role="status" aria-live="polite" hidden></p>
         </div>
 
-        <!-- Auto-detect Steam Path -->
+        <!-- Save Path Action -->
         <div class="form-group">
-          <button type="button" id="btn-use-steam" class="btn btn-secondary">Use Detected Steam Path</button>
-          <p class="form-hint">Automatically checks default Steam folders and selects your latest save slot (UserData*.dat).</p>
+          <button type="button" id="btn-save-path" class="btn btn-primary" disabled>Save Path</button>
         </div>
+
       </div>
     </div>
   </dialog>
+
+  <!-- Footer Section -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p class="footer-attribution">Made with love by Reky &bull; Eiyuden Chronicle: Hundred Heroes is a trademark of Rabbit &amp; Bear Studios and 505 Games.</p>
+      <p class="footer-links">
+        <a href="https://github.com/rekyb/eiyuden-gameplay-tracker" target="_blank" rel="noopener noreferrer" class="footer-link">
+          <svg class="icon icon-github" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>Github</span>
+        </a>
+      </p>
+    </div>
+  </footer>
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>

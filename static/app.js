@@ -12,13 +12,25 @@
 // =============================================================================
 
 const state = {
+  // --- Heroes ---
   characters: [],          // Array of 121 character definition objects
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
   searchQuery: '',         // Lowercase trimmed search string
+
+  // --- Recipes ---
+  recipes: [],                      // Array of 93 recipe definition objects
+  acquiredRecipeIds: new Set(),     // Set of acquired recipe IDs from save file
+  cookedRecipeIds: new Set(),       // Set of manually-marked cooked recipe IDs
+  activeRecipesFilter: 'all',       // 'all' | 'acquired' | 'not_acquired' | 'cooked' | 'not_cooked'
+  recipesSearchQuery: '',           // Lowercase trimmed recipes search string
+
+  // --- App ---
+  activeView: 'heroes',    // 'heroes' | 'recipes'
   saveConfig: null,        // Server config: { save_path, file_exists, detected_steam_path }
   saveStatus: null,        // Save summary: { file_exists, recruited_ids, playtime_formatted, money, ... }
 };
+
 
 // =============================================================================
 // DOM Elements Cache
@@ -27,12 +39,19 @@ const state = {
 const dom = {
   // Action Buttons
   btnSync: null,
-  btnBackup: null,
   btnConfig: null,
   btnCloseConfig: null,
   btnBrowseFile: null,
   btnSavePath: null,
   btnUseSteam: null,
+
+  // Top Navigation Tabs
+  tabNavHeroes: null,
+  tabNavRecipes: null,
+
+  // View Panels
+  viewHeroes: null,
+  viewRecipes: null,
 
   // Stats Display
   statSavePath: null,
@@ -41,35 +60,51 @@ const dom = {
   statMoney: null,
   statHq: null,
 
-  // Progress Bar
-  progressCount: null,
-  progressText: null,
-  progressFill: null,
-  progressTrack: null,
-
-  // Filter Counts & Tabs
+  // Heroes Filter Counts & Tabs
   filterTabs: [],
   countAll: null,
   countRecruited: null,
   countMissing: null,
   countMissable: null,
 
-  // Search Input
+  // Heroes Search Input
   searchInput: null,
 
-  // Table & Empty State
+  // Heroes Table & Empty State
   charactersTbody: null,
   emptyState: null,
+
+  // Recipes Filter Tabs & Search
+  recipesFilterTabs: [],
+  countRecipesAll: null,
+  countRecipesAcquired: null,
+  countRecipesNotAcquired: null,
+  countRecipesCooked: null,
+  countRecipesNotCooked: null,
+  searchRecipesInput: null,
+
+  // Recipes Table & Empty State
+  recipesTbody: null,
+  recipesEmptyState: null,
+  btnCookedHint: null,
+  cookedPopover: null,
+  btnCloseCookedPopover: null,
+
+  // Navigation Badges
+  navCountHeroes: null,
+  navCountRecipes: null,
 
   // Configuration Dialog & Upload
   configDialog: null,
   configPathInput: null,
+  detectStatusHint: null,
   dropZone: null,
   fileInput: null,
 
   // Toast Container
   toastContainer: null,
 };
+
 
 // =============================================================================
 // Utility Functions
@@ -91,6 +126,25 @@ function escapeHtml(text) {
 }
 
 /**
+ * Sets inline status hint message and styling inside a dialog.
+ * @param {HTMLElement|null} element - Status hint element
+ * @param {string} message - Text message to display
+ * @param {'success'|'error'|'info'} [type='info'] - Severity level
+ */
+function setDialogStatus(element, message, type = 'info') {
+  if (!element) return;
+  if (!message) {
+    element.textContent = '';
+    element.className = 'dialog-status-hint';
+    element.hidden = true;
+    return;
+  }
+  element.textContent = message;
+  element.className = `dialog-status-hint hint-${type}`;
+  element.hidden = false;
+}
+
+/**
  * Shows an accessible, auto-dismissing toast notification.
  * @param {string} message - Notification text
  * @param {'info'|'success'|'error'} [type='info'] - Style category
@@ -98,6 +152,8 @@ function escapeHtml(text) {
  */
 function showToast(message, type = 'info', duration = 4000) {
   if (!dom.toastContainer) return;
+  // If settings modal is open, avoid background toasts blurred behind dialog backdrop
+  if (dom.configDialog && dom.configDialog.open) return;
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
@@ -235,29 +291,17 @@ function updateStats() {
 }
 
 /**
- * Updates the progress bar track, percentages, and filter tab counter badges.
+ * Updates filter tab counter badges for heroes.
  */
 function updateProgress() {
   const stats = calculateProgress(state.characters, state.recruitedIds);
-
-  if (dom.progressCount) {
-    dom.progressCount.textContent = `${stats.recruited} / ${stats.total}`;
-  }
-  if (dom.progressText) {
-    dom.progressText.textContent = `(${stats.percentageFormatted}%)`;
-  }
-  if (dom.progressFill) {
-    dom.progressFill.style.width = `${stats.percentage}%`;
-  }
-  if (dom.progressTrack) {
-    dom.progressTrack.setAttribute('aria-valuenow', String(stats.recruited));
-    dom.progressTrack.setAttribute('aria-valuemax', String(stats.total));
-  }
 
   if (dom.countAll) dom.countAll.textContent = String(stats.total);
   if (dom.countRecruited) dom.countRecruited.textContent = String(stats.recruited);
   if (dom.countMissing) dom.countMissing.textContent = String(stats.missing);
   if (dom.countMissable) dom.countMissable.textContent = String(stats.missable);
+
+  if (dom.navCountHeroes) dom.navCountHeroes.textContent = `${stats.recruited}/121`;
 }
 
 /**
@@ -292,81 +336,300 @@ function renderTable() {
 }
 
 // =============================================================================
+// View Switching
+// =============================================================================
+
+/**
+ * Switches the active top-level view (Heroes or Recipes).
+ * @param {'heroes'|'recipes'} viewName
+ */
+function switchView(viewName) {
+  state.activeView = viewName;
+
+  // Toggle view panels
+  if (dom.viewHeroes) dom.viewHeroes.hidden = (viewName !== 'heroes');
+  if (dom.viewRecipes) dom.viewRecipes.hidden = (viewName !== 'recipes');
+
+  // Toggle nav tab active state
+  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+    if (!tab) return;
+    const isActive = tab.dataset.view === viewName;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+  });
+
+  // Persist active view
+  try {
+    localStorage.setItem('eiyuden_active_view', viewName);
+  } catch (_) {}
+}
+
+// =============================================================================
+// Recipes Filtering, Rendering & Cooked Persistence
+// =============================================================================
+
+/**
+ * Debounced cooked IDs sync to backend.
+ */
+let _cookedSyncTimer = null;
+function scheduleCookedSync() {
+  clearTimeout(_cookedSyncTimer);
+  _cookedSyncTimer = setTimeout(async () => {
+    try {
+      await fetch('/api/recipes/cooked', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cooked_ids: Array.from(state.cookedRecipeIds) }),
+      });
+    } catch (_) {
+      // Non-critical — localStorage already saved
+    }
+  }, 800);
+}
+
+/**
+ * Filters a single recipe against the active tab filter and search query.
+ * @param {object} recipe
+ * @param {Set<number>} acquiredIds
+ * @param {Set<number>} cookedIds
+ * @param {string} activeFilter
+ * @param {string} searchQuery
+ * @returns {boolean}
+ */
+function filterRecipe(recipe, acquiredIds, cookedIds, activeFilter, searchQuery) {
+  const isAcquired = acquiredIds.has(recipe.id);
+  const isCooked = cookedIds.has(recipe.id);
+
+  if (activeFilter === 'acquired' && !isAcquired) return false;
+  if (activeFilter === 'not_acquired' && isAcquired) return false;
+  if (activeFilter === 'cooked' && !isCooked) return false;
+  if (activeFilter === 'not_cooked' && isCooked) return false;
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = (recipe.name || '').toLowerCase().includes(q);
+    const locMatch = (recipe.location || '').toLowerCase().includes(q);
+    const howMatch = (recipe.howToObtain || '').toLowerCase().includes(q);
+    if (!nameMatch && !locMatch && !howMatch) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Returns category badge HTML for a recipe.
+ * @param {string} category - 'Appetizer' | 'Main' | 'Dessert'
+ * @returns {string}
+ */
+function recipeCategoryBadge(category) {
+  const cls = {
+    'Appetizer': 'recipe-cat-appetizer',
+    'Main': 'recipe-cat-main',
+    'Dessert': 'recipe-cat-dessert',
+  }[category] || '';
+  return `<span class="recipe-cat-badge ${cls}">${escapeHtml(category)}</span>`;
+}
+
+/**
+ * Generates table row HTML for a recipe.
+ * @param {object} recipe
+ * @param {boolean} isAcquired
+ * @param {boolean} isCooked
+ * @returns {string}
+ */
+function createRecipeRowHtml(recipe, isAcquired, isCooked) {
+  const statusBadge = isAcquired
+    ? '<span class="status-badge status-recruited">Acquired</span>'
+    : '<span class="status-badge status-missing">Not Acquired</span>';
+
+  const checkedAttr = isCooked ? 'checked' : '';
+  const tooltip = 'Check manually when you\'ve cooked this dish at Kurtz\'s restaurant';
+
+  return `
+    <tr>
+      <td class="col-recipe-name">${escapeHtml(recipe.name)}</td>
+      <td class="col-recipe-loc">${escapeHtml(recipe.howToObtain || recipe.location || '—')}</td>
+      <td class="col-recipe-status">${statusBadge}</td>
+      <td class="col-recipe-cooked">
+        <input type="checkbox" class="cooked-checkbox" data-recipe-id="${recipe.id}"
+          ${checkedAttr} title="${tooltip}" aria-label="Mark ${escapeHtml(recipe.name)} as cooked">
+      </td>
+    </tr>
+  `;
+}
+
+/**
+ * Updates recipes filter tab counter badges and nav badge.
+ */
+function updateRecipesProgress() {
+  const total = state.recipes.length;
+  const acquired = state.acquiredRecipeIds.size;
+  const cooked = state.cookedRecipeIds.size;
+  const notAcquired = total - acquired;
+  const notCooked = total - cooked;
+
+  if (dom.countRecipesAll) dom.countRecipesAll.textContent = String(total);
+  if (dom.countRecipesAcquired) dom.countRecipesAcquired.textContent = String(acquired);
+  if (dom.countRecipesNotAcquired) dom.countRecipesNotAcquired.textContent = String(notAcquired);
+  if (dom.countRecipesCooked) dom.countRecipesCooked.textContent = String(cooked);
+  if (dom.countRecipesNotCooked) dom.countRecipesNotCooked.textContent = String(notCooked);
+
+  if (dom.navCountRecipes) dom.navCountRecipes.textContent = `${acquired}/93`;
+}
+
+/**
+ * Filters recipes and renders HTML table rows.
+ */
+function renderRecipesTable() {
+  if (!dom.recipesTbody) return;
+
+  const filtered = state.recipes.filter(r =>
+    filterRecipe(
+      r,
+      state.acquiredRecipeIds,
+      state.cookedRecipeIds,
+      state.activeRecipesFilter,
+      state.recipesSearchQuery
+    )
+  );
+
+  if (filtered.length === 0) {
+    dom.recipesTbody.innerHTML = '';
+    if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = false;
+  } else {
+    if (dom.recipesEmptyState) dom.recipesEmptyState.hidden = true;
+    dom.recipesTbody.innerHTML = filtered
+      .map(r => createRecipeRowHtml(r, state.acquiredRecipeIds.has(r.id), state.cookedRecipeIds.has(r.id)))
+      .join('');
+  }
+
+  updateRecipesProgress();
+}
+
+// =============================================================================
 // API Actions & Data Syncing
 // =============================================================================
 
 /**
+ * Handles edge cases when interacting with a save file:
+ * - Missing or non-existent file (e.g. deleted or moved)
+ * - Corrupted or unreadable file data (e.g. partial write)
+ * - Error reading save file
+ * - Successful synchronization
+ *
+ * @param {object} statusData - Result from /api/save/status or read_save_summary
+ * @param {object} [options]
+ * @param {boolean} [options.silent=false] - Whether to suppress toast notifications
+ * @param {HTMLElement} [options.statusTarget=null] - Optional DOM element for inline status
+ * @returns {{ ok: boolean, reason: string }}
+ */
+function handleSaveFileStatus(statusData, { silent = false, statusTarget = null } = {}) {
+  const savePath = state.saveConfig?.save_path || 'UserData0.dat';
+
+  if (!statusData || !statusData.file_exists) {
+    const hintMsg = `Save file not found at: ${savePath}`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, hintMsg, 'error');
+    }
+    if (!silent) {
+      showToast(`Save file not found at "${savePath}". Open Settings to select or auto-detect your save file.`, 'info');
+    }
+    return { ok: false, reason: 'not_found' };
+  }
+
+  if (statusData.corrupted) {
+    const errMsg = `Save file is corrupted or unreadable (${statusData.error || 'decryption failed'})`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, errMsg, 'error');
+    }
+    if (!silent) {
+      showToast(errMsg, 'error');
+    }
+    return { ok: false, reason: 'corrupted' };
+  }
+
+  if (statusData.error) {
+    const errMsg = `Save file error: ${statusData.error}`;
+    if (statusTarget) {
+      setDialogStatus(statusTarget, errMsg, 'error');
+    }
+    if (!silent) {
+      showToast(errMsg, 'error');
+    }
+    return { ok: false, reason: 'error' };
+  }
+
+  if (statusTarget) {
+    setDialogStatus(
+      statusTarget,
+      `Save synchronized (${(statusData.recruited_ids || []).length} heroes, ${(statusData.acquired_recipe_ids || []).length} recipes)`,
+      'success'
+    );
+  } else if (!silent) {
+    const heroCount = (statusData.recruited_ids || []).length;
+    const recipeCount = (statusData.acquired_recipe_ids || []).length;
+    showToast(
+      `Synchronized save file (${heroCount} heroes, ${recipeCount} recipes)`,
+      'success'
+    );
+  }
+
+  return { ok: true, reason: 'synced' };
+}
+
+/**
  * Synchronizes save file status from the backend API.
+ * Handles edge cases safely:
+ * - Missing/deleted save file
+ * - Corrupted save file data
+ * - Network or server errors
+ *
  * @param {object} [options]
  * @param {boolean} [options.silent=false] - Suppress success toast if true
+ * @param {HTMLElement} [options.statusTarget=null] - Inline status element
  * @returns {Promise<boolean>} Success status
  */
-async function syncSave({ silent = false } = {}) {
+async function syncSave({ silent = false, statusTarget = null } = {}) {
   try {
     const res = await fetch('/api/save/status');
     const data = await res.json();
 
-    if (!res.ok) {
-      state.saveStatus = data;
-      state.recruitedIds = new Set();
-      updateStats();
-      updateProgress();
-      renderTable();
-      showToast(`Could not read save: ${data.error || res.statusText}`, 'error');
-      return false;
-    }
-
     state.saveStatus = data;
-    state.recruitedIds = new Set(data.recruited_ids || []);
+
+    if (!data.file_exists || data.corrupted || !res.ok) {
+      state.recruitedIds = new Set();
+      state.acquiredRecipeIds = new Set();
+    } else {
+      state.recruitedIds = new Set(data.recruited_ids || []);
+      state.acquiredRecipeIds = new Set(data.acquired_recipe_ids || []);
+    }
 
     updateStats();
     updateProgress();
     renderTable();
+    renderRecipesTable();
 
-    if (!data.file_exists) {
-      if (!silent) {
-        showToast(
-          `Save file not found at "${state.saveConfig?.save_path || 'UserData0.dat'}". Open Settings to configure.`,
-          'info'
-        );
-      }
-    } else if (!silent) {
-      showToast(
-        `Synchronized save file (${state.recruitedIds.size} recruited)`,
-        'success'
-      );
-    }
-
-    return true;
+    const handled = handleSaveFileStatus(data, { silent, statusTarget });
+    return handled.ok;
   } catch (err) {
-    showToast(`Network error syncing save: ${err.message}`, 'error');
+    state.recruitedIds = new Set();
+    state.acquiredRecipeIds = new Set();
+    updateStats();
+    updateProgress();
+    renderTable();
+    renderRecipesTable();
+
+    if (statusTarget) {
+      setDialogStatus(statusTarget, `Network error syncing save: ${err.message}`, 'error');
+    }
+    if (!silent) {
+      showToast(`Network error syncing save: ${err.message}`, 'error');
+    }
     return false;
   }
 }
 
-/**
- * Creates a timestamped backup of the current save file.
- */
-async function createBackup() {
-  if (!dom.btnBackup) return;
-  dom.btnBackup.disabled = true;
 
-  try {
-    const res = await fetch('/api/save/backup', { method: 'POST' });
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to create backup');
-    }
-
-    const fileName = (data.backup_file || '').split(/[/\\]/).pop();
-    showToast(`Backup created: ${fileName}`, 'success');
-  } catch (err) {
-    showToast(`Backup failed: ${err.message}`, 'error');
-  } finally {
-    dom.btnBackup.disabled = false;
-  }
-}
 
 /**
  * Uploads a local save file (.dat) to the backend.
@@ -436,37 +699,65 @@ async function handleFileUpload(file) {
  */
 function cacheDomElements() {
   dom.btnSync = document.getElementById('btn-sync');
-  dom.btnBackup = document.getElementById('btn-backup');
   dom.btnConfig = document.getElementById('btn-config');
   dom.btnCloseConfig = document.getElementById('btn-close-config');
   dom.btnBrowseFile = document.getElementById('btn-browse-file');
   dom.btnSavePath = document.getElementById('btn-save-path');
   dom.btnUseSteam = document.getElementById('btn-use-steam');
 
+  // Top Navigation
+  dom.tabNavHeroes = document.getElementById('tab-nav-heroes');
+  dom.tabNavRecipes = document.getElementById('tab-nav-recipes');
+  dom.navCountHeroes = document.getElementById('nav-count-heroes');
+  dom.navCountRecipes = document.getElementById('nav-count-recipes');
+
+  // View Panels
+  dom.viewHeroes = document.getElementById('view-heroes');
+  dom.viewRecipes = document.getElementById('view-recipes');
+
+  // Stats Display
   dom.statSavePath = document.getElementById('stat-save-path');
   dom.statProtagonist = document.getElementById('stat-protagonist');
   dom.statPlaytime = document.getElementById('stat-playtime');
   dom.statMoney = document.getElementById('stat-money');
   dom.statHq = document.getElementById('stat-hq');
 
-  dom.progressCount = document.getElementById('progress-count');
-  dom.progressText = document.getElementById('progress-text');
-  dom.progressFill = document.getElementById('progress-fill');
-  dom.progressTrack = document.querySelector('.progress-track');
-
-  dom.filterTabs = Array.from(document.querySelectorAll('.filter-tab'));
+  // Heroes Filter Tabs & Counts
+  dom.filterTabs = Array.from(document.querySelectorAll('#view-heroes .filter-tab'));
   dom.countAll = document.getElementById('count-all');
   dom.countRecruited = document.getElementById('count-recruited');
   dom.countMissing = document.getElementById('count-missing');
   dom.countMissable = document.getElementById('count-missable');
 
+  // Heroes Search
   dom.searchInput = document.getElementById('search-input');
 
+  // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
   dom.emptyState = document.getElementById('empty-state');
 
+  // Recipes Filter Tabs & Counts
+  dom.recipesFilterTabs = Array.from(document.querySelectorAll('#recipes-filter-tabs .filter-tab'));
+  dom.countRecipesAll = document.getElementById('count-recipes-all');
+  dom.countRecipesAcquired = document.getElementById('count-recipes-acquired');
+  dom.countRecipesNotAcquired = document.getElementById('count-recipes-not-acquired');
+  dom.countRecipesCooked = document.getElementById('count-recipes-cooked');
+  dom.countRecipesNotCooked = document.getElementById('count-recipes-not-cooked');
+
+  // Recipes Search
+  dom.searchRecipesInput = document.getElementById('search-recipes-input');
+
+  // Recipes Table
+  dom.recipesTbody = document.getElementById('recipes-tbody');
+  dom.recipesEmptyState = document.getElementById('recipes-empty-state');
+  dom.btnCookedHint = document.getElementById('btn-cooked-hint');
+  dom.cookedPopover = document.getElementById('cooked-popover');
+  dom.btnCloseCookedPopover = document.getElementById('btn-close-cooked-popover');
+
+  // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
   dom.configPathInput = document.getElementById('config-path-input');
+  dom.detectStatusHint = document.getElementById('detect-status-hint');
   dom.dropZone = document.getElementById('drop-zone');
   dom.fileInput = document.getElementById('file-input');
 
@@ -474,31 +765,147 @@ function cacheDomElements() {
 }
 
 /**
+ * Validates a candidate save file path against the backend API.
+ * @param {string} candidatePath
+ * @returns {Promise<{ valid: boolean, exists: boolean, error?: string, summary?: object }>}
+ */
+async function validateSavePath(candidatePath) {
+  if (!candidatePath) {
+    return { valid: false, exists: false, error: 'Path is empty' };
+  }
+  try {
+    const res = await fetch('/api/save/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ save_path: candidatePath }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return {
+        valid: false,
+        exists: false,
+        error: data.error || `Server error (${res.status})`,
+      };
+    }
+    return await res.json();
+  } catch (err) {
+    return { valid: false, exists: false, error: err.message };
+  }
+}
+
+let _validateSaveTimer = null;
+
+/**
+ * Checks whether the current input differs from the active saved path,
+ * debounces server validation, and toggles the Save Path button state.
+ */
+function updateSavePathButtonState() {
+  if (!dom.btnSavePath || !dom.configPathInput) return;
+
+  const currentVal = dom.configPathInput.value.trim();
+  const activeVal = (state.saveConfig?.save_path || '').trim();
+
+  // If empty or identical to active saved path, keep disabled
+  if (!currentVal || currentVal === activeVal) {
+    dom.btnSavePath.disabled = true;
+    clearTimeout(_validateSaveTimer);
+    setDialogStatus(dom.detectStatusHint, '');
+    return;
+  }
+
+  // Path changed: show checking and debounce validation
+  clearTimeout(_validateSaveTimer);
+  dom.btnSavePath.disabled = true;
+  setDialogStatus(dom.detectStatusHint, 'Checking save file...', 'info');
+
+  _validateSaveTimer = setTimeout(async () => {
+    const val = await validateSavePath(currentVal);
+    // Discard if input changed in the meantime
+    if (dom.configPathInput.value.trim() !== currentVal) return;
+
+    if (val.valid) {
+      dom.btnSavePath.disabled = false;
+      const count = val.summary?.recruited_ids?.length || 0;
+      const playtime = val.summary?.playtime_formatted || '';
+      const heroText = count === 1 ? '1 hero' : `${count} heroes`;
+      const playText = playtime ? `, ${playtime}` : '';
+      setDialogStatus(
+        dom.detectStatusHint,
+        `✓ Valid save file verified (${heroText}${playText})`,
+        'success'
+      );
+    } else {
+      dom.btnSavePath.disabled = true;
+      setDialogStatus(
+        dom.detectStatusHint,
+        val.error || 'Selected file is not a valid Eiyuden Chronicle save file',
+        'error'
+      );
+    }
+  }, 300);
+}
+
+
+/**
  * Registers all user interaction event listeners.
  */
 function setupEventListeners() {
-  // Sync Save Button
+  // Sync Save Button (with 3-second loading indicator delay)
   if (dom.btnSync) {
     dom.btnSync.addEventListener('click', async () => {
       dom.btnSync.disabled = true;
+      dom.btnSync.classList.add('is-syncing');
+      const textSpan = dom.btnSync.querySelector('.btn-text');
+      const prevText = textSpan ? textSpan.textContent : dom.btnSync.textContent;
+      if (textSpan) {
+        textSpan.textContent = 'Syncing...';
+      } else {
+        dom.btnSync.textContent = 'Syncing...';
+      }
+
       try {
-        const cfgRes = await fetch('/api/config');
-        if (cfgRes.ok) {
-          state.saveConfig = await cfgRes.json();
+        const delayPromise = new Promise(resolve => setTimeout(resolve, 3000));
+        let syncError = null;
+        const syncPromise = (async () => {
+          try {
+            const cfgRes = await fetch('/api/config');
+            if (cfgRes.ok) {
+              state.saveConfig = await cfgRes.json();
+            }
+            await syncSave({ silent: true });
+          } catch (err) {
+            syncError = err;
+          }
+        })();
+
+        await Promise.all([syncPromise, delayPromise]);
+
+        if (syncError) {
+          showToast(`Sync error: ${syncError.message}`, 'error');
+        } else if (state.saveStatus) {
+          handleSaveFileStatus(state.saveStatus, { silent: false });
         }
-        await syncSave({ silent: false });
       } finally {
         dom.btnSync.disabled = false;
+        dom.btnSync.classList.remove('is-syncing');
+        if (textSpan) {
+          textSpan.textContent = prevText;
+        } else {
+          dom.btnSync.textContent = prevText;
+        }
       }
     });
   }
 
-  // Backup Save Button
-  if (dom.btnBackup) {
-    dom.btnBackup.addEventListener('click', createBackup);
-  }
+  // Top Navigation Tab Switching
+  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+    if (!tab) return;
+    tab.addEventListener('click', () => {
+      switchView(tab.dataset.view || 'heroes');
+    });
+  });
 
-  // Filter Status Tabs
+  // Heroes Filter Status Tabs
   dom.filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       dom.filterTabs.forEach(t => {
@@ -510,6 +917,109 @@ function setupEventListeners() {
       state.activeFilter = tab.dataset.filter || 'all';
       renderTable();
     });
+  });
+
+  // Recipes Filter Tabs
+  dom.recipesFilterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      dom.recipesFilterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      state.activeRecipesFilter = tab.dataset.filter || 'all';
+      renderRecipesTable();
+    });
+  });
+
+  // Recipes Search Input
+  if (dom.searchRecipesInput) {
+    dom.searchRecipesInput.addEventListener('input', (e) => {
+      state.recipesSearchQuery = e.target.value.trim().toLowerCase();
+      renderRecipesTable();
+    });
+
+    dom.searchRecipesInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.searchRecipesInput.value) {
+        dom.searchRecipesInput.value = '';
+        state.recipesSearchQuery = '';
+        renderRecipesTable();
+      }
+    });
+  }
+
+  // Cooked Checkbox — event delegation on recipes tbody
+  if (dom.recipesTbody) {
+    dom.recipesTbody.addEventListener('change', (e) => {
+      const checkbox = e.target.closest('.cooked-checkbox');
+      if (!checkbox) return;
+      const recipeId = parseInt(checkbox.dataset.recipeId, 10);
+      if (isNaN(recipeId)) return;
+
+      if (checkbox.checked) {
+        state.cookedRecipeIds.add(recipeId);
+      } else {
+        state.cookedRecipeIds.delete(recipeId);
+      }
+
+      // Persist to localStorage immediately
+      try {
+        localStorage.setItem('eiyuden_cooked_recipes', JSON.stringify(Array.from(state.cookedRecipeIds)));
+      } catch (_) {}
+
+      // Debounced sync to backend
+      scheduleCookedSync();
+
+      // Update counters without full re-render (checkbox already reflects state)
+      updateRecipesProgress();
+    });
+  }
+
+  // Cooked Column Hint Tooltip Popover
+  if (dom.btnCookedHint && dom.cookedPopover) {
+    dom.btnCookedHint.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = dom.cookedPopover.hasAttribute('hidden');
+      if (isHidden) {
+        dom.cookedPopover.removeAttribute('hidden');
+        dom.btnCookedHint.setAttribute('aria-expanded', 'true');
+      } else {
+        dom.cookedPopover.setAttribute('hidden', '');
+        dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  if (dom.btnCloseCookedPopover && dom.cookedPopover) {
+    dom.btnCloseCookedPopover.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dom.cookedPopover.setAttribute('hidden', '');
+      if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  if (dom.cookedPopover) {
+    dom.cookedPopover.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // Close Cooked popover on outside click or Escape key
+  document.addEventListener('click', () => {
+    if (dom.cookedPopover && !dom.cookedPopover.hasAttribute('hidden')) {
+      dom.cookedPopover.setAttribute('hidden', '');
+      if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (dom.cookedPopover && !dom.cookedPopover.hasAttribute('hidden')) {
+        dom.cookedPopover.setAttribute('hidden', '');
+        if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+      }
+    }
   });
 
   // Instant Search Input
@@ -531,6 +1041,10 @@ function setupEventListeners() {
   // Settings Modal Open / Close
   if (dom.btnConfig && dom.configDialog) {
     dom.btnConfig.addEventListener('click', () => {
+      setDialogStatus(dom.detectStatusHint, '');
+      if (dom.btnSavePath) {
+        dom.btnSavePath.disabled = true;
+      }
       if (dom.configPathInput) {
         let activePath = state.saveConfig?.save_path;
         if (!activePath) {
@@ -566,6 +1080,15 @@ function setupEventListeners() {
     });
   }
 
+  // Config Path Input listeners: validate and update Save Path button state
+  if (dom.configPathInput) {
+    dom.configPathInput.addEventListener('input', updateSavePathButtonState);
+    dom.configPathInput.addEventListener('change', updateSavePathButtonState);
+    dom.configPathInput.addEventListener('paste', () => {
+      setTimeout(updateSavePathButtonState, 10);
+    });
+  }
+
   // Save Path Button
   if (dom.btnSavePath && dom.configPathInput) {
     dom.btnSavePath.addEventListener('click', async () => {
@@ -576,13 +1099,15 @@ function setupEventListeners() {
       }
 
       dom.btnSavePath.disabled = true;
+      setDialogStatus(dom.detectStatusHint, 'Saving and validating path...', 'info');
+
       try {
         const res = await fetch('/api/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ save_path: newPath }),
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data.success) {
           throw new Error(data.error || 'Failed to update configuration');
@@ -597,34 +1122,49 @@ function setupEventListeners() {
           dom.configDialog.close();
         }
 
-        showToast('Save path updated successfully', 'success');
+        if (data.config && !data.config.file_exists) {
+          showToast(`Path saved, but no save file was found at "${newPath}".`, 'info');
+        } else {
+          showToast('Save path updated successfully', 'success');
+        }
         await syncSave({ silent: false });
       } catch (err) {
+        setDialogStatus(dom.detectStatusHint, err.message, 'error');
         showToast(`Error updating path: ${err.message}`, 'error');
-      } finally {
         dom.btnSavePath.disabled = false;
       }
     });
   }
 
-  // Detect Steam Path Button
+  // Auto-Detect Save Path Button
   if (dom.btnUseSteam && dom.configPathInput) {
     dom.btnUseSteam.addEventListener('click', async () => {
       dom.btnUseSteam.disabled = true;
+      setDialogStatus(dom.detectStatusHint, '');
       try {
         const res = await fetch('/api/config');
         if (res.ok) {
           state.saveConfig = await res.json();
         }
-        const detected = state.saveConfig?.detected_steam_path;
+        const detected = state.saveConfig?.detected_save_path || state.saveConfig?.detected_steam_path;
         if (detected) {
           dom.configPathInput.value = detected;
-          showToast('Detected Steam save path applied to input', 'info');
+          const activeVal = (state.saveConfig?.save_path || '').trim();
+          if (detected.trim() === activeVal) {
+            if (dom.btnSavePath) dom.btnSavePath.disabled = true;
+            setDialogStatus(dom.detectStatusHint, 'Save file detected (already active)', 'info');
+          } else {
+            updateSavePathButtonState();
+          }
         } else {
-          showToast('No Steam save path detected automatically', 'info');
+          setDialogStatus(
+            dom.detectStatusHint,
+            'Could not find save file automatically. Please use Browse (📁) to locate your save file.',
+            'error'
+          );
         }
       } catch (err) {
-        showToast(`Error detecting Steam path: ${err.message}`, 'error');
+        setDialogStatus(dom.detectStatusHint, `Error detecting save path: ${err.message}`, 'error');
       } finally {
         dom.btnUseSteam.disabled = false;
       }
@@ -635,20 +1175,25 @@ function setupEventListeners() {
   if (dom.btnBrowseFile) {
     dom.btnBrowseFile.addEventListener('click', async () => {
       dom.btnBrowseFile.disabled = true;
-      const prevText = dom.btnBrowseFile.textContent;
-      dom.btnBrowseFile.textContent = 'Browsing...';
+      const prevTitle = dom.btnBrowseFile.title;
+      dom.btnBrowseFile.title = 'Browsing files...';
+      setDialogStatus(dom.detectStatusHint, '');
 
       try {
         const res = await fetch('/api/save/browse', { method: 'POST' });
-        if (!res.ok) {
-          throw new Error(`Server returned HTTP ${res.status}`);
-        }
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (data.cancelled) {
           // User closed or cancelled the file dialog
           return;
         }
-        if (data.success && data.path) {
+        if (!res.ok || !data.success) {
+          const errMsg = data.error || `Server returned HTTP ${res.status}`;
+          setDialogStatus(dom.detectStatusHint, errMsg, 'error');
+          showToast(`File rejected: ${errMsg}`, 'error');
+          return;
+        }
+
+        if (data.path) {
           if (dom.configPathInput) {
             dom.configPathInput.value = data.path;
           }
@@ -664,22 +1209,34 @@ function setupEventListeners() {
           if (data.summary) {
             state.saveStatus = data.summary;
             state.recruitedIds = new Set(data.summary.recruited_ids || []);
+            state.acquiredRecipeIds = new Set(data.summary.acquired_recipe_ids || []);
             updateStats();
             updateProgress();
             renderTable();
+            if (typeof renderRecipesTable === 'function') {
+              renderRecipesTable();
+            }
           }
+          if (dom.btnSavePath) {
+            dom.btnSavePath.disabled = true;
+          }
+          const count = data.summary?.recruited_ids?.length || 0;
+          const playtime = data.summary?.playtime_formatted || '';
+          const heroText = count === 1 ? '1 hero' : `${count} heroes`;
+          const playText = playtime ? `, ${playtime}` : '';
+          setDialogStatus(
+            dom.detectStatusHint,
+            `✓ Valid save file loaded (${heroText}${playText})`,
+            'success'
+          );
           showToast(`Save file set to: ${data.path}`, 'success');
-          if (dom.configDialog && typeof dom.configDialog.close === 'function') {
-            dom.configDialog.close();
-          }
-        } else if (data.error) {
-          showToast(data.error, 'error');
         }
       } catch (err) {
+        setDialogStatus(dom.detectStatusHint, `Failed to browse file: ${err.message}`, 'error');
         showToast(`Failed to browse file: ${err.message}`, 'error');
       } finally {
         dom.btnBrowseFile.disabled = false;
-        dom.btnBrowseFile.textContent = prevText;
+        dom.btnBrowseFile.title = prevTitle;
       }
     });
   }
@@ -693,10 +1250,12 @@ async function init() {
   setupEventListeners();
 
   try {
-    // Fetch server configuration and character definitions in parallel
-    const [cfgRes, charRes] = await Promise.all([
+    // Fetch server configuration, characters, recipes, and cooked state in parallel
+    const [cfgRes, charRes, recipeRes, cookedRes] = await Promise.all([
       fetch('/api/config'),
       fetch('/api/characters'),
+      fetch('/api/recipes'),
+      fetch('/api/recipes/cooked'),
     ]);
 
     if (cfgRes.ok) {
@@ -711,7 +1270,35 @@ async function init() {
       showToast('Could not load characters catalog', 'error');
     }
 
-    // Attempt localStorage restore if server path doesn't exist but localStorage has one
+    if (recipeRes.ok) {
+      state.recipes = await recipeRes.json();
+    } else {
+      showToast('Could not load recipes catalog', 'error');
+    }
+
+    // Restore cooked IDs: merge localStorage + server config
+    const serverCookedIds = cookedRes.ok ? ((await cookedRes.json()).cooked_ids || []) : [];
+    let localCookedIds = [];
+    try {
+      const raw = localStorage.getItem('eiyuden_cooked_recipes');
+      if (raw) localCookedIds = JSON.parse(raw);
+    } catch (_) {}
+    const mergedCooked = new Set([...serverCookedIds, ...localCookedIds]);
+    state.cookedRecipeIds = mergedCooked;
+
+    // If merged differs from server, sync back
+    if (mergedCooked.size !== serverCookedIds.length) {
+      try {
+        await fetch('/api/recipes/cooked', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cooked_ids: Array.from(mergedCooked) }),
+        });
+        localStorage.setItem('eiyuden_cooked_recipes', JSON.stringify(Array.from(mergedCooked)));
+      } catch (_) {}
+    }
+
+    // Attempt localStorage restore of save path
     try {
       const savedLocalPath = localStorage.getItem('eiyuden_save_path');
       if (savedLocalPath && state.saveConfig && !state.saveConfig.file_exists && state.saveConfig.save_path !== savedLocalPath) {
@@ -731,14 +1318,33 @@ async function init() {
       // Ignore localStorage sync issues
     }
 
-    // Fetch active save status
-    await syncSave({ silent: true });
+    // Fetch active save status (updates recruitedIds + acquiredRecipeIds)
+    const hasSave = await syncSave({ silent: true });
+    if (!hasSave && state.saveConfig && !state.saveConfig.file_exists) {
+      showToast(
+        `No save file found at "${state.saveConfig.save_path || 'UserData0.dat'}". Open Settings to configure.`,
+        'info'
+      );
+    }
+
+    // Restore saved active view
+    try {
+      const savedView = localStorage.getItem('eiyuden_active_view');
+      if (savedView === 'recipes') {
+        switchView('recipes');
+      } else {
+        switchView('heroes');
+      }
+    } catch (_) {
+      switchView('heroes');
+    }
   } catch (err) {
     showToast(`Initialization failed: ${err.message}`, 'error');
   } finally {
     updateStats();
     updateProgress();
     renderTable();
+    renderRecipesTable();
   }
 }
 
@@ -761,15 +1367,26 @@ if (typeof module !== 'undefined' && module.exports) {
     dom,
     escapeHtml,
     showToast,
+    setDialogStatus,
+    handleSaveFileStatus,
     filterCharacter,
+    filterRecipe,
     calculateProgress,
     createCharacterRowHtml,
+    createRecipeRowHtml,
+    recipeCategoryBadge,
     updateStats,
     updateProgress,
+    updateRecipesProgress,
     renderTable,
+    renderRecipesTable,
+    switchView,
+    scheduleCookedSync,
     syncSave,
-    createBackup,
     handleFileUpload,
+    validateSavePath,
+    updateSavePathButtonState,
     init,
   };
 }
+

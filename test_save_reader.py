@@ -10,7 +10,6 @@ from save_reader import (
     decrypt_save,
     encrypt_save,
     read_save_summary,
-    backup_save,
 )
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "UserData0.dat")
@@ -98,6 +97,21 @@ class TestSaveReader(unittest.TestCase):
             sha_after = hashlib.sha256(f.read()).hexdigest()
         self.assertEqual(sha_before, sha_after)
 
+    def test_read_save_summary_extracts_recipes(self):
+        """Verify read_save_summary extracts acquired_recipe_ids from save fixture."""
+        summary = read_save_summary(FIXTURE_PATH)
+        self.assertIn("acquired_recipe_ids", summary)
+        self.assertIsInstance(summary["acquired_recipe_ids"], list)
+        self.assertIn("acquired_recipe_count", summary)
+        self.assertEqual(summary["acquired_recipe_count"], len(summary["acquired_recipe_ids"]))
+        self.assertGreater(len(summary["acquired_recipe_ids"]), 0)
+        # All extracted IDs must be in 3000..3092 range
+        for rid in summary["acquired_recipe_ids"]:
+            self.assertIsInstance(rid, int)
+            self.assertTrue(3000 <= rid <= 3092)
+        # Verify starter recipe (e.g. 3000 Poached Egg) is present
+        self.assertIn(3000, summary["acquired_recipe_ids"])
+
     def test_read_save_summary_nonexistent_file(self):
         """Verify read_save_summary gracefully handles non-existent file."""
         nonexistent_path = os.path.join(
@@ -107,34 +121,44 @@ class TestSaveReader(unittest.TestCase):
         self.assertIsInstance(summary, dict)
         self.assertFalse(summary.get("file_exists"))
         self.assertEqual(summary.get("recruited_ids"), [])
+        self.assertEqual(summary.get("acquired_recipe_ids"), [])
+        self.assertEqual(summary.get("acquired_recipe_count"), 0)
         self.assertEqual(summary.get("money"), 0)
         self.assertEqual(summary.get("town_level"), 0)
         self.assertEqual(summary.get("population"), 0)
         self.assertEqual(summary.get("playtime_seconds"), 0.0)
 
-    def test_backup_save_creates_timestamped_copy(self):
-        """Verify backup_save writes exact copy with timestamp and preserves original."""
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            backup_path = backup_save(FIXTURE_PATH, backup_dir=tmp_dir)
 
-            self.assertTrue(os.path.isfile(backup_path))
-            self.assertTrue(backup_path.startswith(tmp_dir))
+    def test_read_save_summary_none_and_empty_path(self):
+        """Verify read_save_summary handles None and empty string paths safely."""
+        summary_none = read_save_summary(None)
+        self.assertIsInstance(summary_none, dict)
+        self.assertFalse(summary_none.get("file_exists"))
+        self.assertEqual(summary_none.get("recruited_ids"), [])
 
-            # Validate filename format: UserData0_backup_YYYYMMDD_HHMMSS.dat
-            backup_filename = os.path.basename(backup_path)
-            pattern = r"^UserData0_backup_\d{8}_\d{6}(_\d+)?\.dat$"
-            self.assertRegex(backup_filename, pattern)
+        summary_empty = read_save_summary("")
+        self.assertIsInstance(summary_empty, dict)
+        self.assertFalse(summary_empty.get("file_exists"))
+        self.assertEqual(summary_empty.get("recruited_ids"), [])
 
-            # Compare bytes
-            with open(backup_path, "rb") as bf:
-                backup_bytes = bf.read()
-            self.assertEqual(backup_bytes, self.fixture_bytes)
+    def test_read_save_summary_corrupted_file(self):
+        """Verify read_save_summary does not crash on empty or corrupted file."""
+        with tempfile.NamedTemporaryFile(suffix=".dat", delete=False) as tf:
+            tf.write(b"this is completely invalid save data 12345")
+            corrupt_path = tf.name
 
-    def test_backup_save_nonexistent_file(self):
-        """Verify backup_save raises FileNotFoundError for non-existent source."""
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with self.assertRaises(FileNotFoundError):
-                backup_save("non_existent_file_98765.dat", backup_dir=tmp_dir)
+        try:
+            summary = read_save_summary(corrupt_path)
+            self.assertIsInstance(summary, dict)
+            self.assertTrue(summary.get("file_exists"))
+            self.assertTrue(summary.get("corrupted"))
+            self.assertIn("error", summary)
+            self.assertEqual(summary.get("recruited_ids"), [])
+            self.assertEqual(summary.get("acquired_recipe_ids"), [])
+        finally:
+            if os.path.exists(corrupt_path):
+                os.remove(corrupt_path)
+
 
 
 if __name__ == "__main__":
