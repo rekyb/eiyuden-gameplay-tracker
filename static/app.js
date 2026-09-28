@@ -1295,6 +1295,14 @@ function setupEventListeners() {
         dom.btnSync.textContent = 'Syncing...';
       }
 
+      // Snapshot counts before sync so the toast can show only what changed
+      const prevCounts = {
+        heroCount:    state.recruitedIds.size,
+        recipeCount:  state.acquiredRecipeIds.size,
+        beigomaCount: state.beigomaCollectedIds.length,
+        trainerCount: state.beigomaDefeatedTrainerIds.length,
+      };
+
       try {
         const delayPromise = new Promise(resolve => setTimeout(resolve, 3000));
         let syncError = null;
@@ -1315,7 +1323,7 @@ function setupEventListeners() {
         if (syncError) {
           showToast(`Sync error: ${syncError.message}`, 'error');
         } else if (state.saveStatus) {
-          handleSaveFileStatus(state.saveStatus, { silent: false });
+          handleSaveFileStatus(state.saveStatus, { silent: false, prevCounts });
         }
       } finally {
         dom.btnSync.disabled = false;
@@ -1915,6 +1923,8 @@ if (typeof module !== 'undefined' && module.exports) {
     switchView,
     switchBeigomaSubview,
     applyProgress,
+    buildSyncToast,
+    SYNC_TRACKERS,
     scheduleCookedSync,
     syncSave,
     handleFileUpload,
