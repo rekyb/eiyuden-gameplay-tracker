@@ -736,6 +736,7 @@ function cacheDomElements() {
   dom.btnConfig = document.getElementById('btn-config');
   dom.btnCloseConfig = document.getElementById('btn-close-config');
   dom.btnBrowseFile = document.getElementById('btn-browse-file');
+  dom.browserFilePicker = document.getElementById('browser-file-picker');
   dom.btnSavePath = document.getElementById('btn-save-path');
   dom.btnUseSteam = document.getElementById('btn-use-steam');
 
@@ -1188,25 +1189,34 @@ function setupEventListeners() {
     });
   }
 
-  // Native File Browser trigger
+  // File Browser trigger
   if (dom.btnBrowseFile) {
     dom.btnBrowseFile.addEventListener('click', async () => {
       dom.btnBrowseFile.disabled = true;
       const prevTitle = dom.btnBrowseFile.title;
       dom.btnBrowseFile.title = 'Browsing files...';
-      setDialogStatus(dom.detectStatusHint, '');
+      setDialogStatus(dom.detectStatusHint, 'Opening file browser...', 'info');
 
       try {
-        const res = await fetch('/api/save/browse', { method: 'POST' });
+        const curPath = dom.configPathInput ? dom.configPathInput.value.trim() : '';
+        const res = await fetch('/api/save/browse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_path: curPath }),
+        });
         const data = await res.json().catch(() => ({}));
         if (data.cancelled) {
           // User closed or cancelled the file dialog
+          setDialogStatus(dom.detectStatusHint, '');
           return;
         }
         if (!res.ok || !data.success) {
           const errMsg = data.error || `Server returned HTTP ${res.status}`;
           setDialogStatus(dom.detectStatusHint, errMsg, 'error');
-          showToast(`File rejected: ${errMsg}`, 'error');
+          // If native dialog failed on server, trigger browser file picker fallback
+          if (dom.browserFilePicker) {
+            dom.browserFilePicker.click();
+          }
           return;
         }
 
@@ -1233,22 +1243,66 @@ function setupEventListeners() {
           if (dom.btnSavePath) {
             dom.btnSavePath.disabled = true;
           }
+          const count = data.summary?.recruited_ids?.length || 0;
+          const playtime = data.summary?.playtime_formatted || '';
+          const heroText = count === 1 ? '1 hero' : `${count} heroes`;
+          const playText = playtime ? `, ${playtime}` : '';
           setDialogStatus(
             dom.detectStatusHint,
-            '✓ Valid save file loaded',
+            `✓ Valid save file loaded (${heroText}${playText})`,
             'success'
           );
           showToast(`Save file set to: ${data.path}`, 'success');
-          if (dom.configDialog && typeof dom.configDialog.close === 'function') {
-            dom.configDialog.close();
-          }
         }
       } catch (err) {
         setDialogStatus(dom.detectStatusHint, `Failed to browse file: ${err.message}`, 'error');
-        showToast(`Failed to browse file: ${err.message}`, 'error');
+        // If native dialog failed, attempt browser-side file picker fallback
+        if (dom.browserFilePicker) {
+          dom.browserFilePicker.click();
+        }
       } finally {
         dom.btnBrowseFile.disabled = false;
         dom.btnBrowseFile.title = prevTitle;
+      }
+    });
+  }
+
+  // Browser file input fallback when native file dialog is unavailable
+  if (dom.browserFilePicker) {
+    dom.browserFilePicker.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      // Reset picker input value so selecting the same file again triggers change
+      e.target.value = '';
+
+      // Check if file is in the known save directory
+      const activeDir = (state.saveConfig?.detected_save_path || state.saveConfig?.save_path || '');
+      let candidateResolved = false;
+
+      if (activeDir) {
+        const lastSep = Math.max(activeDir.lastIndexOf('\\'), activeDir.lastIndexOf('/'));
+        if (lastSep !== -1) {
+          const dir = activeDir.substring(0, lastSep + 1);
+          const candidatePath = dir + file.name;
+          const val = await validateSavePath(candidatePath);
+          if (val.valid) {
+            candidateResolved = true;
+            if (dom.configPathInput) {
+              dom.configPathInput.value = candidatePath;
+            }
+            updateSavePathButtonState();
+          }
+        }
+      }
+
+      if (!candidateResolved) {
+        // Fall back to uploading the chosen file
+        await handleFileUpload(file);
+        if (state.saveConfig?.save_path && dom.configPathInput) {
+          dom.configPathInput.value = state.saveConfig.save_path;
+          updateSavePathButtonState();
+        }
       }
     });
   }
