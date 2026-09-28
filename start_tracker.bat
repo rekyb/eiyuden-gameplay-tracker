@@ -5,13 +5,13 @@ echo.
 
 where python >nul 2>nul
 if %errorlevel% equ 0 (
-    python server.py --open
+    python main.py --open
     goto done
 )
 
 where py >nul 2>nul
 if %errorlevel% equ 0 (
-    py -3 server.py --open
+    py -3 main.py --open
     goto done
 )
 

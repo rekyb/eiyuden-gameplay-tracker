@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const app = require('./static/app.js');
+const app = require('../../static/app.js');
 
 test('handleSaveFileStatus handles null/empty status as not_found', () => {
   const result = app.handleSaveFileStatus(null, { silent: true });
@@ -208,4 +208,3 @@ test('filterCharacter does not allow searching by role', () => {
   assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'battle'), false);
   assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'support'), false);
 });
-

@@ -1,12 +1,20 @@
+"""Tests verifying CSS coverage and styling requirements."""
+
+from pathlib import Path
 import re
 import unittest
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class TestStyleCSS(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with open('static/index.html', 'r', encoding='utf-8') as f:
+        html_path = PROJECT_ROOT / "static" / "index.html"
+        css_path = PROJECT_ROOT / "static" / "style.css"
+        with open(html_path, "r", encoding="utf-8") as f:
             cls.html = f.read()
-        with open('static/style.css', 'r', encoding='utf-8') as f:
+        with open(css_path, "r", encoding="utf-8") as f:
             cls.css = f.read()
 
     def test_css_file_exists_and_non_empty(self):
