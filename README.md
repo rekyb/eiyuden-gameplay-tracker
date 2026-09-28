@@ -44,12 +44,12 @@ pip install -r requirements.txt
 Double-click **`start_tracker.bat`** or run:
 
 ```cmd
-python server.py --open
+python main.py --open
 ```
 
 #### macOS / Linux:
 ```bash
-python3 server.py --open
+python3 main.py --open
 ```
 
 The tracker will launch and automatically open `http://localhost:8000` in your default browser.
@@ -96,20 +96,54 @@ If you need to find your save files manually:
 
 ---
 
+## Project Structure
+
+```text
+eiyuden-gameplay-tracker/
+├── main.py                     # Canonical application entry point
+├── start_tracker.bat           # Windows double-click launcher
+├── config/                     # Application configuration
+│   └── config.json             # User settings (save paths, options)
+├── data/                       # Game catalogs & static data
+│   ├── characters.json         # 121 heroes database
+│   └── recipes.json            # 93 recipes database
+├── src/                        # Modular application source code
+│   └── tracker/
+│       ├── config/             # Configuration & platform detection
+│       │   ├── detector.py     # Steam, GOG, Game Pass save file detector
+│       │   └── manager.py      # ConfigManager for loading/saving settings
+│       ├── core/               # Core business logic & data processing
+│       │   ├── crypto.py       # TripleDES-CBC save file decryption
+│       │   ├── models.py       # Character & recipe catalog loaders
+│       │   └── save_reader.py  # Save file parsing & summary extraction
+│       └── server.py           # HTTP API server & static file host
+├── static/                     # Frontend web interface (HTML, CSS, JS)
+│   ├── index.html              # Single-page application interface
+│   ├── app.js                  # Frontend state management & logic
+│   └── style.css               # Application styling & responsive layout
+└── tests/                      # Automated test suites
+    ├── fixtures/               # Test save files and sample fixtures
+    ├── unit/                   # Unit tests (models, save reader, config)
+    ├── e2e/                    # End-to-end server & style tests
+    └── frontend/               # Headless Node.js frontend tests
+```
+
+---
+
 ## Running Tests
 
 ### Backend & E2E Tests (Python)
-59 unit, integration, style, and end-to-end tests:
+Unit, integration, style, and end-to-end tests:
 
 ```bash
-python -m unittest discover -s . -p "test_*.py" -v
+python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
 ### Frontend State & Filter Tests (Node.js)
-12 headless state, debounce, and filtering tests:
+Headless state, debounce, and filtering tests:
 
 ```bash
-node --test test_app.js
+node --test tests/frontend/test_app.js
 ```
 
 ---

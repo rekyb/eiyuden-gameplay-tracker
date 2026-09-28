@@ -18,8 +18,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional, Union
 
 from src.tracker.config.detector import (
-    detect_gamepass_save_path,
-    detect_gog_save_path,
     detect_steam_save_path as detector_detect_steam,
     find_any_save_file,
 )
@@ -28,12 +26,10 @@ from src.tracker.core.models import load_characters, load_recipes
 from src.tracker.core.save_reader import (
     decrypt_save,
     read_save_summary,
-    validate_save_file as core_validate_save_file,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATIC_DIR = PROJECT_ROOT / "static"
-DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 
 
 def detect_save_path() -> Optional[str]:
