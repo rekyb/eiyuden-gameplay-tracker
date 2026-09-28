@@ -94,6 +94,10 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
         "recruited_ids": [],
         "acquired_recipe_ids": [],
         "acquired_recipe_count": 0,
+        "beigoma_collected_ids": [],
+        "beigoma_collected_count": 0,
+        "beigoma_defeated_trainer_ids": [],
+        "beigoma_defeated_trainer_count": 0,
         "playtime_seconds": 0.0,
         "playtime_formatted": "0h 0m 0s",
         "money": 0,
@@ -199,6 +203,39 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
 
     acquired_recipe_ids = sorted(list(acquired_recipe_ids_set))
 
+    # Beigoma & Trainer extraction
+    beigoma_data = save_data.get("_miniGameBeigoma")
+    if not isinstance(beigoma_data, dict):
+        user_data_candidate = save_data.get("UserData")
+        if isinstance(user_data_candidate, dict):
+            beigoma_data = user_data_candidate.get("MiniGameBeigoma", {})
+        else:
+            beigoma_data = {}
+    if not isinstance(beigoma_data, dict):
+        beigoma_data = {}
+
+    raw_usable = beigoma_data.get("_usableBeigomaIDs", [])
+    # Only keep valid collectible IDs (exclude enemy-only tops 604, 605, 606)
+    excluded_tops = {604, 605, 606}
+    if isinstance(raw_usable, list):
+        beigoma_collected_ids = sorted(
+            list({bid for bid in raw_usable if isinstance(bid, int) and bid not in excluded_tops})
+        )
+    else:
+        beigoma_collected_ids = []
+
+    raw_matches = beigoma_data.get("_matchResult", [])
+    defeated_trainer_ids = set()
+    if isinstance(raw_matches, list):
+        for match in raw_matches:
+            if isinstance(match, dict):
+                c_id = match.get("_characterParamId")
+                win_cnt = match.get("_winCount", 0)
+                if isinstance(c_id, int) and c_id != 1 and win_cnt > 0:
+                    defeated_trainer_ids.add(c_id)
+
+    beigoma_defeated_trainer_ids = sorted(list(defeated_trainer_ids))
+
     # Playtime
     raw_seconds = save_data.get("_seconds")
     if raw_seconds is None and isinstance(user_data, dict):
@@ -261,6 +298,10 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
         "recruited_ids": recruited_ids,
         "acquired_recipe_ids": acquired_recipe_ids,
         "acquired_recipe_count": len(acquired_recipe_ids),
+        "beigoma_collected_ids": beigoma_collected_ids,
+        "beigoma_collected_count": len(beigoma_collected_ids),
+        "beigoma_defeated_trainer_ids": beigoma_defeated_trainer_ids,
+        "beigoma_defeated_trainer_count": len(beigoma_defeated_trainer_ids),
         "playtime_seconds": seconds,
         "playtime_formatted": playtime_formatted,
         "money": money,

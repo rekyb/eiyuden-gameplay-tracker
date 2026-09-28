@@ -11,6 +11,8 @@ from src.tracker.core.models import (
     DATA_DIR,
     load_characters,
     load_recipes,
+    load_beigoma,
+    load_beigoma_trainers,
 )
 from src.tracker.core.save_reader import (
     PROTAGONIST_NAMES,
@@ -30,6 +32,8 @@ __all__ = [
     "DATA_DIR",
     "load_characters",
     "load_recipes",
+    "load_beigoma",
+    "load_beigoma_trainers",
     "PROTAGONIST_NAMES",
     "decrypt_save",
     "encrypt_save",

@@ -94,6 +94,39 @@ class TestStyleCSS(unittest.TestCase):
             pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
             self.assertTrue(re.search(pattern, self.css), f"Required class missing in style.css: {c}")
 
+    def test_beigoma_and_trainers_classes_present(self):
+        """Classes for beigoma subnavigation, columns, and status badges must be styled."""
+        required = [
+            'subnav-tabs',
+            'subnav-tab',
+            'subnav-wrapper',
+            'subview-panel',
+            'beigoma-table',
+            'trainer-table',
+            'col-beigoma-name',
+            'col-beigoma-location',
+            'col-beigoma-status',
+            'col-trainer-name',
+            'col-trainer-location',
+            'col-trainer-status',
+            'badge-obtained',
+            'badge-defeated',
+            'badge-missing',
+            'badge-not-battled',
+        ]
+        for c in required:
+            pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
+            self.assertTrue(re.search(pattern, self.css), f"Required beigoma class missing in style.css: {c}")
+
+    def test_beigoma_rarity_styles_defined(self):
+        css_path = Path(__file__).resolve().parent.parent.parent / "static" / "style.css"
+        css = css_path.read_text(encoding="utf-8")
+        self.assertIn('.col-beigoma-rarity', css)
+        self.assertIn('.rarity-stars', css)
+        self.assertIn('.star-filled', css)
+        self.assertIn('.star-empty', css)
+
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -71,6 +71,57 @@ class TestServerAPI(unittest.TestCase):
     def _url(self, path: str) -> str:
         return f"http://127.0.0.1:{self.server_port}{path}"
 
+    def fetch(self, path: str, method: str = "GET", data=None, headers=None):
+        class ResponseWrapper:
+            def __init__(self, status_code, data_bytes, headers_dict):
+                self.status_code = status_code
+                self._data = data_bytes
+                self.headers = headers_dict
+
+            def json(self):
+                return json.loads(self._data.decode("utf-8"))
+
+            @property
+            def text(self):
+                return self._data.decode("utf-8")
+
+        req = urllib.request.Request(self._url(path), data=data, headers=headers or {}, method=method)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return ResponseWrapper(resp.status, resp.read(), dict(resp.headers))
+        except urllib.error.HTTPError as exc:
+            return ResponseWrapper(exc.code, exc.read(), dict(exc.headers))
+
+    def test_api_beigoma_endpoints(self):
+        # GET /api/beigoma
+        res = self.fetch("/api/beigoma")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(len(data), 60)
+
+        # GET /api/beigoma/trainers
+        res_t = self.fetch("/api/beigoma/trainers")
+        self.assertEqual(res_t.status_code, 200)
+        data_t = res_t.json()
+        self.assertEqual(len(data_t), 44)
+
+        # GET /api/beigoma-trainers (alias)
+        res_alias = self.fetch("/api/beigoma-trainers")
+        self.assertEqual(res_alias.status_code, 200)
+        data_alias = res_alias.json()
+        self.assertEqual(len(data_alias), 44)
+
+    def test_api_progress_includes_beigoma(self):
+        res = self.fetch("/api/progress")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("beigoma_collected_ids", data)
+        self.assertIn("beigoma_collected_count", data)
+        self.assertEqual(data.get("beigoma_total_count"), 60)
+        self.assertIn("beigoma_defeated_trainer_ids", data)
+        self.assertIn("beigoma_defeated_trainer_count", data)
+        self.assertEqual(data.get("beigoma_total_trainers"), 44)
+
     def test_get_config(self):
         """GET /api/config returns 200 with save_path, file_exists, and detected_steam_path."""
         req = urllib.request.Request(self._url("/api/config"), method="GET")
@@ -495,6 +546,51 @@ class TestServerAPI(unittest.TestCase):
             urllib.request.urlopen(req)
         self.assertEqual(ctx.exception.code, 400)
         ctx.exception.close()
+
+    def test_custom_beigoma_server_paths(self):
+        """Test server with custom and non-existent beigoma paths."""
+        custom_beigoma = os.path.join(self.temp_dir, "custom_b.json")
+        with open(custom_beigoma, "w", encoding="utf-8") as f:
+            json.dump([{"id": 1, "name": "Top 1", "whereToObtain": "Here"}], f)
+
+        custom_trainers = os.path.join(self.temp_dir, "custom_t.json")
+        with open(custom_trainers, "w", encoding="utf-8") as f:
+            json.dump([{"id": 100, "name": "Trainer 1", "location": "Town"}], f)
+
+        test_httpd = server.create_server(
+            host="127.0.0.1",
+            port=0,
+            config_path=self.config_path,
+            static_dir=self.static_dir,
+            beigoma_path=custom_beigoma,
+            beigoma_trainers_path=custom_trainers,
+        )
+        port = test_httpd.server_address[1]
+        t = threading.Thread(target=test_httpd.serve_forever, daemon=True)
+        t.start()
+
+        try:
+            req_b = urllib.request.Request(f"http://127.0.0.1:{port}/api/beigoma")
+            with urllib.request.urlopen(req_b) as resp:
+                data_b = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(len(data_b), 1)
+                self.assertEqual(data_b[0]["name"], "Top 1")
+
+            req_t = urllib.request.Request(f"http://127.0.0.1:{port}/api/beigoma/trainers")
+            with urllib.request.urlopen(req_t) as resp:
+                data_t = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(len(data_t), 1)
+                self.assertEqual(data_t[0]["name"], "Trainer 1")
+
+            req_prog = urllib.request.Request(f"http://127.0.0.1:{port}/api/progress")
+            with urllib.request.urlopen(req_prog) as resp:
+                data_p = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(data_p["beigoma_total_count"], 1)
+                self.assertEqual(data_p["beigoma_total_trainers"], 1)
+        finally:
+            test_httpd.shutdown()
+            test_httpd.server_close()
+
 
 
 class TestConfigHelpers(unittest.TestCase):
