@@ -134,6 +134,15 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             self.assertIn("trainer-table", html)
             self.assertIn("trainer-list", html)
 
+        # app.js has Beigoma-related logic
+        with urllib.request.urlopen(self._url("/app.js")) as resp:
+            js = resp.read().decode("utf-8")
+            self.assertIn("renderBeigoma", js)
+            self.assertIn("renderTrainers", js)
+            self.assertIn("switchBeigomaSubview", js)
+            self.assertIn("updateBeigomaStats", js)
+            self.assertIn("applyProgress", js)
+
     def test_e2e_save_upload_project_root(self):
         """POST /api/save/upload saves file under project root uploads/ directory."""
         from src.tracker.server import PROJECT_ROOT

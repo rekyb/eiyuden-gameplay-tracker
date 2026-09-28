@@ -25,11 +25,32 @@ const state = {
   activeRecipesFilter: 'all',       // 'all' | 'acquired' | 'not_acquired' | 'cooked' | 'not_cooked'
   recipesSearchQuery: '',           // Lowercase trimmed recipes search string
 
+  // --- Beigoma & Trainers ---
+  beigoma: [],                      // Array of 60 collectible top objects
+  beigomaTrainers: [],              // Array of 44 trainer objects
+  beigomaSubView: 'collection',     // 'collection' | 'trainers'
+  beigomaFilter: 'all',             // 'all' | 'obtained' | 'missing'
+  beigomaSearch: '',                // Lowercase trimmed beigoma search string
+  trainerFilter: 'all',             // 'all' | 'defeated' | 'unbattled'
+  trainerSearch: '',                // Lowercase trimmed trainer search string
+  beigomaCollectedIds: [],          // Array of collected beigoma IDs from save file
+  beigomaDefeatedTrainerIds: [],    // Array of defeated trainer IDs from save file
+
   // --- App ---
-  activeView: 'heroes',    // 'heroes' | 'recipes'
+  activeView: 'heroes',    // 'heroes' | 'recipes' | 'beigoma'
   saveConfig: null,        // Server config: { save_path, file_exists, detected_steam_path }
   saveStatus: null,        // Save summary: { file_exists, recruited_ids, playtime_formatted, money, ... }
 };
+
+// Aliases for property casing compatibility
+Object.defineProperty(state, 'beigomaSubview', {
+  get() { return this.beigomaSubView; },
+  set(v) { this.beigomaSubView = v; },
+  enumerable: true,
+  configurable: true,
+});
+
+const appState = state;
 
 
 // =============================================================================
@@ -48,10 +69,12 @@ const dom = {
   // Top Navigation Tabs
   tabNavHeroes: null,
   tabNavRecipes: null,
+  tabNavBeigoma: null,
 
   // View Panels
   viewHeroes: null,
   viewRecipes: null,
+  viewBeigoma: null,
 
   // Stats Display
   statSavePath: null,
@@ -93,6 +116,36 @@ const dom = {
   // Navigation Badges
   navCountHeroes: null,
   navCountRecipes: null,
+  navCountBeigoma: null,
+
+  // Beigoma Sub-Navigation
+  beigomaSubnav: null,
+  subtabBeigomaCollection: null,
+  subtabBeigomaTrainers: null,
+  subnavCountBeigoma: null,
+  subnavCountTrainers: null,
+
+  // Beigoma Collection Subview
+  subviewBeigomaCollection: null,
+  beigomaFilterTabs: [],
+  countBeigomaAll: null,
+  countBeigomaObtained: null,
+  countBeigomaMissing: null,
+  beigomaSearch: null,
+  beigomaTable: null,
+  beigomaList: null,
+  beigomaEmptyState: null,
+
+  // Beigoma Trainers Subview
+  subviewBeigomaTrainers: null,
+  trainerFilterTabs: [],
+  countTrainerAll: null,
+  countTrainerDefeated: null,
+  countTrainerUnbattled: null,
+  trainerSearch: null,
+  trainerTable: null,
+  trainerList: null,
+  trainerEmptyState: null,
 
   // Configuration Dialog & Upload
   configDialog: null,
@@ -349,14 +402,21 @@ function switchView(viewName) {
   // Toggle view panels
   if (dom.viewHeroes) dom.viewHeroes.hidden = (viewName !== 'heroes');
   if (dom.viewRecipes) dom.viewRecipes.hidden = (viewName !== 'recipes');
+  if (dom.viewBeigoma) dom.viewBeigoma.hidden = (viewName !== 'beigoma');
 
   // Toggle nav tab active state
-  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma].forEach(tab => {
     if (!tab) return;
     const isActive = tab.dataset.view === viewName;
     tab.classList.toggle('active', isActive);
     tab.setAttribute('aria-selected', String(isActive));
   });
+
+  if (viewName === 'beigoma') {
+    switchBeigomaSubview(state.beigomaSubView || 'collection');
+    renderBeigoma();
+    renderTrainers();
+  }
 
   // Persist active view
   try {
@@ -507,6 +567,269 @@ function renderRecipesTable() {
 }
 
 // =============================================================================
+// Beigoma & Trainers Filtering, Rendering & Subviews
+// =============================================================================
+
+/**
+ * Switches the active Beigoma subview (Collection or Trainers).
+ * @param {'collection'|'trainers'} subviewName
+ */
+function switchBeigomaSubview(subviewName) {
+  state.beigomaSubView = subviewName;
+
+  if (dom.subviewBeigomaCollection) {
+    dom.subviewBeigomaCollection.hidden = (subviewName !== 'collection');
+  }
+  if (dom.subviewBeigomaTrainers) {
+    dom.subviewBeigomaTrainers.hidden = (subviewName !== 'trainers');
+  }
+
+  [dom.subtabBeigomaCollection, dom.subtabBeigomaTrainers].forEach(tab => {
+    if (!tab) return;
+    const isActive = tab.dataset.subview === subviewName;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+  });
+
+  try {
+    localStorage.setItem('eiyuden_beigoma_subview', subviewName);
+  } catch (_) {}
+}
+
+/**
+ * Filters a single Beigoma top against active filter and search query.
+ * @param {object} item
+ * @param {Set<number>|Array<number>} collectedIds
+ * @param {string} activeFilter - 'all' | 'obtained' | 'missing'
+ * @param {string} searchQuery
+ * @returns {boolean}
+ */
+function filterBeigoma(item, collectedIds, activeFilter, searchQuery) {
+  const isObtained = collectedIds instanceof Set
+    ? collectedIds.has(item.id)
+    : (Array.isArray(collectedIds) ? collectedIds.includes(item.id) : false);
+
+  if (activeFilter === 'obtained' && !isObtained) return false;
+  if (activeFilter === 'missing' && isObtained) return false;
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = (item.name || '').toLowerCase().includes(q);
+    const locMatch = (item.whereToObtain || '').toLowerCase().includes(q);
+    const idMatch = String(item.id).includes(q);
+    if (!nameMatch && !locMatch && !idMatch) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Filters a single Beigoma trainer against active filter and search query.
+ * @param {object} trainer
+ * @param {Set<number>|Array<number>} defeatedIds
+ * @param {string} activeFilter - 'all' | 'defeated' | 'unbattled'
+ * @param {string} searchQuery
+ * @returns {boolean}
+ */
+function filterTrainer(trainer, defeatedIds, activeFilter, searchQuery) {
+  const isDefeated = defeatedIds instanceof Set
+    ? defeatedIds.has(trainer.id)
+    : (Array.isArray(defeatedIds) ? defeatedIds.includes(trainer.id) : false);
+
+  if (activeFilter === 'defeated' && !isDefeated) return false;
+  if (activeFilter === 'unbattled' && isDefeated) return false;
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = (trainer.name || '').toLowerCase().includes(q);
+    const locMatch = (trainer.location || '').toLowerCase().includes(q);
+    const idMatch = String(trainer.id).includes(q);
+    if (!nameMatch && !locMatch && !idMatch) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Generates table row HTML for a Beigoma top.
+ * @param {object} top
+ * @param {boolean} isObtained
+ * @returns {string}
+ */
+function createBeigomaRowHtml(top, isObtained) {
+  const statusBadge = isObtained
+    ? '<span class="status-badge badge-obtained">Obtained</span>'
+    : '<span class="status-badge badge-missing">Not Obtained</span>';
+
+  return `
+    <tr class="${isObtained ? 'is-recruited' : ''}">
+      <td class="col-beigoma-name">${escapeHtml(top.name)}</td>
+      <td class="col-beigoma-location">${escapeHtml(top.whereToObtain || '—')}</td>
+      <td class="col-beigoma-status">${statusBadge}</td>
+    </tr>
+  `;
+}
+
+/**
+ * Generates table row HTML for a Beigoma trainer.
+ * @param {object} trainer
+ * @param {boolean} isDefeated
+ * @returns {string}
+ */
+function createTrainerRowHtml(trainer, isDefeated) {
+  const statusBadge = isDefeated
+    ? '<span class="status-badge badge-defeated">Defeated</span>'
+    : '<span class="status-badge badge-not-battled">Not Battled</span>';
+
+  return `
+    <tr class="${isDefeated ? 'is-recruited' : ''}">
+      <td class="col-trainer-name">${escapeHtml(trainer.name)}</td>
+      <td class="col-trainer-location">${escapeHtml(trainer.location || '—')}</td>
+      <td class="col-trainer-status">${statusBadge}</td>
+    </tr>
+  `;
+}
+
+/**
+ * Updates Beigoma and trainer counter badges in nav, subnav, and filter bars.
+ */
+function updateBeigomaStats() {
+  const totalBeigoma = state.beigoma.length || 60;
+  const collectedIds = state.beigomaCollectedIds || [];
+  const collectedCount = Array.isArray(collectedIds) ? collectedIds.length : (collectedIds.size || 0);
+  const missingCount = Math.max(0, totalBeigoma - collectedCount);
+
+  const totalTrainers = state.beigomaTrainers.length || 44;
+  const defeatedIds = state.beigomaDefeatedTrainerIds || [];
+  const defeatedCount = Array.isArray(defeatedIds) ? defeatedIds.length : (defeatedIds.size || 0);
+  const unbattledCount = Math.max(0, totalTrainers - defeatedCount);
+
+  // Top Nav counter
+  if (dom.navCountBeigoma) {
+    dom.navCountBeigoma.textContent = `${collectedCount}/${totalBeigoma}`;
+  }
+
+  // Subnav badges
+  if (dom.subnavCountBeigoma) {
+    dom.subnavCountBeigoma.textContent = `${collectedCount}/${totalBeigoma}`;
+  }
+  if (dom.subnavCountTrainers) {
+    dom.subnavCountTrainers.textContent = `${defeatedCount}/${totalTrainers}`;
+  }
+
+  // Beigoma Filter badges
+  if (dom.countBeigomaAll) dom.countBeigomaAll.textContent = String(totalBeigoma);
+  if (dom.countBeigomaObtained) dom.countBeigomaObtained.textContent = String(collectedCount);
+  if (dom.countBeigomaMissing) dom.countBeigomaMissing.textContent = String(missingCount);
+
+  // Trainer Filter badges
+  if (dom.countTrainerAll) dom.countTrainerAll.textContent = String(totalTrainers);
+  if (dom.countTrainerDefeated) dom.countTrainerDefeated.textContent = String(defeatedCount);
+  if (dom.countTrainerUnbattled) dom.countTrainerUnbattled.textContent = String(unbattledCount);
+}
+
+/**
+ * Filters Beigoma list and renders HTML table rows.
+ */
+function renderBeigoma() {
+  if (!dom.beigomaList) return;
+
+  const collectedSet = new Set(state.beigomaCollectedIds);
+  const filtered = state.beigoma.filter(item =>
+    filterBeigoma(
+      item,
+      collectedSet,
+      state.beigomaFilter,
+      state.beigomaSearch
+    )
+  );
+
+  if (filtered.length === 0) {
+    dom.beigomaList.innerHTML = '';
+    if (dom.beigomaEmptyState) dom.beigomaEmptyState.hidden = false;
+  } else {
+    if (dom.beigomaEmptyState) dom.beigomaEmptyState.hidden = true;
+    dom.beigomaList.innerHTML = filtered
+      .map(top => createBeigomaRowHtml(top, collectedSet.has(top.id)))
+      .join('');
+  }
+
+  updateBeigomaStats();
+}
+
+/**
+ * Filters Trainers list and renders HTML table rows.
+ */
+function renderTrainers() {
+  if (!dom.trainerList) return;
+
+  const defeatedSet = new Set(state.beigomaDefeatedTrainerIds);
+  const filtered = state.beigomaTrainers.filter(trainer =>
+    filterTrainer(
+      trainer,
+      defeatedSet,
+      state.trainerFilter,
+      state.trainerSearch
+    )
+  );
+
+  if (filtered.length === 0) {
+    dom.trainerList.innerHTML = '';
+    if (dom.trainerEmptyState) dom.trainerEmptyState.hidden = false;
+  } else {
+    if (dom.trainerEmptyState) dom.trainerEmptyState.hidden = true;
+    dom.trainerList.innerHTML = filtered
+      .map(trainer => createTrainerRowHtml(trainer, defeatedSet.has(trainer.id)))
+      .join('');
+  }
+
+  updateBeigomaStats();
+}
+
+/**
+ * Synchronizes save progress across all tracker domains:
+ * Heroes, Recipes, Beigoma collection, and Beigoma trainers.
+ * @param {object} data - Save summary object
+ */
+function applyProgress(data) {
+  if (!data) return;
+
+  if (Array.isArray(data.recruited_ids)) {
+    state.recruitedIds = new Set(data.recruited_ids);
+  } else if (data.file_exists === false) {
+    state.recruitedIds = new Set();
+  }
+
+  if (Array.isArray(data.acquired_recipe_ids)) {
+    state.acquiredRecipeIds = new Set(data.acquired_recipe_ids);
+  } else if (data.file_exists === false) {
+    state.acquiredRecipeIds = new Set();
+  }
+
+  if (Array.isArray(data.beigoma_collected_ids)) {
+    state.beigomaCollectedIds = [...data.beigoma_collected_ids];
+  } else if (data.file_exists === false) {
+    state.beigomaCollectedIds = [];
+  }
+
+  if (Array.isArray(data.beigoma_defeated_trainer_ids)) {
+    state.beigomaDefeatedTrainerIds = [...data.beigoma_defeated_trainer_ids];
+  } else if (data.file_exists === false) {
+    state.beigomaDefeatedTrainerIds = [];
+  }
+
+  updateStats();
+  updateProgress();
+  if (typeof updateRecipesProgress === 'function') updateRecipesProgress();
+  if (typeof updateBeigomaStats === 'function') updateBeigomaStats();
+
+  renderTable();
+  if (typeof renderRecipesTable === 'function') renderRecipesTable();
+  if (typeof renderBeigoma === 'function') renderBeigoma();
+  if (typeof renderTrainers === 'function') renderTrainers();
+}
+
+// =============================================================================
 // API Actions & Data Syncing
 // =============================================================================
 
@@ -597,27 +920,27 @@ async function syncSave({ silent = false, statusTarget = null } = {}) {
     state.saveStatus = data;
 
     if (!data.file_exists || data.corrupted || !res.ok) {
-      state.recruitedIds = new Set();
-      state.acquiredRecipeIds = new Set();
+      applyProgress({
+        file_exists: false,
+        recruited_ids: [],
+        acquired_recipe_ids: [],
+        beigoma_collected_ids: [],
+        beigoma_defeated_trainer_ids: [],
+      });
     } else {
-      state.recruitedIds = new Set(data.recruited_ids || []);
-      state.acquiredRecipeIds = new Set(data.acquired_recipe_ids || []);
+      applyProgress(data);
     }
-
-    updateStats();
-    updateProgress();
-    renderTable();
-    renderRecipesTable();
 
     const handled = handleSaveFileStatus(data, { silent, statusTarget });
     return handled.ok;
   } catch (err) {
-    state.recruitedIds = new Set();
-    state.acquiredRecipeIds = new Set();
-    updateStats();
-    updateProgress();
-    renderTable();
-    renderRecipesTable();
+    applyProgress({
+      file_exists: false,
+      recruited_ids: [],
+      acquired_recipe_ids: [],
+      beigoma_collected_ids: [],
+      beigoma_defeated_trainer_ids: [],
+    });
 
     if (statusTarget) {
       setDialogStatus(statusTarget, `Network error syncing save: ${err.message}`, 'error');
@@ -672,10 +995,7 @@ async function handleFileUpload(file) {
 
     if (data.summary) {
       state.saveStatus = data.summary;
-      state.recruitedIds = new Set(data.summary.recruited_ids || []);
-      updateStats();
-      updateProgress();
-      renderTable();
+      applyProgress(data.summary);
     } else {
       await syncSave({ silent: true });
     }
@@ -708,12 +1028,15 @@ function cacheDomElements() {
   // Top Navigation
   dom.tabNavHeroes = document.getElementById('tab-nav-heroes');
   dom.tabNavRecipes = document.getElementById('tab-nav-recipes');
+  dom.tabNavBeigoma = document.getElementById('tab-nav-beigoma');
   dom.navCountHeroes = document.getElementById('nav-count-heroes');
   dom.navCountRecipes = document.getElementById('nav-count-recipes');
+  dom.navCountBeigoma = document.getElementById('nav-count-beigoma');
 
   // View Panels
   dom.viewHeroes = document.getElementById('view-heroes');
   dom.viewRecipes = document.getElementById('view-recipes');
+  dom.viewBeigoma = document.getElementById('view-beigoma');
 
   // Stats Display
   dom.statSavePath = document.getElementById('stat-save-path');
@@ -753,6 +1076,35 @@ function cacheDomElements() {
   dom.btnCookedHint = document.getElementById('btn-cooked-hint');
   dom.cookedPopover = document.getElementById('cooked-popover');
   dom.btnCloseCookedPopover = document.getElementById('btn-close-cooked-popover');
+
+  // Beigoma Sub-Navigation
+  dom.beigomaSubnav = document.getElementById('beigoma-subnav');
+  dom.subtabBeigomaCollection = document.getElementById('subtab-beigoma-collection');
+  dom.subtabBeigomaTrainers = document.getElementById('subtab-beigoma-trainers');
+  dom.subnavCountBeigoma = document.getElementById('subnav-count-beigoma');
+  dom.subnavCountTrainers = document.getElementById('subnav-count-trainers');
+
+  // Beigoma Collection Subview
+  dom.subviewBeigomaCollection = document.getElementById('subview-beigoma-collection');
+  dom.beigomaFilterTabs = Array.from(document.querySelectorAll('#beigoma-filter-tabs .filter-tab'));
+  dom.countBeigomaAll = document.getElementById('count-beigoma-all');
+  dom.countBeigomaObtained = document.getElementById('count-beigoma-obtained');
+  dom.countBeigomaMissing = document.getElementById('count-beigoma-missing');
+  dom.beigomaSearch = document.getElementById('beigoma-search');
+  dom.beigomaTable = document.getElementById('beigoma-table');
+  dom.beigomaList = document.getElementById('beigoma-list');
+  dom.beigomaEmptyState = document.getElementById('beigoma-empty-state');
+
+  // Beigoma Trainers Subview
+  dom.subviewBeigomaTrainers = document.getElementById('subview-beigoma-trainers');
+  dom.trainerFilterTabs = Array.from(document.querySelectorAll('#trainer-filter-tabs .filter-tab'));
+  dom.countTrainerAll = document.getElementById('count-trainer-all');
+  dom.countTrainerDefeated = document.getElementById('count-trainer-defeated');
+  dom.countTrainerUnbattled = document.getElementById('count-trainer-unbattled');
+  dom.trainerSearch = document.getElementById('trainer-search');
+  dom.trainerTable = document.getElementById('trainer-table');
+  dom.trainerList = document.getElementById('trainer-list');
+  dom.trainerEmptyState = document.getElementById('trainer-empty-state');
 
   // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
@@ -898,12 +1250,80 @@ function setupEventListeners() {
   }
 
   // Top Navigation Tab Switching
-  [dom.tabNavHeroes, dom.tabNavRecipes].forEach(tab => {
+  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma].forEach(tab => {
     if (!tab) return;
     tab.addEventListener('click', () => {
       switchView(tab.dataset.view || 'heroes');
     });
   });
+
+  // Beigoma Sub-Navigation (Collection vs Trainers)
+  [dom.subtabBeigomaCollection, dom.subtabBeigomaTrainers].forEach(tab => {
+    if (!tab) return;
+    tab.addEventListener('click', () => {
+      switchBeigomaSubview(tab.dataset.subview || 'collection');
+    });
+  });
+
+  // Beigoma Filter Tabs
+  dom.beigomaFilterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      dom.beigomaFilterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      state.beigomaFilter = tab.dataset.filter || 'all';
+      renderBeigoma();
+    });
+  });
+
+  // Beigoma Search Input
+  if (dom.beigomaSearch) {
+    dom.beigomaSearch.addEventListener('input', (e) => {
+      state.beigomaSearch = e.target.value.trim().toLowerCase();
+      renderBeigoma();
+    });
+
+    dom.beigomaSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.beigomaSearch.value) {
+        dom.beigomaSearch.value = '';
+        state.beigomaSearch = '';
+        renderBeigoma();
+      }
+    });
+  }
+
+  // Trainer Filter Tabs
+  dom.trainerFilterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      dom.trainerFilterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      state.trainerFilter = tab.dataset.filter || 'all';
+      renderTrainers();
+    });
+  });
+
+  // Trainer Search Input
+  if (dom.trainerSearch) {
+    dom.trainerSearch.addEventListener('input', (e) => {
+      state.trainerSearch = e.target.value.trim().toLowerCase();
+      renderTrainers();
+    });
+
+    dom.trainerSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.trainerSearch.value) {
+        dom.trainerSearch.value = '';
+        state.trainerSearch = '';
+        renderTrainers();
+      }
+    });
+  }
 
   // Heroes Filter Status Tabs
   dom.filterTabs.forEach(tab => {
@@ -1208,14 +1628,7 @@ function setupEventListeners() {
           }
           if (data.summary) {
             state.saveStatus = data.summary;
-            state.recruitedIds = new Set(data.summary.recruited_ids || []);
-            state.acquiredRecipeIds = new Set(data.summary.acquired_recipe_ids || []);
-            updateStats();
-            updateProgress();
-            renderTable();
-            if (typeof renderRecipesTable === 'function') {
-              renderRecipesTable();
-            }
+            applyProgress(data.summary);
           }
           if (dom.btnSavePath) {
             dom.btnSavePath.disabled = true;
@@ -1250,12 +1663,14 @@ async function init() {
   setupEventListeners();
 
   try {
-    // Fetch server configuration, characters, recipes, and cooked state in parallel
-    const [cfgRes, charRes, recipeRes, cookedRes] = await Promise.all([
+    // Fetch server configuration, characters, recipes, cooked state, beigoma, and trainers in parallel
+    const [cfgRes, charRes, recipeRes, cookedRes, beigomaRes, trainerRes] = await Promise.all([
       fetch('/api/config'),
       fetch('/api/characters'),
       fetch('/api/recipes'),
       fetch('/api/recipes/cooked'),
+      fetch('/api/beigoma'),
+      fetch('/api/beigoma/trainers'),
     ]);
 
     if (cfgRes.ok) {
@@ -1274,6 +1689,18 @@ async function init() {
       state.recipes = await recipeRes.json();
     } else {
       showToast('Could not load recipes catalog', 'error');
+    }
+
+    if (beigomaRes.ok) {
+      state.beigoma = await beigomaRes.json();
+    } else {
+      showToast('Could not load beigoma catalog', 'error');
+    }
+
+    if (trainerRes.ok) {
+      state.beigomaTrainers = await trainerRes.json();
+    } else {
+      showToast('Could not load beigoma trainers catalog', 'error');
     }
 
     // Restore cooked IDs: merge localStorage + server config
@@ -1318,7 +1745,7 @@ async function init() {
       // Ignore localStorage sync issues
     }
 
-    // Fetch active save status (updates recruitedIds + acquiredRecipeIds)
+    // Fetch active save status (updates recruitedIds + acquiredRecipeIds + beigoma)
     const hasSave = await syncSave({ silent: true });
     if (!hasSave && state.saveConfig && !state.saveConfig.file_exists) {
       showToast(
@@ -1332,11 +1759,25 @@ async function init() {
       const savedView = localStorage.getItem('eiyuden_active_view');
       if (savedView === 'recipes') {
         switchView('recipes');
+      } else if (savedView === 'beigoma') {
+        switchView('beigoma');
       } else {
         switchView('heroes');
       }
     } catch (_) {
       switchView('heroes');
+    }
+
+    // Restore saved beigoma subview
+    try {
+      const savedSubview = localStorage.getItem('eiyuden_beigoma_subview');
+      if (savedSubview === 'trainers') {
+        switchBeigomaSubview('trainers');
+      } else {
+        switchBeigomaSubview('collection');
+      }
+    } catch (_) {
+      switchBeigomaSubview('collection');
     }
   } catch (err) {
     showToast(`Initialization failed: ${err.message}`, 'error');
@@ -1345,6 +1786,9 @@ async function init() {
     updateProgress();
     renderTable();
     renderRecipesTable();
+    updateBeigomaStats();
+    renderBeigoma();
+    renderTrainers();
   }
 }
 
@@ -1364,6 +1808,7 @@ if (typeof document !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     state,
+    appState,
     dom,
     escapeHtml,
     showToast,
@@ -1371,16 +1816,25 @@ if (typeof module !== 'undefined' && module.exports) {
     handleSaveFileStatus,
     filterCharacter,
     filterRecipe,
+    filterBeigoma,
+    filterTrainer,
     calculateProgress,
     createCharacterRowHtml,
     createRecipeRowHtml,
+    createBeigomaRowHtml,
+    createTrainerRowHtml,
     recipeCategoryBadge,
     updateStats,
     updateProgress,
     updateRecipesProgress,
+    updateBeigomaStats,
     renderTable,
     renderRecipesTable,
+    renderBeigoma,
+    renderTrainers,
     switchView,
+    switchBeigomaSubview,
+    applyProgress,
     scheduleCookedSync,
     syncSave,
     handleFileUpload,
