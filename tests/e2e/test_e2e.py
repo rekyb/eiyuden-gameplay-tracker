@@ -1,33 +1,45 @@
-import unittest
-import urllib.request
+"""End-to-end integration tests for Eiyuden Save Tracker application."""
+
 import json
 import os
 import shutil
 import tempfile
-import server
+import threading
+import unittest
+import urllib.request
+
+from src.tracker.server import create_server
+from tests.fixtures.generator import create_synthetic_save
+
 
 class TestEndToEndSaveTracker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temp_dir = tempfile.mkdtemp()
+        cls.temp_dir = tempfile.mkdtemp(prefix="eiyuden_e2e_")
         cls.save_fixture = os.path.join(cls.temp_dir, "UserData0.dat")
-        shutil.copy2("UserData0.dat", cls.save_fixture)
+        save_bytes = create_synthetic_save(
+            hero_ids=[10, 20, 150],
+            recipe_item_ids=[8000, 8001, 8026],
+            playtime=3661.0,
+            money=50000,
+            town_level=2,
+            population=45,
+            protagonist_id=10,
+        )
+        with open(cls.save_fixture, "wb") as f:
+            f.write(save_bytes)
 
         cls.config_file = os.path.join(cls.temp_dir, "config.json")
         with open(cls.config_file, "w", encoding="utf-8") as f:
             json.dump({"save_path": cls.save_fixture}, f)
 
-        cls.http_server = server.create_server(
+        cls.http_server = create_server(
             host="127.0.0.1",
             port=0,
             config_path=cls.config_file,
-            characters_path="characters.json",
-            recipes_path="recipes.json",
-            static_dir="static",
         )
         cls.port = cls.http_server.server_address[1]
 
-        import threading
         cls.server_thread = threading.Thread(target=cls.http_server.serve_forever, daemon=True)
         cls.server_thread.start()
 

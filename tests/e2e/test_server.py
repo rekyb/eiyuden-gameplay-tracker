@@ -1,16 +1,18 @@
 """Integration and unit tests for Eiyuden Save Tracker HTTP Server."""
 
 import io
-import os
 import json
+import os
 import shutil
 import tempfile
 import threading
-import urllib.request
-import urllib.error
 import unittest
+import urllib.error
+import urllib.request
+from unittest import mock
 
-import server
+import src.tracker.server as server
+from tests.fixtures.generator import create_synthetic_save
 
 
 class TestServerAPI(unittest.TestCase):
@@ -24,12 +26,20 @@ class TestServerAPI(unittest.TestCase):
         with open(os.path.join(cls.static_dir, "index.html"), "w", encoding="utf-8") as f:
             f.write("<!DOCTYPE html><html><body>Eiyuden Tracker Test</body></html>")
 
-        # Copy characters.json, recipes.json, and UserData0.dat to temp_dir for test fixtures
-        cls.characters_path = os.path.abspath("characters.json")
-        cls.recipes_path = os.path.abspath("recipes.json")
-        cls.real_save_path = os.path.abspath("UserData0.dat")
+        # Generate synthetic save fixture
+        cls.fixture_save_bytes = create_synthetic_save(
+            hero_ids=[10, 20, 150],
+            recipe_item_ids=[8000, 8001, 8026],
+            playtime=3661.0,
+            money=75000,
+            town_level=3,
+            population=60,
+            protagonist_id=10,
+            save_timestamp="2026-09-28T12:00:00",
+        )
         cls.test_save_copy = os.path.join(cls.temp_dir, "UserData0.dat")
-        shutil.copy2(cls.real_save_path, cls.test_save_copy)
+        with open(cls.test_save_copy, "wb") as f:
+            f.write(cls.fixture_save_bytes)
 
         # Write initial test config
         with open(cls.config_path, "w", encoding="utf-8") as f:
@@ -40,8 +50,6 @@ class TestServerAPI(unittest.TestCase):
             host="127.0.0.1",
             port=0,
             config_path=cls.config_path,
-            characters_path=cls.characters_path,
-            recipes_path=cls.recipes_path,
             static_dir=cls.static_dir,
         )
         cls.server_port = cls.httpd.server_address[1]
@@ -258,22 +266,9 @@ class TestServerAPI(unittest.TestCase):
         ) as resp:
             self.assertEqual(resp.status, 200)
 
-
-        # Reset config
-        with urllib.request.urlopen(
-            urllib.request.Request(
-                self._url("/api/config"),
-                data=json.dumps({"save_path": self.test_save_copy}).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-        ) as resp:
-            self.assertEqual(resp.status, 200)
-
     def test_post_save_browse_selected(self):
         """POST /api/save/browse updates config and returns summary when file selected."""
-        from unittest import mock
-        with mock.patch("server.open_native_file_browser", return_value=self.test_save_copy):
+        with mock.patch("src.tracker.server.open_native_file_browser", return_value=self.test_save_copy):
             req = urllib.request.Request(
                 self._url("/api/save/browse"),
                 data=b"{}",
@@ -290,8 +285,7 @@ class TestServerAPI(unittest.TestCase):
 
     def test_post_save_browse_cancelled(self):
         """POST /api/save/browse returns cancelled=True when dialog dismissed."""
-        from unittest import mock
-        with mock.patch("server.open_native_file_browser", return_value=""):
+        with mock.patch("src.tracker.server.open_native_file_browser", return_value=""):
             req = urllib.request.Request(
                 self._url("/api/save/browse"),
                 data=b"{}",
@@ -306,12 +300,11 @@ class TestServerAPI(unittest.TestCase):
 
     def test_post_save_browse_invalid_file(self):
         """POST /api/save/browse rejects invalid save file with HTTP 400."""
-        from unittest import mock
         invalid_file = os.path.join(self.temp_dir, "browse_fake.dat")
         with open(invalid_file, "wb") as f:
             f.write(b"not an eiyuden save file")
 
-        with mock.patch("server.open_native_file_browser", return_value=invalid_file):
+        with mock.patch("src.tracker.server.open_native_file_browser", return_value=invalid_file):
             req = urllib.request.Request(
                 self._url("/api/save/browse"),
                 data=b"{}",
@@ -324,12 +317,11 @@ class TestServerAPI(unittest.TestCase):
             data = json.loads(ctx.exception.read().decode("utf-8"))
             self.assertFalse(data.get("success"))
             self.assertIn("error", data)
+            ctx.exception.close()
 
     def test_post_save_upload_raw_bytes(self):
         """POST /api/save/upload accepts raw binary data, saves, and returns summary."""
-        with open(self.real_save_path, "rb") as f:
-            raw_bytes = f.read()
-
+        raw_bytes = self.fixture_save_bytes
         req = urllib.request.Request(
             self._url("/api/save/upload"),
             data=raw_bytes,
@@ -345,9 +337,7 @@ class TestServerAPI(unittest.TestCase):
 
     def test_post_save_upload_multipart(self):
         """POST /api/save/upload accepts multipart/form-data upload."""
-        with open(self.real_save_path, "rb") as f:
-            raw_bytes = f.read()
-
+        raw_bytes = self.fixture_save_bytes
         boundary = "---------------------------BoundaryTest123"
         body = (
             f"--{boundary}\r\n"
@@ -503,9 +493,10 @@ class TestConfigHelpers(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_load_config_default_when_missing(self):
+    @mock.patch("src.tracker.server.find_any_save_file", return_value=None)
+    def test_load_config_default_when_missing(self, _mock_find):
         cfg = server.load_config(self.config_path)
-        self.assertEqual(cfg, {"save_path": "UserData0.dat"})
+        self.assertEqual(cfg.get("save_path"), "UserData0.dat")
 
     def test_save_and_load_config(self):
         server.save_config({"save_path": "custom/path.dat"}, self.config_path)
@@ -513,14 +504,12 @@ class TestConfigHelpers(unittest.TestCase):
         self.assertEqual(cfg["save_path"], "custom/path.dat")
 
     def test_detect_save_path(self):
-        # Should return str if path exists or None if not, without raising
         result = server.detect_save_path()
         self.assertTrue(result is None or isinstance(result, str))
         self.assertEqual(server.detect_steam_save_path(), result)
 
     def test_detect_save_path_picks_newest_slot_and_ignores_metadata(self):
         """detect_save_path should find UserData1.dat, UserData999.dat, and ignore UserDataInfo.dat."""
-        from unittest import mock
         mock_files = [
             os.path.join(self.temp_dir, "UserData1.dat"),
             os.path.join(self.temp_dir, "UserData2.dat"),
@@ -533,7 +522,7 @@ class TestConfigHelpers(unittest.TestCase):
             # Set increasing mtime
             os.utime(f, (1000 + idx * 10, 1000 + idx * 10))
 
-        with mock.patch("glob.glob", return_value=mock_files):
+        with mock.patch("src.tracker.config.detector.glob.glob", return_value=mock_files):
             detected = server.detect_save_path()
             # UserData2.dat has higher mtime than UserData1.dat, while UserDataInfo is ignored
             self.assertEqual(detected, os.path.abspath(mock_files[1]))

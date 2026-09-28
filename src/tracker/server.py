@@ -4,200 +4,55 @@ Provides a REST API for loading, decrypting, and backing up Eiyuden Chronicle
 save files, serving character definitions, and hosting frontend static assets.
 """
 
-import os
-import sys
+import argparse
+import email
 import glob
 import json
-import email
-import shutil
-import argparse
 import mimetypes
+import os
+from pathlib import Path
+import shutil
+import sys
 import urllib.parse
-from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
-from typing import Dict, Any, Optional
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Any, Dict, List, Optional, Union
 
-import save_reader
+from src.tracker.config.detector import (
+    detect_gamepass_save_path,
+    detect_gog_save_path,
+    detect_steam_save_path as detector_detect_steam,
+    find_any_save_file,
+)
+from src.tracker.config.manager import ConfigManager
+from src.tracker.core.models import load_characters, load_recipes
+from src.tracker.core.save_reader import (
+    decrypt_save,
+    read_save_summary,
+    validate_save_file as core_validate_save_file,
+)
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_STATIC_DIR = PROJECT_ROOT / "static"
+DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 
 
 def detect_save_path() -> Optional[str]:
     """Auto-detect the save file path for Eiyuden Chronicle across platforms.
 
     Searches standard directories for Steam, GOG, and PC Game Pass / Xbox app
-    for save files matching UserData*.dat (e.g. UserData0.dat, UserData1.dat, etc.)
-    and returns the path to the most recently modified save file.
+    for save files matching UserData*.dat and returns the newest file path.
 
     Returns:
         The full path to the latest save file, or None if not found.
     """
-    patterns = []
-
-    # Windows LocalLow path (Steam & GOG standard Unity paths)
-    local_app_data = os.environ.get("LOCALAPPDATA")
-    if local_app_data:
-        locallow = os.path.join(os.path.dirname(local_app_data), "LocalLow")
-        # Steam & profile-based stores
-        patterns.append(
-            os.path.join(
-                locallow,
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "*",
-                "SaveData",
-                "UserData*.dat",
-            )
-        )
-        patterns.append(
-            os.path.join(
-                locallow,
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "*",
-                "UserData*.dat",
-            )
-        )
-        # GOG / direct without user-ID subfolder
-        patterns.append(
-            os.path.join(
-                locallow,
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "SaveData",
-                "UserData*.dat",
-            )
-        )
-        patterns.append(
-            os.path.join(
-                locallow,
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "UserData*.dat",
-            )
-        )
-        # Windows Xbox / PC Game Pass Packages folder
-        packages_dir = os.path.join(local_app_data, "Packages")
-        if os.path.isdir(packages_dir):
-            patterns.append(
-                os.path.join(
-                    packages_dir,
-                    "*EiyudenChronicle*",
-                    "**",
-                    "UserData*.dat",
-                )
-            )
-
-    user_profile = os.environ.get("USERPROFILE")
-    if user_profile:
-        # Steam & GOG in user profile AppData/LocalLow
-        patterns.append(
-            os.path.join(
-                user_profile,
-                "AppData",
-                "LocalLow",
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "*",
-                "SaveData",
-                "UserData*.dat",
-            )
-        )
-        patterns.append(
-            os.path.join(
-                user_profile,
-                "AppData",
-                "LocalLow",
-                "505 Games S_p_A",
-                "EiyudenChronicle",
-                "SaveData",
-                "UserData*.dat",
-            )
-        )
-        # Saved Games directory (GOG / DRM-free)
-        patterns.append(
-            os.path.join(
-                user_profile,
-                "Saved Games",
-                "EiyudenChronicle",
-                "**",
-                "UserData*.dat",
-            )
-        )
-
-    # Linux Proton / Steam Deck path
-    home = os.path.expanduser("~")
-    patterns.append(
-        os.path.join(
-            home,
-            ".steam",
-            "steam",
-            "steamapps",
-            "compatdata",
-            "1658280",
-            "pfx",
-            "drive_c",
-            "users",
-            "steamuser",
-            "AppData",
-            "LocalLow",
-            "505 Games S_p_A",
-            "EiyudenChronicle",
-            "*",
-            "SaveData",
-            "UserData*.dat",
-        )
-    )
-    # GOG / Heroic / Lutris on Linux
-    patterns.append(
-        os.path.join(
-            home,
-            "Games",
-            "*",
-            "drive_c",
-            "users",
-            "*",
-            "AppData",
-            "LocalLow",
-            "505 Games S_p_A",
-            "EiyudenChronicle",
-            "**",
-            "UserData*.dat",
-        )
-    )
-
-    found_files = []
-    for pat in patterns:
-        try:
-            matches = glob.glob(pat, recursive=True)
-        except (OSError, Exception):
-            continue
-        for match in matches:
-            try:
-                if os.path.isfile(match):
-                    base_lower = os.path.basename(match).lower()
-                    # Exclude metadata/system files that are not player saves
-                    if base_lower in ("userdatainfo.dat", "systemdata.dat"):
-                        continue
-                    found_files.append(os.path.abspath(match))
-            except (OSError, Exception):
-                continue
-
-    if found_files:
-        def _safe_mtime(f: str) -> float:
-            try:
-                return os.path.getmtime(f)
-            except OSError:
-                return 0.0
-
-        # Return the most recently modified save file across slots
-        return max(found_files, key=_safe_mtime)
-
-    return None
+    return find_any_save_file()
 
 
 # Alias for backward compatibility
-detect_steam_save_path = detect_save_path
+detect_steam_save_path = detector_detect_steam
 
 
-def load_config(config_path: str = "config.json") -> Dict[str, Any]:
+def load_config(config_path: Optional[Union[str, Path]] = "config.json") -> Dict[str, Any]:
     """Load configuration from disk, falling back to defaults if not found.
 
     Args:
@@ -206,62 +61,53 @@ def load_config(config_path: str = "config.json") -> Dict[str, Any]:
     Returns:
         Configuration dictionary containing 'save_path'.
     """
-    if os.path.isfile(config_path):
+    cm = ConfigManager(config_path)
+    cfg = cm.get_config()
+    if not cfg.get("save_path"):
+        # Fallback: check current directory for any UserData*.dat (newest first)
+        local_candidates = []
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, dict) and "save_path" in data and data["save_path"]:
-                    return data
-        except Exception:
+            for f in glob.glob("UserData*.dat"):
+                if os.path.basename(f).lower() not in ("userdatainfo.dat", "systemdata.dat"):
+                    local_candidates.append(f)
+        except (OSError, Exception):
             pass
 
-    # Fallback: check current directory for any UserData*.dat (newest first)
-    local_candidates = []
-    try:
-        for f in glob.glob("UserData*.dat"):
-            if os.path.basename(f).lower() not in ("userdatainfo.dat", "systemdata.dat"):
-                local_candidates.append(f)
-    except (OSError, Exception):
-        pass
+        if local_candidates:
+            def _safe_mtime_local(f: str) -> float:
+                try:
+                    return os.path.getmtime(f)
+                except OSError:
+                    return 0.0
 
-    if local_candidates:
-        def _safe_mtime_local(f: str) -> float:
-            try:
-                return os.path.getmtime(f)
-            except OSError:
-                return 0.0
-
-        return {"save_path": max(local_candidates, key=_safe_mtime_local)}
-
-    # Next check auto-detected platform save path
-    auto_path = detect_save_path()
-    if auto_path and os.path.isfile(auto_path):
-        return {"save_path": auto_path}
-
-    return {"save_path": "UserData0.dat"}
+            cfg["save_path"] = max(local_candidates, key=_safe_mtime_local)
+        else:
+            auto_path = find_any_save_file()
+            if auto_path and os.path.isfile(auto_path):
+                cfg["save_path"] = auto_path
+            else:
+                cfg["save_path"] = "UserData0.dat"
+    return cfg
 
 
-def save_config(config_data: Dict[str, Any], config_path: str = "config.json") -> None:
+def save_config(config_data: Dict[str, Any], config_path: Optional[Union[str, Path]] = "config.json") -> None:
     """Save configuration dictionary to JSON file.
 
     Args:
         config_data: Dictionary containing configuration settings.
         config_path: Destination path for config.json.
     """
-    dest_dir = os.path.dirname(os.path.abspath(config_path))
-    if dest_dir:
-        os.makedirs(dest_dir, exist_ok=True)
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(config_data, f, indent=2)
+    cm = ConfigManager(config_path)
+    cm.save_config(config_data)
 
 
-def validate_save_file(filepath: Optional[str]) -> Dict[str, Any]:
+def validate_save_file(filepath: Optional[Union[str, Path]]) -> Dict[str, Any]:
     """Validate whether the given path points to a valid Eiyuden Chronicle save file.
 
     Checks:
     1. Path is specified and file exists on disk.
     2. File can be decrypted using Eiyuden TripleDES key and IV.
-    3. Decrypted data contains expected Eiyuden Chronicle structures (_unitData).
+    3. Decrypted data contains expected Eiyuden Chronicle structures (_unitData or UserData).
 
     Returns:
         dict: {
@@ -271,7 +117,7 @@ def validate_save_file(filepath: Optional[str]) -> Dict[str, Any]:
             "summary": dict | None,
         }
     """
-    if not filepath or not isinstance(filepath, (str, os.PathLike)):
+    if not filepath or not isinstance(filepath, (str, Path, os.PathLike)):
         return {"valid": False, "exists": False, "error": "No save file path provided.", "summary": None}
 
     clean_path = str(filepath).strip()
@@ -294,21 +140,20 @@ def validate_save_file(filepath: Optional[str]) -> Dict[str, Any]:
         return {"valid": False, "exists": True, "error": "Save file is empty (0 bytes).", "summary": None}
 
     try:
-        save_data = save_reader.decrypt_save(ciphertext)
+        save_data = decrypt_save(ciphertext)
     except Exception as exc:
         return {"valid": False, "exists": True, "error": "Not a valid Eiyuden Chronicle save file (decryption failed).", "summary": None}
 
-    if not isinstance(save_data, dict) or "_unitData" not in save_data:
+    if not isinstance(save_data, dict) or ("_unitData" not in save_data and "UserData" not in save_data):
         return {"valid": False, "exists": True, "error": "File decrypted, but does not contain Eiyuden Chronicle save data.", "summary": None}
 
-    summary = save_reader.read_save_summary(clean_path)
+    summary = read_save_summary(clean_path)
     return {
         "valid": True,
         "exists": True,
         "error": None,
         "summary": summary,
     }
-
 
 
 def open_native_file_browser(initial_dir: str = "") -> str:
@@ -336,7 +181,6 @@ def open_native_file_browser(initial_dir: str = "") -> str:
         try:
             import subprocess
             target_dir = initial_dir if initial_dir and os.path.isdir(initial_dir) else os.getcwd()
-            # Escaping single quotes in dir
             safe_dir = target_dir.replace("'", "''")
             ps_script = (
                 "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
@@ -459,9 +303,9 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/api/config":
-            cfg = load_config(self.server.config_path)
-            save_path = cfg.get("save_path", "UserData0.dat")
-            detected = detect_save_path()
+            cfg = self.server.config_manager.get_config()
+            save_path = cfg.get("save_path", "")
+            detected = find_any_save_file()
             file_exists = False
             try:
                 if save_path and os.path.isfile(save_path):
@@ -473,47 +317,68 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 "save_path": save_path or "UserData0.dat",
                 "file_exists": file_exists,
                 "detected_save_path": detected,
-                "detected_steam_path": detected,
+                "detected_steam_path": detector_detect_steam(),
             })
             return
 
         if path == "/api/characters":
-            if os.path.isfile(self.server.characters_path):
-                try:
-                    with open(self.server.characters_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    self.send_json(data)
+            if self.server.characters_path is not None:
+                if os.path.isfile(self.server.characters_path):
+                    try:
+                        with open(self.server.characters_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.send_json(data)
+                        return
+                    except Exception as exc:
+                        self.send_json({"error": f"Failed reading characters: {exc}"}, status=500)
+                        return
+                else:
+                    self.send_json([], status=200)
                     return
-                except Exception as exc:
-                    self.send_json({"error": f"Failed reading characters.json: {exc}"}, status=500)
-                    return
-            self.send_json([], status=200)
-            return
+            try:
+                data = load_characters()
+                self.send_json(data)
+                return
+            except Exception as exc:
+                self.send_json({"error": f"Failed reading characters: {exc}"}, status=500)
+                return
 
         if path == "/api/recipes":
-            if os.path.isfile(self.server.recipes_path):
-                try:
-                    with open(self.server.recipes_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    self.send_json(data)
+            if self.server.recipes_path is not None:
+                if os.path.isfile(self.server.recipes_path):
+                    try:
+                        with open(self.server.recipes_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.send_json(data)
+                        return
+                    except Exception as exc:
+                        self.send_json({"error": f"Failed reading recipes: {exc}"}, status=500)
+                        return
+                else:
+                    self.send_json([], status=200)
                     return
-                except Exception as exc:
-                    self.send_json({"error": f"Failed reading recipes.json: {exc}"}, status=500)
-                    return
-            self.send_json([], status=200)
-            return
+            try:
+                data = load_recipes()
+                self.send_json(data)
+                return
+            except Exception as exc:
+                self.send_json({"error": f"Failed reading recipes: {exc}"}, status=500)
+                return
 
         if path == "/api/recipes/cooked":
-            cfg = load_config(self.server.config_path)
-            cooked = cfg.get("cooked_recipe_ids", [])
-            self.send_json({"cooked_ids": cooked if isinstance(cooked, list) else []})
+            cooked = self.server.config_manager.get_cooked_recipe_ids()
+            self.send_json({"cooked_ids": cooked})
             return
 
         if path == "/api/save/status":
-            cfg = load_config(self.server.config_path)
-            save_path = cfg.get("save_path", "UserData0.dat")
+            cfg = self.server.config_manager.get_config()
+            save_path = cfg.get("save_path", "")
+            if not save_path:
+                detected = find_any_save_file()
+                save_path = detected or "UserData0.dat"
+
             try:
-                summary = save_reader.read_save_summary(save_path)
+                summary = read_save_summary(save_path)
                 self.send_json(summary, status=200)
             except Exception as exc:
                 self.send_json({
@@ -600,11 +465,9 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 }, status=400)
                 return
 
-            cfg = load_config(self.server.config_path)
-            cfg["save_path"] = new_save_path
-            save_config(cfg, self.server.config_path)
+            self.server.config_manager.update_save_path(new_save_path)
 
-            detected = detect_save_path()
+            detected = find_any_save_file()
             response_data = {
                 "success": True,
                 "config": {
@@ -612,7 +475,7 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                     "file_exists": val_result["exists"],
                     "valid_save": val_result["valid"],
                     "detected_save_path": detected,
-                    "detected_steam_path": detected,
+                    "detected_steam_path": detector_detect_steam(),
                 },
             }
             if not val_result["exists"]:
@@ -636,21 +499,20 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": "'cooked_ids' must be a list of integers"}, status=400)
                 return
 
-            cfg = load_config(self.server.config_path)
-            cfg["cooked_recipe_ids"] = sorted(list(set(cooked_ids)))
-            save_config(cfg, self.server.config_path)
+            unique_sorted = sorted(list(set(cooked_ids)))
+            self.server.config_manager.set_cooked_recipe_ids(unique_sorted)
 
-            self.send_json({"success": True, "cooked_ids": cfg["cooked_recipe_ids"]})
+            self.send_json({"success": True, "cooked_ids": unique_sorted})
             return
 
         if path == "/api/save/browse":
-            cfg = load_config(self.server.config_path)
+            cfg = self.server.config_manager.get_config()
             current_path = cfg.get("save_path", "")
             initial_dir = ""
             if current_path and os.path.isdir(os.path.dirname(current_path)):
                 initial_dir = os.path.dirname(os.path.abspath(current_path))
             else:
-                auto_path = detect_save_path()
+                auto_path = find_any_save_file()
                 if auto_path and os.path.isfile(auto_path):
                     initial_dir = os.path.dirname(auto_path)
 
@@ -669,17 +531,15 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 }, status=400)
                 return
 
-            cfg["save_path"] = normalized
-            save_config(cfg, self.server.config_path)
+            self.server.config_manager.update_save_path(normalized)
 
-            summary = save_reader.read_save_summary(normalized)
+            summary = read_save_summary(normalized)
             self.send_json({
                 "success": True,
                 "path": normalized,
                 "summary": summary,
             })
             return
-
 
         if path == "/api/save/upload":
             content_type = self.headers.get("Content-Type", "")
@@ -691,7 +551,7 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
 
             # Verify that uploaded data can be decrypted
             try:
-                save_reader.decrypt_save(file_bytes)
+                decrypt_save(file_bytes)
             except Exception as exc:
                 self.send_json(
                     {"error": f"Invalid or unreadable save file data: {exc}"},
@@ -699,7 +559,7 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
 
-            base_dir = os.path.dirname(os.path.abspath(self.server.config_path))
+            base_dir = os.path.dirname(os.path.abspath(str(self.server.config_manager.config_path)))
             uploads_dir = os.path.join(base_dir, "uploads")
             os.makedirs(uploads_dir, exist_ok=True)
             saved_path = os.path.join(uploads_dir, "UserData0.dat")
@@ -711,11 +571,9 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Failed to save upload: {exc}"}, status=500)
                 return
 
-            cfg = load_config(self.server.config_path)
-            cfg["save_path"] = saved_path
-            save_config(cfg, self.server.config_path)
+            self.server.config_manager.update_save_path(saved_path)
 
-            summary = save_reader.read_save_summary(saved_path)
+            summary = read_save_summary(saved_path)
             self.send_json({
                 "success": True,
                 "save_path": saved_path,
@@ -727,41 +585,105 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
 
 
 class SaveTrackerServer(ThreadingHTTPServer):
-    """Threading HTTP Server holding application paths."""
+    """Threading HTTP Server holding application paths and configuration."""
 
     def __init__(
         self,
         server_address,
         RequestHandlerClass,
-        config_path: str = "config.json",
-        characters_path: str = "characters.json",
-        recipes_path: str = "recipes.json",
-        static_dir: str = "static",
+        static_dir: Optional[Union[str, Path]] = None,
+        config_manager: Optional[ConfigManager] = None,
+        config_path: Optional[Union[str, Path]] = None,
+        characters_path: Optional[Union[str, Path]] = None,
+        recipes_path: Optional[Union[str, Path]] = None,
     ):
         super().__init__(server_address, RequestHandlerClass)
-        self.config_path = config_path
-        self.characters_path = characters_path
-        self.recipes_path = recipes_path
-        self.static_dir = static_dir
+        if config_manager is not None:
+            self.config_manager = config_manager
+        elif config_path is not None:
+            self.config_manager = ConfigManager(config_path)
+        else:
+            self.config_manager = ConfigManager()
+
+        self.config_path = str(self.config_manager.config_path)
+        self.static_dir = str(static_dir) if static_dir is not None else str(DEFAULT_STATIC_DIR)
+        self.characters_path = str(characters_path) if characters_path is not None else None
+        self.recipes_path = str(recipes_path) if recipes_path is not None else None
 
 
 def create_server(
     host: str = "127.0.0.1",
     port: int = 8000,
-    config_path: str = "config.json",
-    characters_path: str = "characters.json",
-    recipes_path: str = "recipes.json",
-    static_dir: str = "static",
+    static_dir: Optional[Union[str, Path]] = None,
+    config_manager: Optional[ConfigManager] = None,
+    config_path: Optional[Union[str, Path]] = None,
+    characters_path: Optional[Union[str, Path]] = None,
+    recipes_path: Optional[Union[str, Path]] = None,
 ) -> SaveTrackerServer:
-    """Create a configured SaveTrackerServer instance."""
+    """Create a configured SaveTrackerServer instance.
+
+    Args:
+        host: Host IP or hostname to bind.
+        port: Port number (0 for OS-assigned dynamic port).
+        static_dir: Directory containing frontend static assets.
+        config_manager: ConfigManager instance.
+        config_path: Optional path to config JSON file (legacy/convenience).
+        characters_path: Optional path to characters JSON file (legacy/convenience).
+        recipes_path: Optional path to recipes JSON file (legacy/convenience).
+
+    Returns:
+        SaveTrackerServer instance.
+    """
     return SaveTrackerServer(
         (host, port),
         SaveTrackerRequestHandler,
+        static_dir=static_dir,
+        config_manager=config_manager,
         config_path=config_path,
         characters_path=characters_path,
         recipes_path=recipes_path,
-        static_dir=static_dir,
     )
+
+
+def run_server(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    open_browser: bool = False,
+    static_dir: Optional[Union[str, Path]] = None,
+    config_manager: Optional[ConfigManager] = None,
+) -> None:
+    """Run the Save Tracker HTTP API server until interrupted.
+
+    Args:
+        host: Host to bind.
+        port: Port to listen on.
+        open_browser: Whether to open default browser on start.
+        static_dir: Optional path to frontend static directory.
+        config_manager: Optional ConfigManager instance.
+    """
+    server = create_server(
+        host=host,
+        port=port,
+        static_dir=static_dir,
+        config_manager=config_manager,
+    )
+
+    actual_port = server.server_address[1]
+    url = f"http://{host}:{actual_port}"
+    print(f"Eiyuden Save Tracker server running at {url}")
+    print(f"Loaded config: {server.config_manager.config_path}")
+
+    if open_browser:
+        import webbrowser
+        import threading
+        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping server...")
+        server.shutdown()
+        server.server_close()
 
 
 def main() -> None:
@@ -769,36 +691,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Eiyuden Chronicle Save Tracker API Server")
     parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
-    parser.add_argument("--config", default="config.json", help="Path to config.json (default: config.json)")
-    parser.add_argument("--characters", default="characters.json", help="Path to characters.json (default: characters.json)")
-    parser.add_argument("--recipes", default="recipes.json", help="Path to recipes.json (default: recipes.json)")
-    parser.add_argument("--static", default="static", help="Path to static assets directory (default: static)")
+    parser.add_argument("--config", default=None, help="Path to config.json (default: config/config.json)")
+    parser.add_argument("--characters", default=None, help="Path to characters.json (default: data/characters.json)")
+    parser.add_argument("--recipes", default=None, help="Path to recipes.json (default: data/recipes.json)")
+    parser.add_argument("--static", default=None, help="Path to static assets directory (default: static)")
     parser.add_argument("--open", action="store_true", help="Automatically open browser on launch")
 
     args = parser.parse_args()
-    server = create_server(
+    cm = ConfigManager(args.config) if args.config else None
+    run_server(
         host=args.host,
         port=args.port,
-        config_path=args.config,
-        characters_path=args.characters,
-        recipes_path=args.recipes,
+        open_browser=args.open,
         static_dir=args.static,
+        config_manager=cm,
     )
-
-    actual_port = server.server_address[1]
-    url = f"http://{args.host}:{actual_port}"
-    print(f"Eiyuden Save Tracker server running at {url}")
-    print(f"Loaded config: {args.config}")
-
-    if args.open:
-        import webbrowser, threading
-        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nStopping server...")
-        server.shutdown()
-        server.server_close()
 
 
 if __name__ == "__main__":
