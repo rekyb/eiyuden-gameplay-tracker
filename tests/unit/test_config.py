@@ -133,6 +133,48 @@ class TestConfigManager(unittest.TestCase):
         self.assertTrue(nested_config.exists())
         self.assertEqual(manager.get_config()["save_path"], "nested.dat")
 
+    def test_get_config_returns_independent_list_copies(self):
+        """Verify mutating returned cooked_recipe_ids does not mutate subsequent get_config calls."""
+        manager = ConfigManager(self.config_file)
+
+        # When config file does not exist
+        cfg1 = manager.get_config()
+        cfg1["cooked_recipe_ids"].append(9999)
+        cfg2 = manager.get_config()
+        self.assertEqual(
+            cfg2["cooked_recipe_ids"],
+            [],
+            "Default config cooked_recipe_ids was mutated by modifying previous get_config() result",
+        )
+
+        # When config file exists
+        manager.save_config({"save_path": "save.dat", "cooked_recipe_ids": [100]})
+        cfg3 = manager.get_config()
+        cfg3["cooked_recipe_ids"].append(200)
+        cfg4 = manager.get_config()
+        self.assertEqual(
+            cfg4["cooked_recipe_ids"],
+            [100],
+            "Existing config cooked_recipe_ids was mutated by modifying previous get_config() result",
+        )
+
+    def test_save_config_failure_cleans_up_temp_file(self):
+        """Verify save_config cleans up temp file even if json serialization fails."""
+        manager = ConfigManager(self.config_file)
+        with self.assertRaises(TypeError):
+            manager.save_config({"invalid": object()})
+
+        # Verify no temporary files remain in the config directory
+        temp_files = [
+            f for f in self.config_file.parent.iterdir()
+            if f.name != self.config_file.name
+        ]
+        self.assertEqual(
+            temp_files,
+            [],
+            f"Expected no leftover temp files, but found: {temp_files}",
+        )
+
 
 class TestPlatformSaveDetector(unittest.TestCase):
     """Test suite for platform save detection routines."""

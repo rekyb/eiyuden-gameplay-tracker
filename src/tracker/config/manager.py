@@ -36,7 +36,10 @@ class ConfigManager:
             Dictionary containing 'save_path' and 'cooked_recipe_ids'.
         """
         if not self.config_path.is_file():
-            return dict(DEFAULT_CONFIG)
+            return {
+                "save_path": str(DEFAULT_CONFIG.get("save_path", "")),
+                "cooked_recipe_ids": list(DEFAULT_CONFIG.get("cooked_recipe_ids", [])),
+            }
 
         try:
             with open(self.config_path, "r", encoding="utf-8") as f:
@@ -44,13 +47,21 @@ class ConfigManager:
             if isinstance(data, dict):
                 config = dict(DEFAULT_CONFIG)
                 config.update(data)
-                if not isinstance(config.get("cooked_recipe_ids"), list):
-                    config["cooked_recipe_ids"] = []
-                return config
+                cooked = config.get("cooked_recipe_ids", [])
+                if not isinstance(cooked, list):
+                    cooked = []
+                return {
+                    **config,
+                    "save_path": str(config.get("save_path", "")),
+                    "cooked_recipe_ids": list(cooked),
+                }
         except Exception:
             pass
 
-        return dict(DEFAULT_CONFIG)
+        return {
+            "save_path": str(DEFAULT_CONFIG.get("save_path", "")),
+            "cooked_recipe_ids": list(DEFAULT_CONFIG.get("cooked_recipe_ids", [])),
+        }
 
     def save_config(self, config_data: Dict[str, Any]) -> None:
         """Atomically persist configuration dictionary to disk.
@@ -68,9 +79,11 @@ class ConfigManager:
         )
         temp_path = Path(temp_file.name)
         try:
-            json.dump(config_data, temp_file, indent=2)
-            temp_file.flush()
-            temp_file.close()
+            try:
+                json.dump(config_data, temp_file, indent=2)
+                temp_file.flush()
+            finally:
+                temp_file.close()
             os.replace(temp_path, self.config_path)
         except Exception:
             if temp_path.exists():
