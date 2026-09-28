@@ -1586,6 +1586,58 @@ tr.is-recruited td.col-name .hero-name {
   border: 1px solid var(--border-subtle);
 }
 
+/* --- Fish Tracker --- */
+.fish-table {
+  width: 100%;
+}
+
+.col-fish-name {
+  width: 220px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.col-fish-location {
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.col-fish-rarity {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.col-fish-status {
+  width: 140px;
+  white-space: nowrap;
+}
+
+/* --- Fish Status Badges --- */
+.status-badge.status-caught,
+.status-caught {
+  color: var(--status-recruited-text);
+  background-color: var(--status-recruited-bg);
+  border: 1px solid var(--status-recruited-border);
+}
+
+.status-badge.status-catchable,
+.status-catchable {
+  color: #38bdf8;
+  background-color: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.status-badge.status-undiscovered,
+.status-undiscovered {
+  color: var(--text-muted);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.rarity-5 {
+  color: #f59e0b;
+}
+
 /* --- Responsive Subnav --- */
 @media (max-width: 768px) {
   .subnav-wrapper {

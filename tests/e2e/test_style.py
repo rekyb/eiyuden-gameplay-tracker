@@ -127,7 +127,44 @@ class TestStyleCSS(unittest.TestCase):
         self.assertIn('.star-filled', css)
         self.assertIn('.star-empty', css)
 
+    def test_fish_html_structure(self):
+        """Fish navigation, filter tabs, controls, table, and empty state in HTML."""
+        self.assertIn('id="tab-nav-fish"', self.html)
+        self.assertIn('id="nav-count-fish"', self.html)
+        self.assertIn('id="view-fish"', self.html)
+        self.assertIn('id="fish-filter-tabs"', self.html)
+        self.assertIn('id="count-fish-all"', self.html)
+        self.assertIn('id="count-fish-caught"', self.html)
+        self.assertIn('id="count-fish-catchable"', self.html)
+        self.assertIn('id="count-fish-undiscovered"', self.html)
+        self.assertIn('id="fish-rarity-filter"', self.html)
+        self.assertIn('id="search-fish-input"', self.html)
+        self.assertIn('id="fish-table"', self.html)
+        self.assertIn('id="fish-tbody"', self.html)
+        self.assertIn('id="fish-empty-state"', self.html)
+
+    def test_fish_classes_present(self):
+        """Classes for fish table, columns, and status badges must be styled."""
+        required = [
+            'fish-table',
+            'col-fish-name',
+            'col-fish-location',
+            'col-fish-rarity',
+            'col-fish-status',
+            'status-caught',
+            'status-catchable',
+            'status-undiscovered',
+        ]
+        for c in required:
+            pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
+            self.assertTrue(re.search(pattern, self.css), f"Required fish class missing in style.css: {c}")
+
+    def test_fish_rarity_styles_defined(self):
+        self.assertIn('.col-fish-rarity', self.css)
+        self.assertIn('.rarity-5', self.css)
+
 
 if __name__ == '__main__':
     unittest.main()
+
 
