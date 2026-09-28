@@ -408,6 +408,31 @@ body {
   border-color: var(--border-focus);
 }
 
+/* Chapter Select Filter */
+.select-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-filter {
+  background-color: var(--bg-surface-elevated, #23272f);
+  color: var(--text-primary, #f6f7f9);
+  border: 1px solid var(--border-color, #343a46);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-filter:focus {
+  border-color: var(--accent-blue, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
 .search-box {
   position: relative;
   display: flex;
@@ -512,6 +537,11 @@ body {
   white-space: nowrap;
 }
 
+.col-chapter {
+  width: 150px;
+  min-width: 130px;
+}
+
 .col-location {
   width: 220px;
   color: var(--text-secondary);
@@ -612,6 +642,19 @@ body {
   color: var(--role-attendant-text);
   background-color: var(--role-attendant-bg);
   border-color: var(--role-attendant-border);
+}
+
+.chapter-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: 4px;
+  background-color: rgba(59, 130, 246, 0.12);
+  color: var(--accent-blue, #60a5fa);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  white-space: nowrap;
 }
 
 /* Subtle styling on recruited character row */
@@ -902,6 +945,12 @@ tr.is-recruited td.col-name .hero-name {
     width: 100%;
   }
 
+  .select-box,
+  .search-box {
+    width: 100%;
+  }
+
+  .select-filter,
   .search-input {
     width: 100%;
   }

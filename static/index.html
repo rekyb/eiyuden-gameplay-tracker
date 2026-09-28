@@ -67,13 +67,30 @@
         </div>
 
         <div class="search-filter-controls">
+          <div class="select-box">
+            <label for="chapter-filter" class="sr-only">Filter by Chapter</label>
+            <select id="chapter-filter" class="select-filter" aria-label="Filter by chapter">
+              <option value="all">All Chapters</option>
+              <option value="Prologue">Prologue</option>
+              <option value="The Watch Arc">The Watch Arc</option>
+              <option value="Eltisweiss War Arc">Eltisweiss War Arc</option>
+              <option value="The Alliance and Treefolk Arc">The Alliance and Treefolk Arc</option>
+              <option value="Eucrisse Arc">Eucrisse Arc</option>
+              <option value="Shi'arc Arc">Shi'arc Arc</option>
+              <option value="Guardians Arc">Guardians Arc</option>
+              <option value="Athrabalt War Arc">Athrabalt War Arc</option>
+              <option value="Alliance War Arc">Alliance War Arc</option>
+              <option value="Finale Arc">Finale Arc</option>
+              <option value="DLC / Extra">DLC / Extra</option>
+            </select>
+          </div>
           <div class="search-box">
             <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <label for="search-input" class="sr-only">Search characters</label>
-            <input type="search" id="search-input" class="search-input" placeholder="Search here" autocomplete="off">
+            <input type="search" id="search-input" class="search-input" placeholder="Search by name, chapter, location, or notes..." autocomplete="off">
           </div>
         </div>
       </nav>
@@ -85,6 +102,7 @@
             <thead>
               <tr>
                 <th scope="col" class="col-name">Name</th>
+                <th scope="col" class="col-chapter">Chapter</th>
                 <th scope="col" class="col-location">Location</th>
                 <th scope="col" class="col-guide">How to Recruit</th>
                 <th scope="col" class="col-status">Status</th>
@@ -209,6 +227,16 @@
           </div>
 
           <div class="search-filter-controls">
+            <div class="select-box">
+              <label for="beigoma-rarity-filter" class="sr-only">Filter by Rarity</label>
+              <select id="beigoma-rarity-filter" class="select-filter" aria-label="Filter by rarity">
+                <option value="all">All Rarities</option>
+                <option value="4">4 Stars (Rainbow)</option>
+                <option value="3">3 Stars (Gold)</option>
+                <option value="2">2 Stars (Silver)</option>
+                <option value="1">1 Star (Bronze)</option>
+              </select>
+            </div>
             <div class="search-box">
               <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"></circle>

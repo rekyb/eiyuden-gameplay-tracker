@@ -16,6 +16,7 @@ const state = {
   characters: [],          // Array of 121 character definition objects
   recruitedIds: new Set(), // Set of recruited character ID numbers
   activeFilter: 'all',     // 'all' | 'recruited' | 'missing' | 'missable'
+  activeChapterFilter: 'all', // 'all' | chapter arc name string
   searchQuery: '',         // Lowercase trimmed search string
 
   // --- Recipes ---
@@ -30,6 +31,7 @@ const state = {
   beigomaTrainers: [],              // Array of 44 trainer objects
   beigomaSubView: 'collection',     // 'collection' | 'trainers'
   beigomaFilter: 'all',             // 'all' | 'obtained' | 'missing'
+  beigomaRarityFilter: 'all',       // 'all' | '1' | '2' | '3' | '4'
   beigomaSearch: '',                // Lowercase trimmed beigoma search string
   trainerFilter: 'all',             // 'all' | 'defeated' | 'unbattled'
   trainerSearch: '',                // Lowercase trimmed trainer search string
@@ -90,8 +92,9 @@ const dom = {
   countMissing: null,
   countMissable: null,
 
-  // Heroes Search Input
+  // Heroes Search & Chapter Filter Input
   searchInput: null,
+  chapterFilter: null,
 
   // Heroes Table & Empty State
   charactersTbody: null,
@@ -131,6 +134,7 @@ const dom = {
   countBeigomaAll: null,
   countBeigomaObtained: null,
   countBeigomaMissing: null,
+  beigomaRarityFilter: null,
   beigomaSearch: null,
   beigomaTable: null,
   beigomaList: null,
@@ -239,9 +243,10 @@ function showToast(message, type = 'info', duration = 4000) {
  * @param {Set<number>} recruitedIds - Set of recruited character IDs
  * @param {string} activeFilter - 'all' | 'recruited' | 'missing' | 'missable'
  * @param {string} searchQuery - Search query in lowercase
+ * @param {string} [activeChapterFilter='all'] - Chapter filter string or 'all'
  * @returns {boolean} Whether character matches all criteria
  */
-function filterCharacter(char, recruitedIds, activeFilter, searchQuery) {
+function filterCharacter(char, recruitedIds, activeFilter, searchQuery, activeChapterFilter = 'all') {
   const isRecruited = recruitedIds.has(char.id);
 
   // Status Filter Tab
@@ -249,15 +254,21 @@ function filterCharacter(char, recruitedIds, activeFilter, searchQuery) {
   if (activeFilter === 'missing' && isRecruited) return false;
   if (activeFilter === 'missable' && !char.missable) return false;
 
-  // Instant Text Search (name, location, recruitment notes, ID)
+  // Chapter Filter Dropdown
+  if (activeChapterFilter && activeChapterFilter !== 'all' && char.chapter !== activeChapterFilter) {
+    return false;
+  }
+
+  // Instant Text Search (name, location, recruitment notes, chapter, ID)
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     const nameMatch = (char.name || '').toLowerCase().includes(q);
     const locMatch = (char.location || '').toLowerCase().includes(q);
     const howMatch = (char.howToRecruit || '').toLowerCase().includes(q);
+    const chapterMatch = (char.chapter || '').toLowerCase().includes(q);
     const idMatch = String(char.id).includes(q);
 
-    if (!nameMatch && !locMatch && !howMatch && !idMatch) {
+    if (!nameMatch && !locMatch && !howMatch && !chapterMatch && !idMatch) {
       return false;
     }
   }
@@ -321,6 +332,9 @@ function createCharacterRowHtml(char, isRecruited) {
           ${missableBadge}
         </div>
       </td>
+      <td class="col-chapter">
+        <span class="chapter-badge">${escapeHtml(char.chapter || '—')}</span>
+      </td>
       <td class="col-location">${escapeHtml(char.location || '—')}</td>
       <td class="col-guide">${escapeHtml(char.howToRecruit || '—')}</td>
       <td class="col-status">${statusBadge}</td>
@@ -368,7 +382,8 @@ function renderTable() {
       char,
       state.recruitedIds,
       state.activeFilter,
-      state.searchQuery
+      state.searchQuery,
+      state.activeChapterFilter
     )
   );
 
@@ -599,14 +614,15 @@ function switchBeigomaSubview(subviewName) {
 }
 
 /**
- * Filters a single Beigoma top against active filter and search query.
+ * Filters a single Beigoma top against active filter, rarity filter, and search query.
  * @param {object} item
  * @param {Set<number>|Array<number>} collectedIds
  * @param {string} activeFilter - 'all' | 'obtained' | 'missing'
  * @param {string} searchQuery
+ * @param {string} [activeRarityFilter='all'] - 'all' | '1' | '2' | '3' | '4'
  * @returns {boolean}
  */
-function filterBeigoma(item, collectedIds, activeFilter, searchQuery) {
+function filterBeigoma(item, collectedIds, activeFilter, searchQuery, activeRarityFilter = 'all') {
   const isObtained = collectedIds instanceof Set
     ? collectedIds.has(item.id)
     : (Array.isArray(collectedIds) ? collectedIds.includes(item.id) : false);
@@ -614,12 +630,22 @@ function filterBeigoma(item, collectedIds, activeFilter, searchQuery) {
   if (activeFilter === 'obtained' && !isObtained) return false;
   if (activeFilter === 'missing' && isObtained) return false;
 
+  if (activeRarityFilter && activeRarityFilter !== 'all') {
+    if (Number(item.rarity) !== Number(activeRarityFilter)) {
+      return false;
+    }
+  }
+
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     const nameMatch = (item.name || '').toLowerCase().includes(q);
     const locMatch = (item.whereToObtain || '').toLowerCase().includes(q);
     const idMatch = String(item.id).includes(q);
-    if (!nameMatch && !locMatch && !idMatch) return false;
+
+    const rarityNames = { 1: 'bronze', 2: 'silver', 3: 'gold', 4: 'rainbow' };
+    const tierMatch = (rarityNames[item.rarity] || '').includes(q) || `${item.rarity} star`.includes(q);
+
+    if (!nameMatch && !locMatch && !idMatch && !tierMatch) return false;
   }
 
   return true;
@@ -753,7 +779,8 @@ function renderBeigoma() {
       item,
       collectedSet,
       state.beigomaFilter,
-      state.beigomaSearch
+      state.beigomaSearch,
+      state.beigomaRarityFilter
     )
   );
 
@@ -1127,8 +1154,9 @@ function cacheDomElements() {
   dom.countMissing = document.getElementById('count-missing');
   dom.countMissable = document.getElementById('count-missable');
 
-  // Heroes Search
+  // Heroes Search & Chapter Filter
   dom.searchInput = document.getElementById('search-input');
+  dom.chapterFilter = document.getElementById('chapter-filter');
 
   // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
@@ -1165,6 +1193,7 @@ function cacheDomElements() {
   dom.countBeigomaAll = document.getElementById('count-beigoma-all');
   dom.countBeigomaObtained = document.getElementById('count-beigoma-obtained');
   dom.countBeigomaMissing = document.getElementById('count-beigoma-missing');
+  dom.beigomaRarityFilter = document.getElementById('beigoma-rarity-filter');
   dom.beigomaSearch = document.getElementById('beigoma-search');
   dom.beigomaTable = document.getElementById('beigoma-table');
   dom.beigomaList = document.getElementById('beigoma-list');
@@ -1386,6 +1415,14 @@ function setupEventListeners() {
     });
   }
 
+  // Beigoma Rarity Filter Dropdown
+  if (dom.beigomaRarityFilter) {
+    dom.beigomaRarityFilter.addEventListener('change', (e) => {
+      state.beigomaRarityFilter = e.target.value;
+      renderBeigoma();
+    });
+  }
+
   // Trainer Filter Tabs
   dom.trainerFilterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1532,6 +1569,14 @@ function setupEventListeners() {
       }
     }
   });
+
+  // Chapter Filter Dropdown
+  if (dom.chapterFilter) {
+    dom.chapterFilter.addEventListener('change', (e) => {
+      state.activeChapterFilter = e.target.value;
+      renderTable();
+    });
+  }
 
   // Instant Search Input
   if (dom.searchInput) {

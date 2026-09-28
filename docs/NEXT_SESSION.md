@@ -1,15 +1,16 @@
 # Next Session Handover & Context
 
-- **Current Branch:** `feat/beigoma-tracker`
+- **Current Branch:** `fix/content-errors`
+- **Base Branch:** `feat/beigoma-tracker`
 - **Working Tree:** Clean (all commits up to date)
-- **Status:** All Beigoma & Trainer features, Rarity column, and polish tasks completed. Ready to merge to `master`.
+- **Status:** Content error fixes, story arc chapter tracking & filtering, canonical Beigoma rarity alignment, and Beigoma rarity filter dropdown completed. All tests passing (103 Python tests + 32 Node.js tests). Ready for PR and merge.
 
 ---
 
 ## 1. Quick Resume Instructions for Next Session
 
 To continue in the next session, instruct the agent:
-> *"Resume from `docs/NEXT_SESSION.md`. All Beigoma & Trainer tracker tasks, Rarity column, and QA fixes are complete and tested (102 Python + 25 Node tests passing). Proceed to merge `feat/beigoma-tracker` to `master` using `finishing-a-development-branch`."*
+> *"Resume from `docs/NEXT_SESSION.md`. All content fixes (character recruitment & story arc chapters, canonical Beigoma rarities, Chapter and Rarity dropdown filters) are complete and tested on branch `fix/content-errors` (103 Python + 32 Node tests passing). Proceed to merge `fix/content-errors`."*
 
 ---
 
@@ -17,58 +18,35 @@ To continue in the next session, instruct the agent:
 
 | Task | Description | Status | Commits |
 |------|-------------|--------|---------|
-| 1 | Static Datasets & Unit Tests | ✅ Done (reviewed) | `c333e18` |
-| 2 | Save Reader Extraction | ✅ Done (reviewed) | `42b499d` |
-| 3 | Backend API Endpoints | ✅ Done (reviewed) | `ae30a7c` |
-| 4 | Frontend HTML & CSS | ✅ Done (reviewed) | `e8fcf67` |
-| 5 | Frontend JavaScript Logic | ✅ Done (reviewed) | `1a351e2` |
-| 6 | Full Verification & Live Save Test | ✅ Done (reviewed) | `4952b04` |
-| Fix | Delta-aware Sync Toast & QA Fixes | ✅ Done (tested) | `42b0c22`, `cce5794`, `d880713` |
-| UI | Remove Subtitle from Header | ✅ Done (tested) | `bbfd007` |
-| Data | Descriptive Trainer Locations & Reid Battle Notes | ✅ Done (tested) | `b429834` |
-| Format | Remove Em Dashes to Match Heroes/Recipes Format | ✅ Done (tested) | `854f107` |
-| Fix | Enable Save Path Button on Changing/Selecting Save File | ✅ Done (tested) | `68d78a2` |
-| Feat | Beigoma Rarity Column (1–4 Stars, a11y labels, CSS) | ✅ Done (reviewed) | `d7f97f2`, `c60cdd8`, `9719c28`, `f798c1d` |
-| Clean | Table Pagination Revert (Keep all tables non-paginated) | ✅ Done (tested) | `3a62902` |
+| Chars Schema | Unit test validation for `chapter` and valid story arc names | ✅ Done (reviewed) | `ae9e76d` |
+| Chars Data | Added Story Arc chapter and corrected recruitment instructions for all 121 characters (GameFAQs #81238) | ✅ Done (reviewed) | `19d05dd`, `83b2f8c` |
+| Chars HTML | Added Chapter filter dropdown and table column header | ✅ Done (reviewed) | `d72a7ae` |
+| Styling | Added CSS for `.select-box`, `.select-filter`, `.col-chapter`, and `.chapter-badge` with responsive layout | ✅ Done (reviewed) | `0114f99` |
+| Chars JS | Implemented chapter dropdown filtering, instant search by chapter, and 5-column row rendering | ✅ Done (reviewed) | `034c31e` |
+| Beigoma Data | Aligned all 60 Beigoma top rarities with the canonical RPG Site 4-tier distribution (16 Bronze, 27 Silver, 12 Gold, 5 Rainbow) | ✅ Done (tested) | `8c23f9a` |
+| Beigoma HTML | Added Rarity filter dropdown (`All`, `4 Stars (Rainbow)`, `3 Stars (Gold)`, `2 Stars (Silver)`, `1 Star (Bronze)`) to Beigoma collection toolbar | ✅ Done (reviewed) | `ee25088` |
+| Beigoma JS | Implemented client-side rarity dropdown filtering, tier keyword search, and reactive list rendering | ✅ Done (reviewed) | `583eaa6` |
+| Verification | Full regression testing across backend and frontend test runners | ✅ Done (verified) | `2bcbd70` |
 
-- **All tests passing:** 102 Python (`python -m unittest discover tests`) + 25 Node (`node --test tests/frontend/test_app.js`)
-- **Live Save File Verified:** Exactly 23/60 Beigoma tops obtained, 14/44 opponent trainers defeated.
+- **All tests passing:** 103 Python (`python -m unittest discover tests`) + 32 Node.js (`node --test tests/frontend/test_app.js`)
+- **Zero regressions:** Working tree is clean.
 
 ---
 
-## 3. Extensibility Architecture: Multi-Tracker Support
+## 3. Key Design Decisions
 
-The sync notification toast is built around `SYNC_TRACKERS` in `static/app.js`:
-```javascript
-const SYNC_TRACKERS = [
-  { label: 'hero',    labelPlural: 'heroes',           key: 'heroCount' },
-  { label: 'recipe',  labelPlural: 'recipes',          key: 'recipeCount' },
-  { label: 'beigoma', labelPlural: 'beigoma',          key: 'beigomaCount' },
-  { label: 'trainer', labelPlural: 'trainers defeated', key: 'trainerCount' },
-];
-```
-When future trackers (Fish, Chests, Runes) are implemented:
-1. Extract counts in `save_reader.py` and forward via `/api/progress`.
-2. Update `applyProgress()` in `app.js` to populate state arrays.
-3. Add a single entry to `SYNC_TRACKERS` with `label`, `labelPlural`, and `key`. The delta toast automatically handles formatting and delta diffing.
+| Feature | Implementation Choice |
+|---------|-----------------------|
+| Chapter Arcs | Canonical 11 Story Arcs from vreaper's GameFAQs guide (`Prologue`, `The Watch Arc`, `Eltisweiss War Arc`, `The Alliance and Treefolk Arc`, `Eucrisse Arc`, `Shi'arc Arc`, `Guardians Arc`, `Athrabalt War Arc`, `Alliance War Arc`, `Finale Arc`, `DLC / Extra`) |
+| Chapter UI | 5th table column with styled `.chapter-badge` pill + `.select-filter` dropdown in toolbar + search by chapter |
+| Beigoma Rarities | Exact 4-tier distribution from RPG Site: 16 Bronze (1★), 27 Silver (2★), 12 Gold (3★), 5 Rainbow (4★) |
+| Beigoma Rarity Filter | `.select-filter` dropdown in Beigoma collection toolbar (`All Rarities`, `4 Stars (Rainbow)`, `3 Stars (Gold)`, `2 Stars (Silver)`, `1 Star (Bronze)`) + tier search keywords |
 
 ---
 
-## 4. Key Design Decisions
+## 4. Reference Documents
 
-| Decision | Choice |
-|----------|--------|
-| Navigation | Single "Beigoma" top-level tab with sub-tabs (Collection + Trainers) |
-| Trainer table | Ultra-Minimalist 3-column: Trainer Name \| Location \| Status |
-| Filter style | Standard Tracker Toolbar (Search + Status Tabs) for both sub-tabs |
-| Manual override | 100% Automatic Read-Only from Save File |
-| Architecture | Decoupled Static Metadata + Unified API Payload |
-| HTML structure | Single `static/index.html` (no separate HTML files per feature) |
-
----
-
-## 5. Reference Documents
-
-- **Design Spec:** [`docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md)
-- **Implementation Plan:** [`docs/superpowers/plans/2026-09-28-beigoma-tracker.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-28-beigoma-tracker.md)
-- **SDD Progress Ledger:** [`.superpowers/sdd/progress.md`](file:///C:/projects/eiyuden-gameplay-tracker/.superpowers/sdd/progress.md)
+- **Character Fixes Spec:** [`docs/superpowers/specs/2026-09-28-character-recruitment-and-chapter-fixes-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-character-recruitment-and-chapter-fixes-design.md)
+- **Character Fixes Plan:** [`docs/superpowers/plans/2026-09-28-character-recruitment-and-chapter-fixes.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-28-character-recruitment-and-chapter-fixes.md)
+- **Beigoma Rarity Filter Spec:** [`docs/superpowers/specs/2026-09-28-beigoma-rarity-filter-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-beigoma-rarity-filter-design.md)
+- **Beigoma Rarity Filter Plan:** [`docs/superpowers/plans/2026-09-28-beigoma-rarity-filter.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-28-beigoma-rarity-filter.md)

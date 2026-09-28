@@ -8,7 +8,20 @@ from src.tracker.core.models import DATA_DIR, load_characters
 
 EXPECTED_TOTAL_CHARACTERS = 121
 VALID_ROLES = {"Battle", "Support", "Attendant"}
-REQUIRED_KEYS = {"id", "name", "role", "location", "howToRecruit", "missable"}
+VALID_CHAPTERS = {
+    "Prologue",
+    "The Watch Arc",
+    "Eltisweiss War Arc",
+    "The Alliance and Treefolk Arc",
+    "Eucrisse Arc",
+    "Shi'arc Arc",
+    "Guardians Arc",
+    "Athrabalt War Arc",
+    "Alliance War Arc",
+    "Finale Arc",
+    "DLC / Extra",
+}
+REQUIRED_KEYS = {"id", "name", "role", "chapter", "location", "howToRecruit", "missable"}
 
 
 class TestCharactersDatabase(unittest.TestCase):
@@ -55,6 +68,13 @@ class TestCharactersDatabase(unittest.TestCase):
                 c["role"],
                 VALID_ROLES,
                 f"Role for {char_name} must be one of {VALID_ROLES}, got '{c['role']}'",
+            )
+
+            self.assertIsInstance(c["chapter"], str, f"Chapter must be str: {char_id}")
+            self.assertIn(
+                c["chapter"],
+                VALID_CHAPTERS,
+                f"Chapter for {char_name} must be in VALID_CHAPTERS, got '{c.get('chapter')}'",
             )
 
             self.assertIsInstance(c["location"], str, f"Location must be str: {char_id}")
@@ -127,7 +147,7 @@ class TestCharactersDatabase(unittest.TestCase):
     def test_load_characters_custom_directory(self):
         """Verify load_characters accepts a custom data_dir path."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            sample_data = [{"id": 999, "name": "TestHero", "role": "Battle", "location": "TestLoc", "howToRecruit": "Test recruit steps", "missable": False}]
+            sample_data = [{"id": 999, "name": "TestHero", "role": "Battle", "chapter": "Prologue", "location": "TestLoc", "howToRecruit": "Test recruit steps", "missable": False}]
             file_path = Path(tmpdir) / "characters.json"
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(sample_data, f)

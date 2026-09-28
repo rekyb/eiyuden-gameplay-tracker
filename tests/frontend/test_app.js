@@ -243,6 +243,76 @@ test('filterCharacter does not allow searching by role', () => {
   assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'support'), false);
 });
 
+test('filterCharacter filters by activeChapterFilter', () => {
+  const charWatch = {
+    id: 1,
+    name: 'Garr',
+    chapter: 'The Watch Arc',
+    location: 'Altverden',
+    howToRecruit: 'Recruit in Watch Arc',
+  };
+  const charEucrisse = {
+    id: 2,
+    name: 'Perielle',
+    chapter: 'Eucrisse Arc',
+    location: 'Hishahn',
+    howToRecruit: 'Recruit in Eucrisse Arc',
+  };
+
+  // 'all' matches both
+  assert.strictEqual(app.filterCharacter(charWatch, new Set(), 'all', '', 'all'), true);
+  assert.strictEqual(app.filterCharacter(charEucrisse, new Set(), 'all', '', 'all'), true);
+
+  // 'The Watch Arc' matches charWatch, rejects charEucrisse
+  assert.strictEqual(app.filterCharacter(charWatch, new Set(), 'all', '', 'The Watch Arc'), true);
+  assert.strictEqual(app.filterCharacter(charEucrisse, new Set(), 'all', '', 'The Watch Arc'), false);
+
+  // 'Eucrisse Arc' matches charEucrisse, rejects charWatch
+  assert.strictEqual(app.filterCharacter(charWatch, new Set(), 'all', '', 'Eucrisse Arc'), false);
+  assert.strictEqual(app.filterCharacter(charEucrisse, new Set(), 'all', '', 'Eucrisse Arc'), true);
+});
+
+test('filterCharacter matches char.chapter in text search query', () => {
+  const character = {
+    id: 1,
+    name: 'Nowa',
+    chapter: 'The Watch Arc',
+    location: 'Eltisweiss',
+    howToRecruit: 'Prologue',
+  };
+
+  // Searching by chapter text matches
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'watch'), true);
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'watch arc'), true);
+  assert.strictEqual(app.filterCharacter(character, new Set(), 'all', 'eucrisse'), false);
+});
+
+test('createCharacterRowHtml renders col-chapter with chapter-badge', () => {
+  const character = {
+    id: 1,
+    name: 'Nowa',
+    chapter: 'The Watch Arc',
+    location: 'Eltisweiss',
+    howToRecruit: 'Prologue',
+    missable: false,
+  };
+
+  const html = app.createCharacterRowHtml(character, false);
+  assert.ok(html.includes('<td class="col-chapter">'));
+  assert.ok(html.includes('<span class="chapter-badge">The Watch Arc</span>'));
+
+  // Test fallback when chapter is missing or empty
+  const charNoChapter = {
+    id: 2,
+    name: 'Mellore',
+    location: 'Altverden',
+    howToRecruit: 'Quest',
+  };
+  const htmlNoChapter = app.createCharacterRowHtml(charNoChapter, true);
+  assert.ok(htmlNoChapter.includes('<td class="col-chapter">'));
+  assert.ok(htmlNoChapter.includes('<span class="chapter-badge">—</span>'));
+});
+
 test('filterBeigoma correctly filters by status and text search', () => {
   const top = {
     id: 1,
@@ -471,6 +541,31 @@ test('renderTable renders all filtered heroes into tbody without pagination', ()
   assert.strictEqual((dummyTbody.innerHTML.match(/<tr/g) || []).length, 45);
 });
 
+test('renderTable respects state.activeChapterFilter', () => {
+  app.state.characters = [
+    { id: 1, name: 'Hero 1', chapter: 'Prologue', location: 'Loc 1', howToRecruit: 'Recruit 1' },
+    { id: 2, name: 'Hero 2', chapter: 'The Watch Arc', location: 'Loc 2', howToRecruit: 'Recruit 2' },
+  ];
+  app.state.recruitedIds = new Set();
+  app.state.activeFilter = 'all';
+  app.state.searchQuery = '';
+  app.state.activeChapterFilter = 'The Watch Arc';
+
+  const dummyTbody = { innerHTML: '' };
+  const dummyEmpty = { hidden: false };
+  app.dom.charactersTbody = dummyTbody;
+  app.dom.emptyState = dummyEmpty;
+
+  app.renderTable();
+  assert.strictEqual(dummyEmpty.hidden, true);
+  assert.strictEqual((dummyTbody.innerHTML.match(/<tr/g) || []).length, 1);
+  assert.ok(dummyTbody.innerHTML.includes('Hero 2'));
+  assert.ok(!dummyTbody.innerHTML.includes('Hero 1'));
+
+  // Reset
+  app.state.activeChapterFilter = 'all';
+});
+
 test('renderRecipesTable renders all filtered recipes into tbody without pagination', () => {
   app.state.recipes = Array.from({ length: 30 }, (_, i) => ({
     id: 3000 + i + 1,
@@ -548,6 +643,61 @@ test('renderTrainers renders all filtered trainers into list without pagination'
   assert.strictEqual(dummyEmpty.hidden, true);
   assert.strictEqual((dummyList.innerHTML.match(/<tr/g) || []).length, 25);
 });
+
+test('filterBeigoma filters by activeRarityFilter', () => {
+  const top4Star = { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' };
+  const top2Star = { id: 17, name: 'Sahagin', rarity: 2, whereToObtain: 'Lake' };
+
+  // All matches both
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', 'all'), true);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', 'all'), true);
+
+  // Filter 4 stars
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', '4'), true);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', '4'), false);
+
+  // Filter 2 stars
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', '2'), false);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', '2'), true);
+});
+
+test('filterBeigoma matches rarity tier keywords in text search query', () => {
+  const top = { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' };
+  assert.strictEqual(app.filterBeigoma(top, new Set(), 'all', 'rainbow'), true);
+  assert.strictEqual(app.filterBeigoma(top, new Set(), 'all', 'gold'), false);
+});
+
+test('renderBeigoma respects state.beigomaRarityFilter', () => {
+  const originalList = app.dom.beigomaList;
+  const originalEmpty = app.dom.beigomaEmptyState;
+  const originalBeigoma = app.state.beigoma;
+  const originalFilter = app.state.beigomaRarityFilter;
+
+  const mockList = { innerHTML: '' };
+  const mockEmpty = { hidden: true };
+  app.dom.beigomaList = mockList;
+  app.dom.beigomaEmptyState = mockEmpty;
+
+  app.state.beigoma = [
+    { id: 1, name: 'Plantvine', rarity: 1, whereToObtain: 'Drop' },
+    { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' },
+  ];
+  app.state.beigomaCollectedIds = [];
+  app.state.beigomaFilter = 'all';
+  app.state.beigomaSearch = '';
+  app.state.beigomaRarityFilter = '4';
+
+  app.renderBeigoma();
+  assert.ok(mockList.innerHTML.includes('Devil of Destruction'));
+  assert.ok(!mockList.innerHTML.includes('Plantvine'));
+
+  // Restore
+  app.dom.beigomaList = originalList;
+  app.dom.beigomaEmptyState = originalEmpty;
+  app.state.beigoma = originalBeigoma;
+  app.state.beigomaRarityFilter = originalFilter;
+});
+
 
 
 
