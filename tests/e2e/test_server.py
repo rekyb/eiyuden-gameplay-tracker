@@ -92,6 +92,38 @@ class TestServerAPI(unittest.TestCase):
         except urllib.error.HTTPError as exc:
             return ResponseWrapper(exc.code, exc.read(), dict(exc.headers))
 
+    @property
+    def client(self):
+        class _Client:
+            def __init__(client_self, outer):
+                client_self.outer = outer
+
+            def get(client_self, path, **kwargs):
+                return client_self.outer.fetch(path, method="GET", **kwargs)
+
+            def post(client_self, path, data=None, headers=None, **kwargs):
+                return client_self.outer.fetch(path, method="POST", data=data, headers=headers, **kwargs)
+
+        return _Client(self)
+
+    def test_get_fish_endpoint(self):
+        response = self.client.get("/api/fish")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 52)
+        self.assertEqual(data[0]["name"], "Curry Mackerel")
+
+    def test_progress_includes_fish_data(self):
+        response = self.client.get("/api/progress")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("fish_caught_ids", data)
+        self.assertIn("fish_caught_count", data)
+        self.assertIn("fish_total_count", data)
+        self.assertIn("discovered_spot_ids", data)
+        self.assertEqual(data["fish_total_count"], 52)
+
     def test_api_beigoma_endpoints(self):
         # GET /api/beigoma
         res = self.fetch("/api/beigoma")
@@ -587,6 +619,38 @@ class TestServerAPI(unittest.TestCase):
                 data_p = json.loads(resp.read().decode("utf-8"))
                 self.assertEqual(data_p["beigoma_total_count"], 1)
                 self.assertEqual(data_p["beigoma_total_trainers"], 1)
+        finally:
+            test_httpd.shutdown()
+            test_httpd.server_close()
+
+    def test_custom_fish_server_path(self):
+        """Test server with custom fish path."""
+        custom_fish = os.path.join(self.temp_dir, "custom_f.json")
+        with open(custom_fish, "w", encoding="utf-8") as f:
+            json.dump([{"id": 99, "name": "Custom Salmon", "spot_ids": [1]}], f)
+
+        test_httpd = server.create_server(
+            host="127.0.0.1",
+            port=0,
+            config_path=self.config_path,
+            static_dir=self.static_dir,
+            fish_path=custom_fish,
+        )
+        port = test_httpd.server_address[1]
+        t = threading.Thread(target=test_httpd.serve_forever, daemon=True)
+        t.start()
+
+        try:
+            req_f = urllib.request.Request(f"http://127.0.0.1:{port}/api/fish")
+            with urllib.request.urlopen(req_f) as resp:
+                data_f = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(len(data_f), 1)
+                self.assertEqual(data_f[0]["name"], "Custom Salmon")
+
+            req_prog = urllib.request.Request(f"http://127.0.0.1:{port}/api/progress")
+            with urllib.request.urlopen(req_prog) as resp:
+                data_p = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(data_p["fish_total_count"], 1)
         finally:
             test_httpd.shutdown()
             test_httpd.server_close()
