@@ -644,6 +644,61 @@ test('renderTrainers renders all filtered trainers into list without pagination'
   assert.strictEqual((dummyList.innerHTML.match(/<tr/g) || []).length, 25);
 });
 
+test('filterBeigoma filters by activeRarityFilter', () => {
+  const top4Star = { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' };
+  const top2Star = { id: 17, name: 'Sahagin', rarity: 2, whereToObtain: 'Lake' };
+
+  // All matches both
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', 'all'), true);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', 'all'), true);
+
+  // Filter 4 stars
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', '4'), true);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', '4'), false);
+
+  // Filter 2 stars
+  assert.strictEqual(app.filterBeigoma(top4Star, new Set(), 'all', '', '2'), false);
+  assert.strictEqual(app.filterBeigoma(top2Star, new Set(), 'all', '', '2'), true);
+});
+
+test('filterBeigoma matches rarity tier keywords in text search query', () => {
+  const top = { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' };
+  assert.strictEqual(app.filterBeigoma(top, new Set(), 'all', 'rainbow'), true);
+  assert.strictEqual(app.filterBeigoma(top, new Set(), 'all', 'gold'), false);
+});
+
+test('renderBeigoma respects state.beigomaRarityFilter', () => {
+  const originalList = app.dom.beigomaList;
+  const originalEmpty = app.dom.beigomaEmptyState;
+  const originalBeigoma = app.state.beigoma;
+  const originalFilter = app.state.beigomaRarityFilter;
+
+  const mockList = { innerHTML: '' };
+  const mockEmpty = { hidden: true };
+  app.dom.beigomaList = mockList;
+  app.dom.beigomaEmptyState = mockEmpty;
+
+  app.state.beigoma = [
+    { id: 1, name: 'Plantvine', rarity: 1, whereToObtain: 'Drop' },
+    { id: 56, name: 'Devil of Destruction', rarity: 4, whereToObtain: 'Boss' },
+  ];
+  app.state.beigomaCollectedIds = [];
+  app.state.beigomaFilter = 'all';
+  app.state.beigomaSearch = '';
+  app.state.beigomaRarityFilter = '4';
+
+  app.renderBeigoma();
+  assert.ok(mockList.innerHTML.includes('Devil of Destruction'));
+  assert.ok(!mockList.innerHTML.includes('Plantvine'));
+
+  // Restore
+  app.dom.beigomaList = originalList;
+  app.dom.beigomaEmptyState = originalEmpty;
+  app.state.beigoma = originalBeigoma;
+  app.state.beigomaRarityFilter = originalFilter;
+});
+
+
 
 
 

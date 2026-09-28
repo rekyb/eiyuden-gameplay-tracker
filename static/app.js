@@ -31,6 +31,7 @@ const state = {
   beigomaTrainers: [],              // Array of 44 trainer objects
   beigomaSubView: 'collection',     // 'collection' | 'trainers'
   beigomaFilter: 'all',             // 'all' | 'obtained' | 'missing'
+  beigomaRarityFilter: 'all',       // 'all' | '1' | '2' | '3' | '4'
   beigomaSearch: '',                // Lowercase trimmed beigoma search string
   trainerFilter: 'all',             // 'all' | 'defeated' | 'unbattled'
   trainerSearch: '',                // Lowercase trimmed trainer search string
@@ -133,6 +134,7 @@ const dom = {
   countBeigomaAll: null,
   countBeigomaObtained: null,
   countBeigomaMissing: null,
+  beigomaRarityFilter: null,
   beigomaSearch: null,
   beigomaTable: null,
   beigomaList: null,
@@ -612,14 +614,15 @@ function switchBeigomaSubview(subviewName) {
 }
 
 /**
- * Filters a single Beigoma top against active filter and search query.
+ * Filters a single Beigoma top against active filter, rarity filter, and search query.
  * @param {object} item
  * @param {Set<number>|Array<number>} collectedIds
  * @param {string} activeFilter - 'all' | 'obtained' | 'missing'
  * @param {string} searchQuery
+ * @param {string} [activeRarityFilter='all'] - 'all' | '1' | '2' | '3' | '4'
  * @returns {boolean}
  */
-function filterBeigoma(item, collectedIds, activeFilter, searchQuery) {
+function filterBeigoma(item, collectedIds, activeFilter, searchQuery, activeRarityFilter = 'all') {
   const isObtained = collectedIds instanceof Set
     ? collectedIds.has(item.id)
     : (Array.isArray(collectedIds) ? collectedIds.includes(item.id) : false);
@@ -627,12 +630,22 @@ function filterBeigoma(item, collectedIds, activeFilter, searchQuery) {
   if (activeFilter === 'obtained' && !isObtained) return false;
   if (activeFilter === 'missing' && isObtained) return false;
 
+  if (activeRarityFilter && activeRarityFilter !== 'all') {
+    if (Number(item.rarity) !== Number(activeRarityFilter)) {
+      return false;
+    }
+  }
+
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     const nameMatch = (item.name || '').toLowerCase().includes(q);
     const locMatch = (item.whereToObtain || '').toLowerCase().includes(q);
     const idMatch = String(item.id).includes(q);
-    if (!nameMatch && !locMatch && !idMatch) return false;
+
+    const rarityNames = { 1: 'bronze', 2: 'silver', 3: 'gold', 4: 'rainbow' };
+    const tierMatch = (rarityNames[item.rarity] || '').includes(q) || `${item.rarity} star`.includes(q);
+
+    if (!nameMatch && !locMatch && !idMatch && !tierMatch) return false;
   }
 
   return true;
@@ -766,7 +779,8 @@ function renderBeigoma() {
       item,
       collectedSet,
       state.beigomaFilter,
-      state.beigomaSearch
+      state.beigomaSearch,
+      state.beigomaRarityFilter
     )
   );
 
@@ -1179,6 +1193,7 @@ function cacheDomElements() {
   dom.countBeigomaAll = document.getElementById('count-beigoma-all');
   dom.countBeigomaObtained = document.getElementById('count-beigoma-obtained');
   dom.countBeigomaMissing = document.getElementById('count-beigoma-missing');
+  dom.beigomaRarityFilter = document.getElementById('beigoma-rarity-filter');
   dom.beigomaSearch = document.getElementById('beigoma-search');
   dom.beigomaTable = document.getElementById('beigoma-table');
   dom.beigomaList = document.getElementById('beigoma-list');
@@ -1397,6 +1412,14 @@ function setupEventListeners() {
         state.beigomaSearch = '';
         renderBeigoma();
       }
+    });
+  }
+
+  // Beigoma Rarity Filter Dropdown
+  if (dom.beigomaRarityFilter) {
+    dom.beigomaRarityFilter.addEventListener('change', (e) => {
+      state.beigomaRarityFilter = e.target.value;
+      renderBeigoma();
     });
   }
 
