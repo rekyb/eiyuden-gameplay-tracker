@@ -300,23 +300,22 @@ test('filterTrainer correctly filters by status and text search', () => {
   assert.strictEqual(app.filterTrainer(trainer, new Set(), 'all', 'altverden'), true);
 });
 
-test('createBeigomaRowHtml produces correct markup for obtained and missing tops', () => {
-  const top = {
-    id: 5,
-    name: 'Flame Sprout',
-    whereToObtain: 'Mount Caravan dropped by Hellhound',
-  };
+test('createBeigomaRowHtml produces correct markup with rarity stars', () => {
+  const top3Star = { id: 41, name: 'Soul Reaper', whereToObtain: 'Drop in Deadworld', rarity: 3 };
+  const html = app.createBeigomaRowHtml(top3Star, true);
 
-  const htmlObtained = app.createBeigomaRowHtml(top, true);
-  assert.ok(htmlObtained.includes('Flame Sprout'));
-  assert.ok(htmlObtained.includes('Mount Caravan'));
-  assert.ok(htmlObtained.includes('badge-obtained'));
-  assert.ok(htmlObtained.includes('Obtained'));
+  assert.ok(html.includes('col-beigoma-rarity'));
+  assert.ok(html.includes('aria-label="Rarity: 3 of 4 stars"'));
+  assert.ok(html.includes('<span class="star-filled">★★★</span>'));
+  assert.ok(html.includes('<span class="star-empty">☆</span>'));
+  assert.ok(html.includes('badge-obtained'));
 
-  const htmlMissing = app.createBeigomaRowHtml(top, false);
-  assert.ok(htmlMissing.includes('Flame Sprout'));
-  assert.ok(htmlMissing.includes('badge-missing'));
-  assert.ok(htmlMissing.includes('Not Obtained'));
+  const top1Star = { id: 1, name: 'Plantvine', whereToObtain: 'Drop in Forest', rarity: 1 };
+  const html1 = app.createBeigomaRowHtml(top1Star, false);
+  assert.ok(html1.includes('aria-label="Rarity: 1 of 4 stars"'));
+  assert.ok(html1.includes('<span class="star-filled">★</span>'));
+  assert.ok(html1.includes('<span class="star-empty">☆☆☆</span>'));
+  assert.ok(html1.includes('badge-missing'));
 });
 
 test('createTrainerRowHtml produces correct markup for defeated and unbattled trainers', () => {

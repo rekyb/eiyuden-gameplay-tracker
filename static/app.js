@@ -792,10 +792,21 @@ function createBeigomaRowHtml(top, isObtained) {
     ? '<span class="status-badge badge-obtained">Obtained</span>'
     : '<span class="status-badge badge-missing">Not Obtained</span>';
 
+  const rarity = Math.max(1, Math.min(4, parseInt(top.rarity, 10) || 1));
+  const filledStars = '★'.repeat(rarity);
+  const emptyStars = '☆'.repeat(4 - rarity);
+
+  const rarityHtml = `
+    <span class="rarity-stars" aria-label="Rarity: ${rarity} of 4 stars" title="${rarity} of 4 stars">
+      <span class="star-filled">${filledStars}</span><span class="star-empty">${emptyStars}</span>
+    </span>
+  `;
+
   return `
     <tr class="${isObtained ? 'is-recruited' : ''}">
       <td class="col-beigoma-name">${escapeHtml(top.name)}</td>
       <td class="col-beigoma-location">${escapeHtml(top.whereToObtain || '—')}</td>
+      <td class="col-beigoma-rarity">${rarityHtml}</td>
       <td class="col-beigoma-status">${statusBadge}</td>
     </tr>
   `;
