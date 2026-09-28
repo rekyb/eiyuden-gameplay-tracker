@@ -991,6 +991,12 @@ tr.is-recruited td.col-name .hero-name {
   flex-shrink: 0;
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .icon {
   flex-shrink: 0;
   vertical-align: middle;

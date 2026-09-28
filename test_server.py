@@ -227,11 +227,11 @@ class TestServerAPI(unittest.TestCase):
         with open(corrupt_path, "wb") as f:
             f.write(b"not a valid encrypted save file at all")
 
-        # Point config to corrupt file
+        # Point config to corrupt file with force=True
         with urllib.request.urlopen(
             urllib.request.Request(
                 self._url("/api/config"),
-                data=json.dumps({"save_path": corrupt_path}).encode("utf-8"),
+                data=json.dumps({"save_path": corrupt_path, "force": True}).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
@@ -343,6 +343,27 @@ class TestServerAPI(unittest.TestCase):
                 self.assertFalse(data.get("success"))
                 self.assertTrue(data.get("cancelled"))
 
+    def test_post_save_browse_invalid_file(self):
+        """POST /api/save/browse rejects invalid save file with HTTP 400."""
+        from unittest import mock
+        invalid_file = os.path.join(self.temp_dir, "browse_fake.dat")
+        with open(invalid_file, "wb") as f:
+            f.write(b"not an eiyuden save file")
+
+        with mock.patch("server.open_native_file_browser", return_value=invalid_file):
+            req = urllib.request.Request(
+                self._url("/api/save/browse"),
+                data=b"{}",
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with self.assertRaises(urllib.error.HTTPError) as ctx:
+                urllib.request.urlopen(req)
+            self.assertEqual(ctx.exception.code, 400)
+            data = json.loads(ctx.exception.read().decode("utf-8"))
+            self.assertFalse(data.get("success"))
+            self.assertIn("error", data)
+
     def test_post_save_upload_raw_bytes(self):
         """POST /api/save/upload accepts raw binary data, saves, and returns summary."""
         with open(self.real_save_path, "rb") as f:
@@ -444,6 +465,73 @@ class TestServerAPI(unittest.TestCase):
         with urllib.request.urlopen(req) as resp:
             self.assertIn(resp.status, (200, 204))
             self.assertEqual(resp.headers.get("Access-Control-Allow-Origin"), "*")
+
+    def test_post_save_validate_valid_file(self):
+        """POST /api/save/validate returns valid=True for actual Eiyuden save file."""
+        req = urllib.request.Request(
+            self._url("/api/save/validate"),
+            data=json.dumps({"save_path": self.test_save_copy}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertTrue(data.get("valid"))
+            self.assertTrue(data.get("exists"))
+            self.assertIsNone(data.get("error"))
+            self.assertIn("summary", data)
+            self.assertGreater(len(data["summary"]["recruited_ids"]), 0)
+
+    def test_post_save_validate_invalid_file(self):
+        """POST /api/save/validate returns valid=False for non-Eiyuden file."""
+        invalid_file = os.path.join(self.temp_dir, "fake_save.dat")
+        with open(invalid_file, "wb") as f:
+            f.write(b"not an encrypted eiyuden save")
+
+        req = urllib.request.Request(
+            self._url("/api/save/validate"),
+            data=json.dumps({"save_path": invalid_file}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertFalse(data.get("valid"))
+            self.assertTrue(data.get("exists"))
+            self.assertIsNotNone(data.get("error"))
+
+    def test_post_save_validate_missing_file(self):
+        """POST /api/save/validate returns exists=False for missing file."""
+        req = urllib.request.Request(
+            self._url("/api/save/validate"),
+            data=json.dumps({"save_path": "does_not_exist_xyz.dat"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertFalse(data.get("valid"))
+            self.assertFalse(data.get("exists"))
+
+    def test_post_config_rejects_invalid_eiyuden_file(self):
+        """POST /api/config rejects setting save_path to an existing non-Eiyuden file."""
+        invalid_file = os.path.join(self.temp_dir, "corrupt_not_eiyuden.dat")
+        with open(invalid_file, "wb") as f:
+            f.write(b"random content")
+
+        req = urllib.request.Request(
+            self._url("/api/config"),
+            data=json.dumps({"save_path": invalid_file}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
+        ctx.exception.close()
 
 
 class TestConfigHelpers(unittest.TestCase):

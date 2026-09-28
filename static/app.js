@@ -799,6 +799,87 @@ function cacheDomElements() {
   dom.toastContainer = document.getElementById('toast-container');
 }
 
+/**
+ * Validates a candidate save file path against the backend API.
+ * @param {string} candidatePath
+ * @returns {Promise<{ valid: boolean, exists: boolean, error?: string, summary?: object }>}
+ */
+async function validateSavePath(candidatePath) {
+  if (!candidatePath) {
+    return { valid: false, exists: false, error: 'Path is empty' };
+  }
+  try {
+    const res = await fetch('/api/save/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ save_path: candidatePath }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return {
+        valid: false,
+        exists: false,
+        error: data.error || `Server error (${res.status})`,
+      };
+    }
+    return await res.json();
+  } catch (err) {
+    return { valid: false, exists: false, error: err.message };
+  }
+}
+
+let _validateSaveTimer = null;
+
+/**
+ * Checks whether the current input differs from the active saved path,
+ * debounces server validation, and toggles the Save Path button state.
+ */
+function updateSavePathButtonState() {
+  if (!dom.btnSavePath || !dom.configPathInput) return;
+
+  const currentVal = dom.configPathInput.value.trim();
+  const activeVal = (state.saveConfig?.save_path || '').trim();
+
+  // If empty or identical to active saved path, keep disabled
+  if (!currentVal || currentVal === activeVal) {
+    dom.btnSavePath.disabled = true;
+    clearTimeout(_validateSaveTimer);
+    setDialogStatus(dom.detectStatusHint, '');
+    return;
+  }
+
+  // Path changed: show checking and debounce validation
+  clearTimeout(_validateSaveTimer);
+  dom.btnSavePath.disabled = true;
+  setDialogStatus(dom.detectStatusHint, 'Checking save file...', 'info');
+
+  _validateSaveTimer = setTimeout(async () => {
+    const val = await validateSavePath(currentVal);
+    // Discard if input changed in the meantime
+    if (dom.configPathInput.value.trim() !== currentVal) return;
+
+    if (val.valid) {
+      dom.btnSavePath.disabled = false;
+      const count = val.summary?.recruited_ids?.length || 0;
+      const playtime = val.summary?.playtime_formatted || '';
+      const heroText = count === 1 ? '1 hero' : `${count} heroes`;
+      const playText = playtime ? `, ${playtime}` : '';
+      setDialogStatus(
+        dom.detectStatusHint,
+        `✓ Valid save file verified (${heroText}${playText})`,
+        'success'
+      );
+    } else {
+      dom.btnSavePath.disabled = true;
+      setDialogStatus(
+        dom.detectStatusHint,
+        val.error || 'Selected file is not a valid Eiyuden Chronicle save file',
+        'error'
+      );
+    }
+  }, 300);
+}
+
 
 /**
  * Registers all user interaction event listeners.
@@ -978,6 +1059,9 @@ function setupEventListeners() {
     dom.btnConfig.addEventListener('click', () => {
       setDialogStatus(dom.detectStatusHint, '');
       setDialogStatus(dom.saveActionsStatusHint, '');
+      if (dom.btnSavePath) {
+        dom.btnSavePath.disabled = true;
+      }
       if (dom.configPathInput) {
         let activePath = state.saveConfig?.save_path;
         if (!activePath) {
@@ -1013,6 +1097,15 @@ function setupEventListeners() {
     });
   }
 
+  // Config Path Input listeners: validate and update Save Path button state
+  if (dom.configPathInput) {
+    dom.configPathInput.addEventListener('input', updateSavePathButtonState);
+    dom.configPathInput.addEventListener('change', updateSavePathButtonState);
+    dom.configPathInput.addEventListener('paste', () => {
+      setTimeout(updateSavePathButtonState, 10);
+    });
+  }
+
   // Save Path Button
   if (dom.btnSavePath && dom.configPathInput) {
     dom.btnSavePath.addEventListener('click', async () => {
@@ -1023,13 +1116,15 @@ function setupEventListeners() {
       }
 
       dom.btnSavePath.disabled = true;
+      setDialogStatus(dom.detectStatusHint, 'Saving and validating path...', 'info');
+
       try {
         const res = await fetch('/api/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ save_path: newPath }),
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data.success) {
           throw new Error(data.error || 'Failed to update configuration');
@@ -1051,8 +1146,8 @@ function setupEventListeners() {
         }
         await syncSave({ silent: false });
       } catch (err) {
+        setDialogStatus(dom.detectStatusHint, err.message, 'error');
         showToast(`Error updating path: ${err.message}`, 'error');
-      } finally {
         dom.btnSavePath.disabled = false;
       }
     });
@@ -1071,7 +1166,13 @@ function setupEventListeners() {
         const detected = state.saveConfig?.detected_save_path || state.saveConfig?.detected_steam_path;
         if (detected) {
           dom.configPathInput.value = detected;
-          setDialogStatus(dom.detectStatusHint, 'Save file detected and filled above', 'success');
+          const activeVal = (state.saveConfig?.save_path || '').trim();
+          if (detected.trim() === activeVal) {
+            if (dom.btnSavePath) dom.btnSavePath.disabled = true;
+            setDialogStatus(dom.detectStatusHint, 'Save file detected (already active)', 'info');
+          } else {
+            updateSavePathButtonState();
+          }
         } else {
           setDialogStatus(
             dom.detectStatusHint,
@@ -1093,18 +1194,23 @@ function setupEventListeners() {
       dom.btnBrowseFile.disabled = true;
       const prevTitle = dom.btnBrowseFile.title;
       dom.btnBrowseFile.title = 'Browsing files...';
+      setDialogStatus(dom.detectStatusHint, '');
 
       try {
         const res = await fetch('/api/save/browse', { method: 'POST' });
-        if (!res.ok) {
-          throw new Error(`Server returned HTTP ${res.status}`);
-        }
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (data.cancelled) {
           // User closed or cancelled the file dialog
           return;
         }
-        if (data.success && data.path) {
+        if (!res.ok || !data.success) {
+          const errMsg = data.error || `Server returned HTTP ${res.status}`;
+          setDialogStatus(dom.detectStatusHint, errMsg, 'error');
+          showToast(`File rejected: ${errMsg}`, 'error');
+          return;
+        }
+
+        if (data.path) {
           if (dom.configPathInput) {
             dom.configPathInput.value = data.path;
           }
@@ -1124,14 +1230,21 @@ function setupEventListeners() {
             updateProgress();
             renderTable();
           }
+          if (dom.btnSavePath) {
+            dom.btnSavePath.disabled = true;
+          }
+          setDialogStatus(
+            dom.detectStatusHint,
+            '✓ Valid save file loaded',
+            'success'
+          );
           showToast(`Save file set to: ${data.path}`, 'success');
           if (dom.configDialog && typeof dom.configDialog.close === 'function') {
             dom.configDialog.close();
           }
-        } else if (data.error) {
-          showToast(data.error, 'error');
         }
       } catch (err) {
+        setDialogStatus(dom.detectStatusHint, `Failed to browse file: ${err.message}`, 'error');
         showToast(`Failed to browse file: ${err.message}`, 'error');
       } finally {
         dom.btnBrowseFile.disabled = false;
@@ -1284,6 +1397,8 @@ if (typeof module !== 'undefined' && module.exports) {
     syncSave,
     createBackup,
     handleFileUpload,
+    validateSavePath,
+    updateSavePathButtonState,
     init,
   };
 }

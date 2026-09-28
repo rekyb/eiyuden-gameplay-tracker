@@ -255,6 +255,62 @@ def save_config(config_data: Dict[str, Any], config_path: str = "config.json") -
         json.dump(config_data, f, indent=2)
 
 
+def validate_save_file(filepath: Optional[str]) -> Dict[str, Any]:
+    """Validate whether the given path points to a valid Eiyuden Chronicle save file.
+
+    Checks:
+    1. Path is specified and file exists on disk.
+    2. File can be decrypted using Eiyuden TripleDES key and IV.
+    3. Decrypted data contains expected Eiyuden Chronicle structures (_unitData).
+
+    Returns:
+        dict: {
+            "valid": bool,
+            "exists": bool,
+            "error": str | None,
+            "summary": dict | None,
+        }
+    """
+    if not filepath or not isinstance(filepath, (str, os.PathLike)):
+        return {"valid": False, "exists": False, "error": "No save file path provided.", "summary": None}
+
+    clean_path = str(filepath).strip()
+    if not clean_path:
+        return {"valid": False, "exists": False, "error": "Save file path is empty.", "summary": None}
+
+    try:
+        if not os.path.isfile(clean_path):
+            return {"valid": False, "exists": False, "error": f"File does not exist: {clean_path}", "summary": None}
+    except Exception as exc:
+        return {"valid": False, "exists": False, "error": f"Invalid path: {exc}", "summary": None}
+
+    try:
+        with open(clean_path, "rb") as f:
+            ciphertext = f.read()
+    except OSError as exc:
+        return {"valid": False, "exists": True, "error": f"Cannot read file: {exc}", "summary": None}
+
+    if len(ciphertext) == 0:
+        return {"valid": False, "exists": True, "error": "Save file is empty (0 bytes).", "summary": None}
+
+    try:
+        save_data = save_reader.decrypt_save(ciphertext)
+    except Exception as exc:
+        return {"valid": False, "exists": True, "error": "Not a valid Eiyuden Chronicle save file (decryption failed).", "summary": None}
+
+    if not isinstance(save_data, dict) or "_unitData" not in save_data:
+        return {"valid": False, "exists": True, "error": "File decrypted, but does not contain Eiyuden Chronicle save data.", "summary": None}
+
+    summary = save_reader.read_save_summary(clean_path)
+    return {
+        "valid": True,
+        "exists": True,
+        "error": None,
+        "summary": summary,
+    }
+
+
+
 def open_native_file_browser(initial_dir: str = "") -> str:
     """Open native OS file picker and return selected file path, or empty string if cancelled."""
     # 1. Try tkinter
@@ -503,6 +559,21 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
         content_len = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_len) if content_len > 0 else b""
 
+        if path == "/api/save/validate":
+            try:
+                payload = json.loads(body.decode("utf-8"))
+            except Exception:
+                self.send_json({"error": "Invalid JSON body", "valid": False, "exists": False}, status=400)
+                return
+
+            if not isinstance(payload, dict) or not payload.get("save_path"):
+                self.send_json({"error": "Missing 'save_path' in payload", "valid": False, "exists": False}, status=400)
+                return
+
+            result = validate_save_file(payload["save_path"])
+            self.send_json(result, status=200)
+            return
+
         if path == "/api/config":
             try:
                 payload = json.loads(body.decode("utf-8"))
@@ -519,28 +590,32 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": "Missing or invalid 'save_path'"}, status=400)
                 return
 
+            val_result = validate_save_file(new_save_path)
+            # If file exists on disk but is NOT a valid Eiyuden save file, reject unless force is true
+            if val_result["exists"] and not val_result["valid"] and not payload.get("force"):
+                self.send_json({
+                    "error": val_result["error"] or "Not a valid Eiyuden Chronicle save file",
+                    "valid": False,
+                    "exists": True,
+                }, status=400)
+                return
+
             cfg = load_config(self.server.config_path)
             cfg["save_path"] = new_save_path
             save_config(cfg, self.server.config_path)
 
             detected = detect_save_path()
-            file_exists = False
-            try:
-                if new_save_path and os.path.isfile(new_save_path):
-                    file_exists = True
-            except Exception:
-                file_exists = False
-
             response_data = {
                 "success": True,
                 "config": {
                     "save_path": new_save_path,
-                    "file_exists": file_exists,
+                    "file_exists": val_result["exists"],
+                    "valid_save": val_result["valid"],
                     "detected_save_path": detected,
                     "detected_steam_path": detected,
                 },
             }
-            if not file_exists:
+            if not val_result["exists"]:
                 response_data["warning"] = f"Save file not found at: {new_save_path}"
             self.send_json(response_data)
             return
@@ -585,6 +660,15 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 return
 
             normalized = os.path.normpath(selected_path)
+            val_result = validate_save_file(normalized)
+            if not val_result["valid"]:
+                self.send_json({
+                    "success": False,
+                    "error": val_result["error"] or "Selected file is not a valid Eiyuden Chronicle save file",
+                    "path": normalized,
+                }, status=400)
+                return
+
             cfg["save_path"] = normalized
             save_config(cfg, self.server.config_path)
 
