@@ -61,12 +61,6 @@ const dom = {
   statMoney: null,
   statHq: null,
 
-  // Heroes Progress Bar
-  progressCount: null,
-  progressText: null,
-  progressFill: null,
-  progressTrack: null,
-
   // Heroes Filter Counts & Tabs
   filterTabs: [],
   countAll: null,
@@ -80,14 +74,6 @@ const dom = {
   // Heroes Table & Empty State
   charactersTbody: null,
   emptyState: null,
-
-  // Recipes Progress
-  recipesProgressFill: null,
-  recipesProgressCount: null,
-  recipesProgressPercent: null,
-  recipesCookedCount: null,
-  recipesCookedPercent: null,
-  recipesProgressBar: null,
 
   // Recipes Filter Tabs & Search
   recipesFilterTabs: [],
@@ -281,29 +267,17 @@ function updateStats() {
 }
 
 /**
- * Updates the progress bar track, percentages, and filter tab counter badges.
+ * Updates filter tab counter badges for heroes.
  */
 function updateProgress() {
   const stats = calculateProgress(state.characters, state.recruitedIds);
-
-  if (dom.progressCount) {
-    dom.progressCount.textContent = `${stats.recruited} / ${stats.total}`;
-  }
-  if (dom.progressText) {
-    dom.progressText.textContent = `(${stats.percentageFormatted}%)`;
-  }
-  if (dom.progressFill) {
-    dom.progressFill.style.width = `${stats.percentage}%`;
-  }
-  if (dom.progressTrack) {
-    dom.progressTrack.setAttribute('aria-valuenow', String(stats.recruited));
-    dom.progressTrack.setAttribute('aria-valuemax', String(stats.total));
-  }
 
   if (dom.countAll) dom.countAll.textContent = String(stats.total);
   if (dom.countRecruited) dom.countRecruited.textContent = String(stats.recruited);
   if (dom.countMissing) dom.countMissing.textContent = String(stats.missing);
   if (dom.countMissable) dom.countMissable.textContent = String(stats.missable);
+
+  if (dom.navCountHeroes) dom.navCountHeroes.textContent = `${stats.recruited}/121`;
 }
 
 /**
@@ -463,7 +437,7 @@ function createRecipeRowHtml(recipe, isAcquired, isCooked) {
 }
 
 /**
- * Updates recipes progress bar and filter badge counts.
+ * Updates recipes filter tab counter badges and nav badge.
  */
 function updateRecipesProgress() {
   const total = state.recipes.length;
@@ -471,15 +445,6 @@ function updateRecipesProgress() {
   const cooked = state.cookedRecipeIds.size;
   const notAcquired = total - acquired;
   const notCooked = total - cooked;
-  const pctAcquired = total > 0 ? (acquired / total) * 100 : 0;
-  const pctCooked = total > 0 ? (cooked / total) * 100 : 0;
-
-  if (dom.recipesProgressFill) dom.recipesProgressFill.style.width = `${pctAcquired}%`;
-  if (dom.recipesProgressBar) dom.recipesProgressBar.setAttribute('aria-valuenow', String(acquired));
-  if (dom.recipesProgressCount) dom.recipesProgressCount.textContent = `${acquired} / ${total}`;
-  if (dom.recipesProgressPercent) dom.recipesProgressPercent.textContent = `(${pctAcquired.toFixed(1)}%)`;
-  if (dom.recipesCookedCount) dom.recipesCookedCount.textContent = `${cooked} / ${total}`;
-  if (dom.recipesCookedPercent) dom.recipesCookedPercent.textContent = `(${pctCooked.toFixed(1)}%)`;
 
   if (dom.countRecipesAll) dom.countRecipesAll.textContent = String(total);
   if (dom.countRecipesAcquired) dom.countRecipesAcquired.textContent = String(acquired);
@@ -693,12 +658,6 @@ function cacheDomElements() {
   dom.statMoney = document.getElementById('stat-money');
   dom.statHq = document.getElementById('stat-hq');
 
-  // Heroes Progress Bar
-  dom.progressCount = document.getElementById('progress-count');
-  dom.progressText = document.getElementById('progress-text');
-  dom.progressFill = document.getElementById('progress-fill');
-  dom.progressTrack = document.querySelector('.progress-track');
-
   // Heroes Filter Tabs & Counts
   dom.filterTabs = Array.from(document.querySelectorAll('#view-heroes .filter-tab'));
   dom.countAll = document.getElementById('count-all');
@@ -712,14 +671,6 @@ function cacheDomElements() {
   // Heroes Table
   dom.charactersTbody = document.getElementById('characters-tbody');
   dom.emptyState = document.getElementById('empty-state');
-
-  // Recipes Progress
-  dom.recipesProgressFill = document.getElementById('recipes-progress-fill');
-  dom.recipesProgressBar = document.getElementById('recipes-progress-bar');
-  dom.recipesProgressCount = document.getElementById('recipes-progress-count');
-  dom.recipesProgressPercent = document.getElementById('recipes-progress-percent');
-  dom.recipesCookedCount = document.getElementById('recipes-cooked-count');
-  dom.recipesCookedPercent = document.getElementById('recipes-cooked-percent');
 
   // Recipes Filter Tabs & Counts
   dom.recipesFilterTabs = Array.from(document.querySelectorAll('#recipes-filter-tabs .filter-tab'));
