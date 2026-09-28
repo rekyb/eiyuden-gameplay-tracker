@@ -1271,6 +1271,9 @@ tr.is-recruited td.col-name .hero-name {
 }
 
 .footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.78rem;
   color: var(--text-muted);
   text-decoration: none;
@@ -1282,6 +1285,11 @@ tr.is-recruited td.col-name .hero-name {
 .footer-link:hover {
   color: var(--text-secondary);
   border-bottom-color: var(--text-secondary);
+}
+
+.icon-github {
+  width: 14px;
+  height: 14px;
 }
 
 /* --- Responsive: Top Nav & Footer --- */
