@@ -1056,16 +1056,137 @@ tr.is-recruited td.col-name .hero-name {
 .col-recipe-cooked {
   width: 90px;
   text-align: center;
+  position: relative;
 }
 
-/* Cooked column header hint icon */
+/* Cooked column header hint button */
+.hint-icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 1px 3px;
+  font-size: 0.85rem;
+  line-height: 1;
+  vertical-align: middle;
+  border-radius: var(--radius-sm);
+  margin-left: 2px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.hint-icon-btn:hover,
+.hint-icon-btn:focus-visible {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+  outline: none;
+}
+
 .hint-icon {
   display: inline-block;
   font-size: 0.85rem;
+}
+
+/* Cooked Popover Tooltip */
+.cooked-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 310px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--text-primary);
+  white-space: normal;
+}
+
+.cooked-popover[hidden] {
+  display: none !important;
+}
+
+.cooked-popover-arrow {
+  position: absolute;
+  top: -6px;
+  right: 22px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--bg-card);
+  border-left: 1px solid var(--border-medium);
+  border-top: 1px solid var(--border-medium);
+  transform: rotate(45deg);
+}
+
+.cooked-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.cooked-popover-title {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cooked-popover-close {
+  background: none;
+  border: none;
   color: var(--text-muted);
-  cursor: help;
-  vertical-align: middle;
-  margin-left: 2px;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease;
+}
+
+.cooked-popover-close:hover {
+  color: var(--text-primary);
+}
+
+.cooked-popover-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  line-height: 1.45;
+}
+
+.cooked-popover-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.cooked-popover-text em {
+  color: var(--text-primary);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .cooked-popover {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+    right: auto;
+  }
+  .cooked-popover-arrow {
+    display: none;
+  }
 }
 
 /* Cooked Checkbox */

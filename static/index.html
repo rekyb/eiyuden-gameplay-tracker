@@ -96,11 +96,6 @@
     <!-- VIEW: RECIPES TRACKER -->
     <div id="view-recipes" class="view-panel" hidden>
 
-      <!-- Guidance Hint for Manual Cooked Tracking -->
-      <p class="recipes-hint">
-        Tip: Check off dishes manually in the <strong>Cooked</strong> column as you prepare them at Kurtz's restaurant to track your progress toward the <em>Gourmand Hero</em> Steam achievement.
-      </p>
-
       <!-- Recipes Controls: Filter Tabs & Search -->
       <nav class="toolbar" aria-label="Recipe filters and search">
         <div class="filter-group" role="tablist" id="recipes-filter-tabs" aria-label="Filter recipe status">
@@ -138,8 +133,19 @@
                 <th scope="col" class="col-recipe-name">Name</th>
                 <th scope="col" class="col-recipe-loc">How to Obtain</th>
                 <th scope="col" class="col-recipe-status">Status</th>
-                <th scope="col" class="col-recipe-cooked" title="Click checkbox manually when you have prepared this dish at Kurtz's restaurant for the Gourmand Hero achievement.">
-                  Cooked <span class="hint-icon" aria-hidden="true">ⓘ</span>
+                <th scope="col" class="col-recipe-cooked">
+                  <span>Cooked</span>
+                  <button type="button" id="btn-cooked-hint" class="hint-icon-btn" aria-label="Cooked tracking information" title="Click for info">
+                    <span class="hint-icon" aria-hidden="true">ⓘ</span>
+                  </button>
+                  <div id="cooked-popover" class="cooked-popover" role="dialog" aria-label="Cooked dishes guidance" hidden>
+                    <div class="cooked-popover-arrow"></div>
+                    <div class="cooked-popover-header">
+                      <span class="cooked-popover-title">Cooked Tracking</span>
+                      <button type="button" id="btn-close-cooked-popover" class="cooked-popover-close" aria-label="Close tooltip">&times;</button>
+                    </div>
+                    <p class="cooked-popover-text">Tip: Check off dishes manually in the <strong>Cooked</strong> column as you prepare them at Kurtz's restaurant to track your progress toward the <em>Gourmand Hero</em> Steam achievement.</p>
+                  </div>
                 </th>
               </tr>
             </thead>

@@ -87,6 +87,9 @@ const dom = {
   // Recipes Table & Empty State
   recipesTbody: null,
   recipesEmptyState: null,
+  btnCookedHint: null,
+  cookedPopover: null,
+  btnCloseCookedPopover: null,
 
   // Navigation Badges
   navCountHeroes: null,
@@ -685,6 +688,9 @@ function cacheDomElements() {
   // Recipes Table
   dom.recipesTbody = document.getElementById('recipes-tbody');
   dom.recipesEmptyState = document.getElementById('recipes-empty-state');
+  dom.btnCookedHint = document.getElementById('btn-cooked-hint');
+  dom.cookedPopover = document.getElementById('cooked-popover');
+  dom.btnCloseCookedPopover = document.getElementById('btn-close-cooked-popover');
 
   // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
@@ -799,6 +805,52 @@ function setupEventListeners() {
       updateRecipesProgress();
     });
   }
+
+  // Cooked Column Hint Tooltip Popover
+  if (dom.btnCookedHint && dom.cookedPopover) {
+    dom.btnCookedHint.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = dom.cookedPopover.hasAttribute('hidden');
+      if (isHidden) {
+        dom.cookedPopover.removeAttribute('hidden');
+        dom.btnCookedHint.setAttribute('aria-expanded', 'true');
+      } else {
+        dom.cookedPopover.setAttribute('hidden', '');
+        dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  if (dom.btnCloseCookedPopover && dom.cookedPopover) {
+    dom.btnCloseCookedPopover.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dom.cookedPopover.setAttribute('hidden', '');
+      if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  if (dom.cookedPopover) {
+    dom.cookedPopover.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // Close Cooked popover on outside click or Escape key
+  document.addEventListener('click', () => {
+    if (dom.cookedPopover && !dom.cookedPopover.hasAttribute('hidden')) {
+      dom.cookedPopover.setAttribute('hidden', '');
+      if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (dom.cookedPopover && !dom.cookedPopover.hasAttribute('hidden')) {
+        dom.cookedPopover.setAttribute('hidden', '');
+        if (dom.btnCookedHint) dom.btnCookedHint.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
 
   // Instant Search Input
   if (dom.searchInput) {
