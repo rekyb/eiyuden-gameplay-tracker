@@ -981,7 +981,12 @@ tr.is-recruited td.col-name .hero-name {
 
 /* --- Settings Button with Gear Icon --- */
 .btn-settings {
-  gap: 0.45rem;
+  padding: 0.45rem;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon {
@@ -990,8 +995,8 @@ tr.is-recruited td.col-name .hero-name {
 }
 
 .icon-gear {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 /* --- Save Actions Group (inside Settings dialog) --- */
