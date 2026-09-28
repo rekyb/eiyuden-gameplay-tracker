@@ -10,7 +10,6 @@ from save_reader import (
     decrypt_save,
     encrypt_save,
     read_save_summary,
-    backup_save,
 )
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "UserData0.dat")
@@ -129,23 +128,6 @@ class TestSaveReader(unittest.TestCase):
         self.assertEqual(summary.get("population"), 0)
         self.assertEqual(summary.get("playtime_seconds"), 0.0)
 
-    def test_backup_save_creates_timestamped_copy(self):
-        """Verify backup_save writes exact copy with timestamp and preserves original."""
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            backup_path = backup_save(FIXTURE_PATH, backup_dir=tmp_dir)
-
-            self.assertTrue(os.path.isfile(backup_path))
-            self.assertTrue(backup_path.startswith(tmp_dir))
-
-            # Validate filename format: UserData0_backup_YYYYMMDD_HHMMSS.dat
-            backup_filename = os.path.basename(backup_path)
-            pattern = r"^UserData0_backup_\d{8}_\d{6}(_\d+)?\.dat$"
-            self.assertRegex(backup_filename, pattern)
-
-            # Compare bytes
-            with open(backup_path, "rb") as bf:
-                backup_bytes = bf.read()
-            self.assertEqual(backup_bytes, self.fixture_bytes)
 
     def test_read_save_summary_none_and_empty_path(self):
         """Verify read_save_summary handles None and empty string paths safely."""
@@ -177,13 +159,6 @@ class TestSaveReader(unittest.TestCase):
             if os.path.exists(corrupt_path):
                 os.remove(corrupt_path)
 
-    def test_backup_save_none_and_empty_path(self):
-        """Verify backup_save raises FileNotFoundError for None or empty paths without TypeError."""
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with self.assertRaises(FileNotFoundError):
-                backup_save(None, backup_dir=tmp_dir)
-            with self.assertRaises(FileNotFoundError):
-                backup_save("", backup_dir=tmp_dir)
 
 
 if __name__ == "__main__":

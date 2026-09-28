@@ -258,45 +258,6 @@ class TestServerAPI(unittest.TestCase):
         ) as resp:
             self.assertEqual(resp.status, 200)
 
-    def test_post_save_backup(self):
-        """POST /api/save/backup creates backup file and returns path."""
-        req = urllib.request.Request(
-            self._url("/api/save/backup"),
-            data=b"{}",
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req) as resp:
-            self.assertEqual(resp.status, 200)
-            data = json.loads(resp.read().decode("utf-8"))
-            self.assertTrue(data.get("success"))
-            self.assertIn("backup_file", data)
-            backup_file = data["backup_file"]
-            self.assertTrue(os.path.isfile(backup_file))
-
-    def test_post_save_backup_missing_file(self):
-        """POST /api/save/backup returns 404 if save file does not exist."""
-        missing_file = os.path.join(self.temp_dir, "nonexistent_backup.dat")
-        with urllib.request.urlopen(
-            urllib.request.Request(
-                self._url("/api/config"),
-                data=json.dumps({"save_path": missing_file}).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-        ) as resp:
-            self.assertEqual(resp.status, 200)
-
-        req = urllib.request.Request(
-            self._url("/api/save/backup"),
-            data=b"{}",
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with self.assertRaises(urllib.error.HTTPError) as ctx:
-            urllib.request.urlopen(req)
-        self.assertEqual(ctx.exception.code, 404)
-        ctx.exception.close()
 
         # Reset config
         with urllib.request.urlopen(

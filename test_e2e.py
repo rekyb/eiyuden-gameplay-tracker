@@ -78,28 +78,6 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             self.assertGreater(status["town_level"], 0)
             self.assertGreater(status["population"], 0)
 
-    def test_e2e_backup_creation(self):
-        req = urllib.request.Request(
-            self._url("/api/save/backup"),
-            data=b"{}",
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req) as resp:
-            self.assertEqual(resp.status, 200)
-            data = json.loads(resp.read().decode("utf-8"))
-            self.assertTrue(data["success"])
-            backup_file = data["backup_file"]
-            self.assertTrue(os.path.isfile(backup_file))
-            # Verify exact byte equality
-            with open(self.save_fixture, "rb") as f1, open(backup_file, "rb") as f2:
-                self.assertEqual(f1.read(), f2.read())
-            # Clean up backup
-            try:
-                os.remove(backup_file)
-            except OSError:
-                pass
-
     def test_e2e_recipes_api_and_assets(self):
         """93 recipes served, HTML has recipes view and navigation, footer attribution."""
         # 93 recipes served

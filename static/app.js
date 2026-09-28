@@ -39,7 +39,6 @@ const state = {
 const dom = {
   // Action Buttons
   btnSync: null,
-  btnBackup: null,
   btnConfig: null,
   btnCloseConfig: null,
   btnBrowseFile: null,
@@ -99,7 +98,6 @@ const dom = {
   configDialog: null,
   configPathInput: null,
   detectStatusHint: null,
-  saveActionsStatusHint: null,
   dropZone: null,
   fileInput: null,
 
@@ -631,38 +629,6 @@ async function syncSave({ silent = false, statusTarget = null } = {}) {
 }
 
 
-/**
- * Creates a timestamped backup of the current save file.
- */
-async function createBackup() {
-  if (!dom.btnBackup) return;
-  dom.btnBackup.disabled = true;
-  setDialogStatus(dom.saveActionsStatusHint, '');
-
-  try {
-    const res = await fetch('/api/save/backup', { method: 'POST' });
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to create backup');
-    }
-
-    const fileName = (data.backup_file || '').split(/[/\\]/).pop();
-    if (dom.configDialog && dom.configDialog.open) {
-      setDialogStatus(dom.saveActionsStatusHint, `Backup created: ${fileName}`, 'success');
-    } else {
-      showToast(`Backup created: ${fileName}`, 'success');
-    }
-  } catch (err) {
-    if (dom.configDialog && dom.configDialog.open) {
-      setDialogStatus(dom.saveActionsStatusHint, `Backup failed: ${err.message}`, 'error');
-    } else {
-      showToast(`Backup failed: ${err.message}`, 'error');
-    }
-  } finally {
-    dom.btnBackup.disabled = false;
-  }
-}
 
 /**
  * Uploads a local save file (.dat) to the backend.
@@ -732,7 +698,6 @@ async function handleFileUpload(file) {
  */
 function cacheDomElements() {
   dom.btnSync = document.getElementById('btn-sync');
-  dom.btnBackup = document.getElementById('btn-backup');
   dom.btnConfig = document.getElementById('btn-config');
   dom.btnCloseConfig = document.getElementById('btn-close-config');
   dom.btnBrowseFile = document.getElementById('btn-browse-file');
@@ -792,7 +757,6 @@ function cacheDomElements() {
   dom.configDialog = document.getElementById('config-dialog');
   dom.configPathInput = document.getElementById('config-path-input');
   dom.detectStatusHint = document.getElementById('detect-status-hint');
-  dom.saveActionsStatusHint = document.getElementById('save-actions-status-hint');
   dom.dropZone = document.getElementById('drop-zone');
   dom.fileInput = document.getElementById('file-input');
 
@@ -889,31 +853,33 @@ function setupEventListeners() {
   if (dom.btnSync) {
     dom.btnSync.addEventListener('click', async () => {
       dom.btnSync.disabled = true;
-      const prevText = dom.btnSync.textContent;
-      dom.btnSync.textContent = 'Syncing...';
-      setDialogStatus(dom.saveActionsStatusHint, '');
+      dom.btnSync.classList.add('is-syncing');
+      const textSpan = dom.btnSync.querySelector('.btn-text');
+      const prevText = textSpan ? textSpan.textContent : dom.btnSync.textContent;
+      if (textSpan) {
+        textSpan.textContent = 'Syncing...';
+      } else {
+        dom.btnSync.textContent = 'Syncing...';
+      }
+
       try {
         const cfgRes = await fetch('/api/config');
         if (cfgRes.ok) {
           state.saveConfig = await cfgRes.json();
         }
-        const isDialogOpen = Boolean(dom.configDialog && dom.configDialog.open);
-        await syncSave({
-          silent: isDialogOpen,
-          statusTarget: isDialogOpen ? dom.saveActionsStatusHint : null,
-        });
+        await syncSave({ silent: false });
       } catch (err) {
         showToast(`Sync error: ${err.message}`, 'error');
       } finally {
         dom.btnSync.disabled = false;
-        dom.btnSync.textContent = prevText;
+        dom.btnSync.classList.remove('is-syncing');
+        if (textSpan) {
+          textSpan.textContent = prevText;
+        } else {
+          dom.btnSync.textContent = prevText;
+        }
       }
     });
-  }
-
-  // Backup Save Button
-  if (dom.btnBackup) {
-    dom.btnBackup.addEventListener('click', createBackup);
   }
 
   // Top Navigation Tab Switching
@@ -1061,7 +1027,6 @@ function setupEventListeners() {
   if (dom.btnConfig && dom.configDialog) {
     dom.btnConfig.addEventListener('click', () => {
       setDialogStatus(dom.detectStatusHint, '');
-      setDialogStatus(dom.saveActionsStatusHint, '');
       if (dom.btnSavePath) {
         dom.btnSavePath.disabled = true;
       }
@@ -1403,7 +1368,6 @@ if (typeof module !== 'undefined' && module.exports) {
     switchView,
     scheduleCookedSync,
     syncSave,
-    createBackup,
     handleFileUpload,
     validateSavePath,
     updateSavePathButtonState,

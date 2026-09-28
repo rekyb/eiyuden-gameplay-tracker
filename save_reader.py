@@ -1,15 +1,12 @@
 """Eiyuden Chronicle: Hundred Heroes Save File Reader & Decryption Core.
 
-Decrypts TripleDES-CBC encrypted save files (UserData0.dat), parses summary
-information (recruited characters, playtime, money, town stats), and handles
-timestamped backups.
+Decrypts TripleDES-CBC encrypted save files (UserData0.dat) and parses summary
+information (recruited characters, playtime, money, town stats).
 """
 
 import os
 import json
-import shutil
-import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 try:
     from cryptography.hazmat.decrepit.ciphers.algorithms import TripleDES
@@ -210,40 +207,3 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
     }
 
 
-def backup_save(filepath: Optional[str], backup_dir: str = "backups") -> str:
-    """Create a timestamped, byte-exact copy of the save file.
-
-    Args:
-        filepath: Path to the existing save file.
-        backup_dir: Directory where the backup will be stored (defaults to 'backups').
-
-    Returns:
-        Destination path of the created backup file.
-
-    Raises:
-        FileNotFoundError: If the source save file does not exist or filepath is invalid.
-    """
-    if not filepath or not isinstance(filepath, (str, os.PathLike)):
-        raise FileNotFoundError("Source save file path is not specified or invalid.")
-
-    try:
-        if not os.path.isfile(filepath):
-            raise FileNotFoundError(f"Source save file not found: {filepath}")
-    except TypeError:
-        raise FileNotFoundError(f"Source save file path is invalid: {filepath}")
-
-    os.makedirs(backup_dir, exist_ok=True)
-
-    base, ext = os.path.splitext(os.path.basename(filepath))
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    dest_name = f"{base}_backup_{timestamp}{ext}"
-    dest_path = os.path.join(backup_dir, dest_name)
-
-    counter = 1
-    while os.path.exists(dest_path):
-        dest_name = f"{base}_backup_{timestamp}_{counter}{ext}"
-        dest_path = os.path.join(backup_dir, dest_name)
-        counter += 1
-
-    shutil.copy2(filepath, dest_path)
-    return dest_path

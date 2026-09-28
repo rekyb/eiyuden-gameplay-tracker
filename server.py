@@ -680,32 +680,6 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        if path == "/api/save/backup":
-            cfg = load_config(self.server.config_path)
-            save_path = cfg.get("save_path", "UserData0.dat")
-
-            file_exists = False
-            try:
-                if save_path and os.path.isfile(save_path):
-                    file_exists = True
-            except Exception:
-                file_exists = False
-
-            if not file_exists:
-                self.send_json(
-                    {"error": f"Save file does not exist at '{save_path}'"},
-                    status=404,
-                )
-                return
-
-            try:
-                base_dir = os.path.dirname(os.path.abspath(self.server.config_path))
-                backup_dir = os.path.join(base_dir, "backups")
-                dest = save_reader.backup_save(save_path, backup_dir=backup_dir)
-                self.send_json({"success": True, "backup_file": dest})
-            except Exception as exc:
-                self.send_json({"error": str(exc)}, status=500)
-            return
 
         if path == "/api/save/upload":
             content_type = self.headers.get("Content-Type", "")
