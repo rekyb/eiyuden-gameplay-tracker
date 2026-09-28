@@ -1,30 +1,46 @@
-import os
-import re
 import hashlib
+import os
 import tempfile
 import unittest
 
-from save_reader import (
+from src.tracker.core.save_reader import (
     KEY,
     IV,
     decrypt_save,
     encrypt_save,
+    extract_save_data,
     read_save_summary,
+    validate_save_file,
 )
+from tests.fixtures.generator import create_synthetic_save
 
-FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "UserData0.dat")
 EXPECTED_KEY = bytes.fromhex("b3ba76ead29507bad9e68bab87b6e920fe5193bdce92a870")
 EXPECTED_IV = bytes.fromhex("2f6e9693c9779505")
 
 
 class TestSaveReader(unittest.TestCase):
     def setUp(self):
-        self.assertTrue(
-            os.path.exists(FIXTURE_PATH),
-            f"Fixture save file not found: {FIXTURE_PATH}",
+        self.temp_file = tempfile.NamedTemporaryFile(suffix=".dat", delete=False)
+        self.fixture_path = self.temp_file.name
+        self.fixture_bytes = create_synthetic_save(
+            hero_ids=[10, 20, 150],
+            recipe_item_ids=[8000, 8015, 8026],
+            playtime=3661.0,
+            money=75000,
+            town_level=3,
+            population=60,
+            protagonist_id=10,
+            save_timestamp="2026-09-28T12:00:00",
         )
-        with open(FIXTURE_PATH, "rb") as f:
-            self.fixture_bytes = f.read()
+        self.temp_file.write(self.fixture_bytes)
+        self.temp_file.close()
+
+    def tearDown(self):
+        if os.path.exists(self.fixture_path):
+            try:
+                os.remove(self.fixture_path)
+            except OSError:
+                pass
 
     def test_constants(self):
         """Verify KEY and IV match the game's static TripleDES credentials."""
@@ -32,7 +48,7 @@ class TestSaveReader(unittest.TestCase):
         self.assertEqual(IV, EXPECTED_IV)
 
     def test_decrypt_save_fixture(self):
-        """Verify decrypting UserData0.dat returns a valid dict with recruited units."""
+        """Verify decrypting synthetic save returns a valid dict with recruited units."""
         data = decrypt_save(self.fixture_bytes)
         self.assertIsInstance(data, dict)
         self.assertIn("_unitData", data)
@@ -44,11 +60,11 @@ class TestSaveReader(unittest.TestCase):
 
     def test_decrypt_save_invalid_data(self):
         """Verify decrypting corrupted or invalid ciphertext raises ValueError."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             decrypt_save(b"corrupted_invalid_data_not_3des")
 
     def test_roundtrip_encrypt_decrypt(self):
-        """Verify synthetic payload roundtrips through encrypt_save and decrypt_save."""
+        """Verify payload roundtrips through encrypt_save and decrypt_save."""
         sample_payload = {
             "test_key": "test_value",
             "nested": {"count": 42, "items": [1, 2, 3]},
@@ -57,9 +73,22 @@ class TestSaveReader(unittest.TestCase):
         decrypted = decrypt_save(ciphertext)
         self.assertEqual(decrypted, sample_payload)
 
+    def test_extract_save_data(self):
+        """Verify extract_save_data deserializes valid decrypted plaintext."""
+        from src.tracker.core.crypto import decrypt_save_bytes
+        plaintext = decrypt_save_bytes(self.fixture_bytes)
+        parsed = extract_save_data(plaintext)
+        self.assertIsInstance(parsed, dict)
+        self.assertIn("_unitData", parsed)
+
+    def test_extract_save_data_invalid_json(self):
+        """Verify extract_save_data raises ValueError on malformed plaintext."""
+        with self.assertRaises(ValueError):
+            extract_save_data(b"not valid json {")
+
     def test_read_save_summary_fixture(self):
-        """Verify read_save_summary extracts accurate stats from UserData0.dat."""
-        summary = read_save_summary(FIXTURE_PATH)
+        """Verify read_save_summary extracts accurate stats from synthetic save."""
+        summary = read_save_summary(self.fixture_path)
         self.assertIsInstance(summary, dict)
 
         # Check file existence flag
@@ -92,24 +121,26 @@ class TestSaveReader(unittest.TestCase):
     def test_read_save_summary_non_destructive(self):
         """Verify read_save_summary does not mutate the source save file."""
         sha_before = hashlib.sha256(self.fixture_bytes).hexdigest()
-        _ = read_save_summary(FIXTURE_PATH)
-        with open(FIXTURE_PATH, "rb") as f:
+        _ = read_save_summary(self.fixture_path)
+        with open(self.fixture_path, "rb") as f:
             sha_after = hashlib.sha256(f.read()).hexdigest()
         self.assertEqual(sha_before, sha_after)
 
     def test_read_save_summary_extracts_recipes(self):
         """Verify read_save_summary extracts acquired_recipe_ids from save fixture."""
-        summary = read_save_summary(FIXTURE_PATH)
+        summary = read_save_summary(self.fixture_path)
         self.assertIn("acquired_recipe_ids", summary)
         self.assertIsInstance(summary["acquired_recipe_ids"], list)
         self.assertIn("acquired_recipe_count", summary)
-        self.assertEqual(summary["acquired_recipe_count"], len(summary["acquired_recipe_ids"]))
+        self.assertEqual(
+            summary["acquired_recipe_count"], len(summary["acquired_recipe_ids"])
+        )
         self.assertGreater(len(summary["acquired_recipe_ids"]), 0)
         # All extracted IDs must be in 3000..3092 range
         for rid in summary["acquired_recipe_ids"]:
             self.assertIsInstance(rid, int)
             self.assertTrue(3000 <= rid <= 3092)
-        # Verify starter recipe (e.g. 3000 Poached Egg) is present
+        # Verify starter recipe (3000 Poached Egg) is present
         self.assertIn(3000, summary["acquired_recipe_ids"])
 
     def test_read_save_summary_nonexistent_file(self):
@@ -127,7 +158,6 @@ class TestSaveReader(unittest.TestCase):
         self.assertEqual(summary.get("town_level"), 0)
         self.assertEqual(summary.get("population"), 0)
         self.assertEqual(summary.get("playtime_seconds"), 0.0)
-
 
     def test_read_save_summary_none_and_empty_path(self):
         """Verify read_save_summary handles None and empty string paths safely."""
@@ -159,6 +189,32 @@ class TestSaveReader(unittest.TestCase):
             if os.path.exists(corrupt_path):
                 os.remove(corrupt_path)
 
+    def test_validate_save_file_valid(self):
+        """Verify validate_save_file returns True for valid save file."""
+        self.assertTrue(validate_save_file(self.fixture_path))
+
+    def test_validate_save_file_invalid(self):
+        """Verify validate_save_file returns False for missing, empty, or corrupt files."""
+        self.assertFalse(validate_save_file(None))
+        self.assertFalse(validate_save_file(""))
+        self.assertFalse(validate_save_file("nonexistent_save_file.dat"))
+
+        with tempfile.NamedTemporaryFile(suffix=".dat", delete=False) as tf:
+            tf.write(b"corrupted bytes not valid 3des")
+            corrupt_path = tf.name
+        try:
+            self.assertFalse(validate_save_file(corrupt_path))
+        finally:
+            if os.path.exists(corrupt_path):
+                os.remove(corrupt_path)
+
+        with tempfile.NamedTemporaryFile(suffix=".dat", delete=False) as tf:
+            empty_path = tf.name
+        try:
+            self.assertFalse(validate_save_file(empty_path))
+        finally:
+            if os.path.exists(empty_path):
+                os.remove(empty_path)
 
 
 if __name__ == "__main__":

@@ -1,23 +1,20 @@
 """Eiyuden Chronicle: Hundred Heroes Save File Reader & Decryption Core.
 
-Decrypts TripleDES-CBC encrypted save files (UserData0.dat) and parses summary
-information (recruited characters, playtime, money, town stats).
+Provides save file reading, summary extraction, and validation routines
+using the core TripleDES-CBC cryptography module.
 """
 
-import os
 import json
-from typing import Dict, Any, List, Optional
+import os
+from typing import Any, Dict, List, Optional
 
-try:
-    from cryptography.hazmat.decrepit.ciphers.algorithms import TripleDES
-except ImportError:  # pragma: no cover - fallback for older cryptography versions
-    from cryptography.hazmat.primitives.ciphers.algorithms import TripleDES
-
-from cryptography.hazmat.primitives.ciphers import Cipher, modes
-from cryptography.hazmat.primitives import padding
-
-KEY = bytes.fromhex("b3ba76ead29507bad9e68bab87b6e920fe5193bdce92a870")
-IV = bytes.fromhex("2f6e9693c9779505")
+from src.tracker.core.crypto import (
+    KEY,
+    IV,
+    decrypt_save_bytes,
+    encrypt_save_dict,
+    is_valid_magic,
+)
 
 PROTAGONIST_NAMES: Dict[int, str] = {
     10: "Nowa",
@@ -37,19 +34,13 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
 
     Raises:
         ValueError: If decryption or JSON deserialization fails.
+        TypeError: If data is not bytes or bytearray.
     """
-    if not isinstance(data, (bytes, bytearray)):
-        raise TypeError("Encrypted data must be bytes or bytearray")
-
     try:
-        cipher = Cipher(TripleDES(KEY), modes.CBC(IV))
-        decryptor = cipher.decryptor()
-        padded_data = decryptor.update(data) + decryptor.finalize()
-
-        unpadder = padding.PKCS7(64).unpadder()
-        plaintext = unpadder.update(padded_data) + unpadder.finalize()
-
+        plaintext = decrypt_save_bytes(data)
         return json.loads(plaintext.decode("utf-8"))
+    except (TypeError, ValueError):
+        raise
     except Exception as exc:
         raise ValueError(f"Failed to decrypt save data: {exc}") from exc
 
@@ -63,13 +54,25 @@ def encrypt_save(data: Dict[str, Any]) -> bytes:
     Returns:
         Encrypted ciphertext bytes.
     """
-    plaintext = json.dumps(data).encode("utf-8")
-    padder = padding.PKCS7(64).padder()
-    padded_data = padder.update(plaintext) + padder.finalize()
+    return encrypt_save_dict(data)
 
-    cipher = Cipher(TripleDES(KEY), modes.CBC(IV))
-    encryptor = cipher.encryptor()
-    return encryptor.update(padded_data) + encryptor.finalize()
+
+def extract_save_data(decrypted_bytes: bytes) -> Dict[str, Any]:
+    """Parse decrypted save bytes into a Python dictionary.
+
+    Args:
+        decrypted_bytes: Decrypted plaintext bytes.
+
+    Returns:
+        Decoded dictionary.
+
+    Raises:
+        ValueError: If JSON deserialization fails.
+    """
+    try:
+        return json.loads(decrypted_bytes.decode("utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Failed to parse decrypted save data: {exc}") from exc
 
 
 def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
@@ -134,9 +137,19 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
     raw_units = save_data.get("_unitData", {}).get("_units", [])
     recruited_ids: List[int] = []
     for u in raw_units:
-        uid = u.get("_id")
-        if isinstance(uid, int):
-            recruited_ids.append(uid)
+        if isinstance(u, dict):
+            uid = u.get("_id")
+            if isinstance(uid, int):
+                recruited_ids.append(uid)
+
+    if not recruited_ids and "UserData" in save_data:
+        raw_units = save_data.get("UserData", {}).get("UnitData", [])
+        if isinstance(raw_units, list):
+            for u in raw_units:
+                if isinstance(u, dict):
+                    uid = u.get("UnitId") or u.get("_id") or u.get("id")
+                    if isinstance(uid, int):
+                        recruited_ids.append(uid)
 
     # Recipe & Restaurant Dishes extraction
     acquired_recipe_ids_set = set()
@@ -165,10 +178,36 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
                     if 3000 <= dish_id <= 3092:
                         acquired_recipe_ids_set.add(dish_id)
 
+    # 3. Fallback from UserData container
+    user_data = save_data.get("UserData", {})
+    if isinstance(user_data, dict):
+        menu_list = user_data.get("Restaurant", {}).get("MenuList", [])
+        if isinstance(menu_list, list):
+            for m in menu_list:
+                if isinstance(m, int) and 3000 <= m <= 3092:
+                    acquired_recipe_ids_set.add(m)
+        inv = user_data.get("Inventory", [])
+        if isinstance(inv, list):
+            for item in inv:
+                if isinstance(item, dict):
+                    iid = item.get("ItemId")
+                    cnt = item.get("Count", 0)
+                    if isinstance(iid, int) and 8000 <= iid <= 8201 and cnt > 0:
+                        dish_id = 3000 + (iid % 1000)
+                        if 3000 <= dish_id <= 3092:
+                            acquired_recipe_ids_set.add(dish_id)
+
     acquired_recipe_ids = sorted(list(acquired_recipe_ids_set))
 
     # Playtime
-    seconds = float(save_data.get("_seconds", 0.0))
+    raw_seconds = save_data.get("_seconds")
+    if raw_seconds is None and isinstance(user_data, dict):
+        raw_seconds = user_data.get("PlayTime", 0.0)
+    try:
+        seconds = float(raw_seconds or 0.0)
+    except (ValueError, TypeError):
+        seconds = 0.0
+
     h = int(seconds // 3600)
     m = int((seconds % 3600) // 60)
     s = int(seconds % 60)
@@ -176,14 +215,40 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
 
     # Headquarters / Fortress Town stats
     ft = save_data.get("_fortressTown", {})
-    town_level = int(ft.get("_fortressTownLevel", 0))
-    population = int(ft.get("_population", 0))
+    town_level_val = ft.get("_fortressTownLevel")
+    if town_level_val is None and isinstance(user_data, dict):
+        town_level_val = user_data.get("TownLevel", 0)
+    try:
+        town_level = int(town_level_val or 0)
+    except (ValueError, TypeError):
+        town_level = 0
+
+    pop_val = ft.get("_population")
+    if pop_val is None and isinstance(user_data, dict):
+        pop_val = user_data.get("Population", 0)
+    try:
+        population = int(pop_val or 0)
+    except (ValueError, TypeError):
+        population = 0
 
     # Money / Baqua
-    money = int(save_data.get("_money", 0))
+    money_val = save_data.get("_money")
+    if money_val is None and isinstance(user_data, dict):
+        money_val = user_data.get("Money", 0)
+    try:
+        money = int(money_val or 0)
+    except (ValueError, TypeError):
+        money = 0
 
     # Protagonist
-    protagonist_id = int(save_data.get("_personalUnitId", 0))
+    protagonist_id_val = save_data.get("_personalUnitId")
+    if protagonist_id_val is None and isinstance(user_data, dict):
+        protagonist_id_val = user_data.get("Protagonist", 0)
+    try:
+        protagonist_id = int(protagonist_id_val or 0)
+    except (ValueError, TypeError):
+        protagonist_id = 0
+
     protagonist_name = PROTAGONIST_NAMES.get(
         protagonist_id, f"Hero_{protagonist_id}" if protagonist_id else ""
     )
@@ -207,3 +272,35 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
     }
 
 
+def validate_save_file(save_path: Optional[str]) -> bool:
+    """Validate whether the given path points to a valid Eiyuden Chronicle save file.
+
+    Args:
+        save_path: Path to the save file.
+
+    Returns:
+        bool: True if file exists and contains valid decryptable save data, False otherwise.
+    """
+    if not save_path or not isinstance(save_path, (str, os.PathLike)):
+        return False
+
+    clean_path = str(save_path).strip()
+    if not clean_path:
+        return False
+
+    try:
+        if not os.path.isfile(clean_path):
+            return False
+        with open(clean_path, "rb") as f:
+            ciphertext = f.read()
+        if len(ciphertext) == 0:
+            return False
+        plaintext = decrypt_save_bytes(ciphertext)
+        if not is_valid_magic(plaintext):
+            return False
+        save_data = json.loads(plaintext.decode("utf-8"))
+        if not isinstance(save_data, dict):
+            return False
+        return "_unitData" in save_data or "UserData" in save_data
+    except Exception:
+        return False

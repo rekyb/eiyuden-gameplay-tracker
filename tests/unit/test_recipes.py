@@ -1,8 +1,11 @@
 import json
 import os
+import tempfile
 import unittest
+from pathlib import Path
 
-RECIPES_JSON_PATH = os.path.join(os.path.dirname(__file__), "recipes.json")
+from src.tracker.core.models import DATA_DIR, load_recipes
+
 EXPECTED_TOTAL_RECIPES = 93
 VALID_CATEGORIES = {"Appetizer", "Main", "Dessert"}
 REQUIRED_KEYS = {"id", "name", "category", "location", "howToObtain", "recipeItemId"}
@@ -11,12 +14,12 @@ STARTER_IDS = set(range(3000, 3008))
 
 class TestRecipesDatabase(unittest.TestCase):
     def setUp(self):
+        recipes_path = DATA_DIR / "recipes.json"
         self.assertTrue(
-            os.path.exists(RECIPES_JSON_PATH),
-            f"Database file not found: {RECIPES_JSON_PATH}",
+            recipes_path.exists(),
+            f"Database file not found: {recipes_path}",
         )
-        with open(RECIPES_JSON_PATH, "r", encoding="utf-8") as f:
-            self.recipes = json.load(f)
+        self.recipes = load_recipes()
 
     def test_json_structure_and_count(self):
         """Verify the database is a list with exactly 93 entries."""
@@ -160,6 +163,18 @@ class TestRecipesDatabase(unittest.TestCase):
         self.assertEqual(recipe_map[3092]["category"], "Dessert")
         self.assertEqual(recipe_map[3092]["recipeItemId"], 8092)
         self.assertIn("Cooking Battle 16", recipe_map[3092]["location"])
+
+    def test_load_recipes_custom_directory(self):
+        """Verify load_recipes accepts a custom data_dir path."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sample_data = [{"id": 3000, "name": "TestDish", "category": "Appetizer", "location": "TestLoc", "howToObtain": "Test obtain steps", "recipeItemId": 0}]
+            file_path = Path(tmpdir) / "recipes.json"
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(sample_data, f)
+
+            loaded = load_recipes(data_dir=Path(tmpdir))
+            self.assertEqual(len(loaded), 1)
+            self.assertEqual(loaded[0]["name"], "TestDish")
 
 
 if __name__ == "__main__":

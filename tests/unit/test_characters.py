@@ -1,8 +1,11 @@
 import os
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
-CHARACTERS_JSON_PATH = os.path.join(os.path.dirname(__file__), "characters.json")
+from src.tracker.core.models import DATA_DIR, load_characters
+
 EXPECTED_TOTAL_CHARACTERS = 121
 VALID_ROLES = {"Battle", "Support", "Attendant"}
 REQUIRED_KEYS = {"id", "name", "role", "location", "howToRecruit", "missable"}
@@ -10,12 +13,12 @@ REQUIRED_KEYS = {"id", "name", "role", "location", "howToRecruit", "missable"}
 
 class TestCharactersDatabase(unittest.TestCase):
     def setUp(self):
+        characters_path = DATA_DIR / "characters.json"
         self.assertTrue(
-            os.path.exists(CHARACTERS_JSON_PATH),
-            f"Database file not found: {CHARACTERS_JSON_PATH}",
+            characters_path.exists(),
+            f"Database file not found: {characters_path}",
         )
-        with open(CHARACTERS_JSON_PATH, "r", encoding="utf-8") as f:
-            self.characters = json.load(f)
+        self.characters = load_characters()
 
     def test_json_structure_and_count(self):
         """Verify the database is a list with exactly 121 entries."""
@@ -120,6 +123,18 @@ class TestCharactersDatabase(unittest.TestCase):
         self.assertIn(1210, char_map)
         self.assertEqual(char_map[1210]["name"], "Grace")
         self.assertEqual(char_map[1210]["role"], "Battle")
+
+    def test_load_characters_custom_directory(self):
+        """Verify load_characters accepts a custom data_dir path."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sample_data = [{"id": 999, "name": "TestHero", "role": "Battle", "location": "TestLoc", "howToRecruit": "Test recruit steps", "missable": False}]
+            file_path = Path(tmpdir) / "characters.json"
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(sample_data, f)
+
+            loaded = load_characters(data_dir=Path(tmpdir))
+            self.assertEqual(len(loaded), 1)
+            self.assertEqual(loaded[0]["name"], "TestHero")
 
 
 if __name__ == "__main__":
