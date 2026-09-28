@@ -389,10 +389,10 @@ test('applyProgress updates state and counts from save payload', () => {
 });
 
 test('buildSyncToast generates proper delta and up-to-date messages', () => {
-  // Case 1: First sync / no prevCounts -> shows formatted totals
+  // Case 1: First sync / no prevCounts -> shows "Save up to date"
   const initialCounts = { heroCount: 23, recipeCount: 45, beigomaCount: 23, trainerCount: 14 };
   const firstSyncMsg = app.buildSyncToast(null, initialCounts);
-  assert.strictEqual(firstSyncMsg, 'Save synced · 23 heroes · 45 recipes · 23 beigoma · 14 trainers defeated');
+  assert.strictEqual(firstSyncMsg, 'Save up to date');
 
   // Case 2: Deltas present -> only mentions changed categories
   const prevCounts = { heroCount: 23, recipeCount: 45, beigomaCount: 23, trainerCount: 14 };
@@ -405,8 +405,8 @@ test('buildSyncToast generates proper delta and up-to-date messages', () => {
                                          { heroCount: 11, recipeCount: 5, beigomaCount: 0, trainerCount: 0 });
   assert.strictEqual(singleDelta, 'Synced · +1 hero');
 
-  // Case 4: No change -> shows up-to-date message with totals
+  // Case 4: No change / no update yet -> simply shows "Save up to date" without item listing or deltas
   const noChangeMsg = app.buildSyncToast(prevCounts, prevCounts);
-  assert.strictEqual(noChangeMsg, 'Save up to date · 23 heroes · 45 recipes · 23 beigoma · 14 trainers defeated');
+  assert.strictEqual(noChangeMsg, 'Save up to date');
 });
 

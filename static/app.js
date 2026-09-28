@@ -917,12 +917,10 @@ const SYNC_TRACKERS = [
 /**
  * Builds a human-friendly sync toast message.
  *
- * When prevCounts is provided and deltas are detected, emits delta copy:
+ * When deltas are detected, emits delta copy:
  *   "Synced · +2 heroes · +5 beigoma"
- * When nothing changed, emits totals copy:
- *   "Save up to date · 23 heroes · 23 beigoma · 14 trainers defeated"
- * When prevCounts is unavailable (first sync), emits totals only:
- *   "Save synced · 23 heroes · 45 recipes · 23 beigoma · 14 trainers defeated"
+ * When there are no new updates, emits simple status without listing items:
+ *   "Save up to date"
  *
  * Designed to be extended: add entries to SYNC_TRACKERS for fish, chests, runes, etc.
  *
@@ -944,27 +942,9 @@ function buildSyncToast(prevCounts, newCounts) {
     if (deltas.length > 0) {
       return `Synced · ${deltas.join(' · ')}`;
     }
-
-    // Nothing new — show totals as "up to date" confirmation
-    const totals = SYNC_TRACKERS
-      .map(t => {
-        const count = newCounts[t.key] || 0;
-        if (count === 0) return null;
-        return `${count} ${count === 1 ? t.label : t.labelPlural}`;
-      })
-      .filter(Boolean);
-    return `Save up to date · ${totals.join(' · ')}`;
   }
 
-  // No snapshot available — first sync or upload; show totals
-  const totals = SYNC_TRACKERS
-    .map(t => {
-      const count = newCounts[t.key] || 0;
-      if (count === 0) return null;
-      return `${count} ${count === 1 ? t.label : t.labelPlural}`;
-    })
-    .filter(Boolean);
-  return totals.length > 0 ? `Save synced · ${totals.join(' · ')}` : 'Save synced';
+  return 'Save up to date';
 }
 
 /**
