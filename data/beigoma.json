@@ -237,12 +237,12 @@
   {
     "id": 505,
     "name": "Neo Absolute Zero",
-    "whereToObtain": "Reward for defeating Reid (Headquarters rematch)"
+    "whereToObtain": "Reward for defeating Reid in final battle at Headquarters (recruits Reid)"
   },
   {
     "id": 506,
     "name": "Infinity Force",
-    "whereToObtain": "Reward for defeating Dr. Corque (Headquarters)"
+    "whereToObtain": "Reward for defeating Dr. Corque in Gardhaven Castle secret room"
   },
   {
     "id": 507,
@@ -262,12 +262,12 @@
   {
     "id": 601,
     "name": "Gigas Fist",
-    "whereToObtain": "Reward for defeating Fender (Werne Village)"
+    "whereToObtain": "Reward for defeating Fender (Kyshiri Village)"
   },
   {
     "id": 602,
     "name": "Cheetalita",
-    "whereToObtain": "Reward for defeating Celera (Kyshiri Village)"
+    "whereToObtain": "Reward for defeating Celera (Werne Village)"
   },
   {
     "id": 603,

@@ -1,222 +1,222 @@
 [
   {
     "id": 1000,
-    "name": "Reid",
-    "location": "Eltisweiss"
+    "name": "Reid (1st Battle — Tutorial)",
+    "location": "Eltisweiss — Southwest plaza near south town exit"
   },
   {
     "id": 3,
-    "name": "Reid",
-    "location": "Headquarters"
+    "name": "Reid (2nd Battle — Rematch 1)",
+    "location": "Headquarters — 1F courtyard near the Theater (after recruiting Dr. Corque)"
   },
   {
     "id": 4,
-    "name": "Reid",
-    "location": "Headquarters"
+    "name": "Reid (3rd Battle — Rematch 2)",
+    "location": "Headquarters — 1F courtyard near the Theater (after defeating Zeph)"
   },
   {
     "id": 22,
-    "name": "Reid",
-    "location": "Headquarters"
+    "name": "Reid (Final Battle — Recruitment)",
+    "location": "Headquarters — Near Dr. Corque's room (after defeating Crash; recruits Reid)"
   },
   {
     "id": 5,
     "name": "Taq",
-    "location": "Altverden Village"
+    "location": "Altverden Village — In front of the Inn"
   },
   {
     "id": 6,
     "name": "Fender",
-    "location": "Werne Village"
+    "location": "Kyshiri Village — Right of the windmill near watchtower"
   },
   {
     "id": 7,
     "name": "Celera",
-    "location": "Kyshiri Village"
+    "location": "Werne Village — Near the windmill on the east side"
   },
   {
     "id": 8,
     "name": "Venom",
-    "location": "Daphan Village"
+    "location": "Daphan Village — Center of the village near residential area"
   },
   {
     "id": 9,
     "name": "Thudd",
-    "location": "Arenside"
+    "location": "Arenside — Center of town, by the fountain"
   },
   {
     "id": 10,
     "name": "Zeph",
-    "location": "The Treefolk Village"
+    "location": "The Treefolk Village — Lower platform near the Trading Post"
   },
   {
     "id": 11,
     "name": "Flowe",
-    "location": "Hishahn"
+    "location": "Hishahn — Southeast side near the wooden bridge"
   },
   {
     "id": 12,
     "name": "Pyre",
-    "location": "Impershi'arc"
+    "location": "Impershi'arc — East side ramp leading toward sandship docks"
   },
   {
     "id": 13,
     "name": "Crash",
-    "location": "Ardinale City"
+    "location": "Ardinale City — Lowtown / Lower district residential plaza"
   },
   {
     "id": 2,
     "name": "Dr. Corque",
-    "location": "Headquarters"
+    "location": "Gardhaven Castle — Secret room behind hidden staircase (final challenge)"
   },
   {
     "id": 101,
     "name": "Villager",
-    "location": "Arenside"
+    "location": "Arenside — Center of town, standing by the fountain"
   },
   {
     "id": 102,
     "name": "Traveler",
-    "location": "Arenside"
+    "location": "Fort Xialuke — North gate area near checkpoint"
   },
   {
     "id": 103,
     "name": "Girl",
-    "location": "Fort Xialuke"
+    "location": "Eltisweiss — Northwest plaza near the fountain"
   },
   {
     "id": 104,
     "name": "Citizen",
-    "location": "Eltisweiss"
+    "location": "Eltisweiss — Southeast alleyway near Dr. Corque's house"
   },
   {
     "id": 105,
     "name": "Elder",
-    "location": "Eltisweiss"
+    "location": "Altverden Village — West side near the residential houses"
   },
   {
     "id": 106,
     "name": "Villager",
-    "location": "Altverden Village"
+    "location": "Werne Village — East side near the windmill"
   },
   {
     "id": 107,
     "name": "Boy",
-    "location": "Werne Village"
+    "location": "Kyshiri Village — By the watchtower"
   },
   {
     "id": 108,
     "name": "Villager",
-    "location": "Werne Village"
+    "location": "The Treefolk Village — Near the Trading Post"
   },
   {
     "id": 109,
     "name": "Citizen",
-    "location": "Kyshiri Village"
+    "location": "Hishahn — Southeast district near the bridge"
   },
   {
     "id": 110,
     "name": "Boy",
-    "location": "Kyshiri Village"
+    "location": "Hishahn — Northwest plaza near the canal"
   },
   {
     "id": 111,
     "name": "Elder",
-    "location": "The Treefolk Village"
+    "location": "Twinhorne East — Pier / harbor walkway"
   },
   {
     "id": 112,
     "name": "Girl",
-    "location": "Hishahn"
+    "location": "Daphan Village — Near the southern residential huts"
   },
   {
     "id": 113,
     "name": "Soldier",
-    "location": "Hishahn"
+    "location": "Dabavin — Hidden behind the waterfall on the lower level"
   },
   {
     "id": 114,
     "name": "Dr. Felix",
-    "location": "Impershi'arc"
+    "location": "Impershi'arc — East side pier near sandship dock"
   },
   {
     "id": 115,
     "name": "Noble",
-    "location": "Impershi'arc"
+    "location": "Ardinale City — City center, near the Smithy"
   },
   {
     "id": 116,
     "name": "Ishiyama",
-    "location": "Ardinale City"
+    "location": "Ardinale City — Far northeast upper district, right of the cathedral"
   },
   {
     "id": 117,
     "name": "Villager",
-    "location": "Ardinale City"
+    "location": "Yarnaan — 3F terrace walkway (available after town liberation)"
   },
   {
     "id": 118,
     "name": "Boy",
-    "location": "Ardinale City"
+    "location": "Athrabalt — Southwest plaza near the stone benches"
   },
   {
     "id": 119,
     "name": "Citizen",
-    "location": "Ardinale City"
+    "location": "Athrabalt — East district near the residential row (southern side)"
   },
   {
     "id": 120,
     "name": "Typhoon",
-    "location": "Athrabalt"
+    "location": "Athrabalt — East district near the stairs (northern side)"
   },
   {
     "id": 121,
     "name": "Boy",
-    "location": "Athrabalt"
+    "location": "Skriss Village — Northwest side near the tents"
   },
   {
     "id": 122,
     "name": "Citizen",
-    "location": "Athrabalt"
+    "location": "Twinhorne West — Near the Smithy"
   },
   {
     "id": 123,
     "name": "Traveling Merchant",
-    "location": "Daphan Village"
+    "location": "Impershi'arc — Inside the Trading Post"
   },
   {
     "id": 124,
     "name": "Noble",
-    "location": "Dabavin"
+    "location": "Ardinale City — Inside the Inn (1F lobby)"
   },
   {
     "id": 125,
     "name": "Traveler",
-    "location": "Twinhorne East"
+    "location": "Bounty Hill — Southeast side, near the Recovery Incense"
   },
   {
     "id": 126,
     "name": "Traveler",
-    "location": "Twinhorne West"
+    "location": "The Den of the Dunes — Oasis camp clearing"
   },
   {
     "id": 127,
     "name": "Beigoma Sage",
-    "location": "Eltisweiss"
+    "location": "Eltisweiss — Inside Dr. Corque's Beigoma laboratory (after all other storyline battles)"
   },
   {
     "id": 301,
     "name": "Resident",
-    "location": "Headquarters"
+    "location": "Headquarters — West exit / 1F courtyard"
   },
   {
     "id": 302,
     "name": "Resident",
-    "location": "Headquarters"
+    "location": "Headquarters — Northeast residential area / houses"
   },
   {
     "id": 303,
     "name": "Resident",
-    "location": "Headquarters"
+    "location": "Headquarters — Outside near the Hot Spring"
   }
 ]
