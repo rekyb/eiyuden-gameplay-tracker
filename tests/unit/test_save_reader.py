@@ -207,10 +207,74 @@ class TestSaveReader(unittest.TestCase):
         self.assertEqual(summary.get("beigoma_collected_count"), 0)
         self.assertEqual(summary.get("beigoma_defeated_trainer_ids"), [])
         self.assertEqual(summary.get("beigoma_defeated_trainer_count"), 0)
+        self.assertEqual(summary.get("fish_caught_ids"), [])
+        self.assertEqual(summary.get("fish_caught_count"), 0)
+        self.assertEqual(summary.get("fish_total_count"), 52)
+        self.assertEqual(summary.get("discovered_spot_ids"), [])
         self.assertEqual(summary.get("money"), 0)
         self.assertEqual(summary.get("town_level"), 0)
         self.assertEqual(summary.get("population"), 0)
         self.assertEqual(summary.get("playtime_seconds"), 0.0)
+
+    def test_fish_and_spots_extraction_from_save(self):
+        """Verify extraction of caught fish IDs and discovered fishing spot IDs."""
+        save_data = {
+            "_unitData": {"_units": [{"_id": 10}]},
+            "_fishesRegistrations": [
+                {"_fishId": 21, "_spotId": 1, "_count": 5, "_newFlag": True},
+                {"_fishId": 40, "_spotId": 1, "_count": 2, "_newFlag": True},
+                {"_fishId": 21, "_spotId": 4, "_count": 1, "_newFlag": False},  # duplicate fish ID
+                {"_fishId": 999, "_spotId": 1, "_count": 1},  # invalid fish ID (>52)
+                {"_fishId": 0, "_spotId": 1, "_count": 1},  # invalid fish ID (<1)
+                {"_fishId": "not_an_int", "_spotId": 1, "_count": 1},  # malformed
+                "not_a_dict",  # malformed entry
+            ],
+            "_fishingSpots": [
+                {"_id": 1, "_resource": {"_count": 10, "_max": 10}, "_coolTime": 0.0, "_isDiscoverd": True},
+                {"_id": 2, "_resource": {"_count": 10, "_max": 10}, "_coolTime": 0.0, "_isDiscoverd": False},
+                {"_id": 51, "_resource": {"_count": 15, "_max": 15}, "_coolTime": 0.0, "_isDiscoverd": True},
+                {"_id": 1, "_resource": {"_count": 10, "_max": 10}, "_coolTime": 0.0, "_isDiscoverd": True},  # duplicate spot ID
+                {"_id": "bad_id", "_isDiscoverd": True},  # invalid ID type
+                {"_id": 3},  # missing _isDiscoverd
+                "invalid_spot_entry",  # malformed entry
+            ],
+        }
+        raw_bytes = encrypt_save(save_data)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".dat") as tf:
+            tf.write(raw_bytes)
+            tf_path = tf.name
+
+        try:
+            summary = read_save_summary(tf_path)
+            self.assertEqual(summary["fish_caught_ids"], [21, 40])
+            self.assertEqual(summary["fish_caught_count"], 2)
+            self.assertEqual(summary["fish_total_count"], 52)
+            self.assertEqual(summary["discovered_spot_ids"], [1, 51])
+        finally:
+            if os.path.exists(tf_path):
+                os.remove(tf_path)
+
+    def test_fish_and_spots_extraction_empty_or_missing(self):
+        """Verify safe defaults when _fishesRegistrations and _fishingSpots are missing or malformed."""
+        save_data = {
+            "_unitData": {"_units": [{"_id": 10}]},
+            "_fishesRegistrations": "invalid_type",
+            "_fishingSpots": None,
+        }
+        raw_bytes = encrypt_save(save_data)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".dat") as tf:
+            tf.write(raw_bytes)
+            tf_path = tf.name
+
+        try:
+            summary = read_save_summary(tf_path)
+            self.assertEqual(summary["fish_caught_ids"], [])
+            self.assertEqual(summary["fish_caught_count"], 0)
+            self.assertEqual(summary["fish_total_count"], 52)
+            self.assertEqual(summary["discovered_spot_ids"], [])
+        finally:
+            if os.path.exists(tf_path):
+                os.remove(tf_path)
 
     def test_read_save_summary_none_and_empty_path(self):
         """Verify read_save_summary handles None and empty string paths safely."""
@@ -238,6 +302,10 @@ class TestSaveReader(unittest.TestCase):
             self.assertIn("error", summary)
             self.assertEqual(summary.get("recruited_ids"), [])
             self.assertEqual(summary.get("acquired_recipe_ids"), [])
+            self.assertEqual(summary.get("fish_caught_ids"), [])
+            self.assertEqual(summary.get("fish_caught_count"), 0)
+            self.assertEqual(summary.get("fish_total_count"), 52)
+            self.assertEqual(summary.get("discovered_spot_ids"), [])
         finally:
             if os.path.exists(corrupt_path):
                 os.remove(corrupt_path)
