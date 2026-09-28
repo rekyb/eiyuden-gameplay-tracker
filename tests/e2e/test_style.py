@@ -46,6 +46,7 @@ class TestStyleCSS(unittest.TestCase):
             'role-battle',
             'role-support',
             'role-attendant',
+            'chapter-badge',
             'toast',
             'toast-success',
             'toast-error',
