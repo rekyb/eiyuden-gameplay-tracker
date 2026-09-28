@@ -185,6 +185,7 @@
         <!-- Auto-detect Save Path -->
         <div class="form-group">
           <button type="button" id="btn-use-steam" class="btn btn-secondary">Auto-Detect Save Path</button>
+          <p id="detect-status-hint" class="dialog-status-hint" role="status" aria-live="polite" hidden></p>
         </div>
 
         <!-- Relocated Save Actions (Sync & Backup) -->
@@ -195,6 +196,7 @@
             <button type="button" id="btn-sync" class="btn btn-primary" title="Re-read and synchronize with the active save file">Sync Save Now</button>
             <button type="button" id="btn-backup" class="btn btn-secondary" title="Create a timestamped backup of the current save file">Backup Save Now</button>
           </div>
+          <p id="save-actions-status-hint" class="dialog-status-hint" role="status" aria-live="polite" hidden></p>
         </div>
       </div>
     </div>

@@ -1314,3 +1314,35 @@ tr.is-recruited td.col-name .hero-name {
     flex-direction: column;
   }
 }
+
+/* --- Dialog Inline Status Hints --- */
+.dialog-status-hint {
+  font-size: 0.775rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0 0;
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+.dialog-status-hint[hidden] {
+  display: none !important;
+}
+
+.dialog-status-hint.hint-success {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.dialog-status-hint.hint-error {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.dialog-status-hint.hint-info {
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}

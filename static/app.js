@@ -98,6 +98,8 @@ const dom = {
   // Configuration Dialog & Upload
   configDialog: null,
   configPathInput: null,
+  detectStatusHint: null,
+  saveActionsStatusHint: null,
   dropZone: null,
   fileInput: null,
 
@@ -126,6 +128,25 @@ function escapeHtml(text) {
 }
 
 /**
+ * Sets inline status hint message and styling inside a dialog.
+ * @param {HTMLElement|null} element - Status hint element
+ * @param {string} message - Text message to display
+ * @param {'success'|'error'|'info'} [type='info'] - Severity level
+ */
+function setDialogStatus(element, message, type = 'info') {
+  if (!element) return;
+  if (!message) {
+    element.textContent = '';
+    element.className = 'dialog-status-hint';
+    element.hidden = true;
+    return;
+  }
+  element.textContent = message;
+  element.className = `dialog-status-hint hint-${type}`;
+  element.hidden = false;
+}
+
+/**
  * Shows an accessible, auto-dismissing toast notification.
  * @param {string} message - Notification text
  * @param {'info'|'success'|'error'} [type='info'] - Style category
@@ -133,6 +154,8 @@ function escapeHtml(text) {
  */
 function showToast(message, type = 'info', duration = 4000) {
   if (!dom.toastContainer) return;
+  // If settings modal is open, avoid background toasts blurred behind dialog backdrop
+  if (dom.configDialog && dom.configDialog.open) return;
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
@@ -550,6 +573,7 @@ async function syncSave({ silent = false } = {}) {
 async function createBackup() {
   if (!dom.btnBackup) return;
   dom.btnBackup.disabled = true;
+  setDialogStatus(dom.saveActionsStatusHint, '');
 
   try {
     const res = await fetch('/api/save/backup', { method: 'POST' });
@@ -560,9 +584,17 @@ async function createBackup() {
     }
 
     const fileName = (data.backup_file || '').split(/[/\\]/).pop();
-    showToast(`Backup created: ${fileName}`, 'success');
+    if (dom.configDialog && dom.configDialog.open) {
+      setDialogStatus(dom.saveActionsStatusHint, `Backup created: ${fileName}`, 'success');
+    } else {
+      showToast(`Backup created: ${fileName}`, 'success');
+    }
   } catch (err) {
-    showToast(`Backup failed: ${err.message}`, 'error');
+    if (dom.configDialog && dom.configDialog.open) {
+      setDialogStatus(dom.saveActionsStatusHint, `Backup failed: ${err.message}`, 'error');
+    } else {
+      showToast(`Backup failed: ${err.message}`, 'error');
+    }
   } finally {
     dom.btnBackup.disabled = false;
   }
@@ -695,6 +727,8 @@ function cacheDomElements() {
   // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
   dom.configPathInput = document.getElementById('config-path-input');
+  dom.detectStatusHint = document.getElementById('detect-status-hint');
+  dom.saveActionsStatusHint = document.getElementById('save-actions-status-hint');
   dom.dropZone = document.getElementById('drop-zone');
   dom.fileInput = document.getElementById('file-input');
 
@@ -710,12 +744,30 @@ function setupEventListeners() {
   if (dom.btnSync) {
     dom.btnSync.addEventListener('click', async () => {
       dom.btnSync.disabled = true;
+      setDialogStatus(dom.saveActionsStatusHint, '');
       try {
         const cfgRes = await fetch('/api/config');
         if (cfgRes.ok) {
           state.saveConfig = await cfgRes.json();
         }
-        await syncSave({ silent: false });
+        const success = await syncSave({ silent: true });
+        if (dom.configDialog && dom.configDialog.open) {
+          if (success && state.saveStatus?.file_exists) {
+            setDialogStatus(
+              dom.saveActionsStatusHint,
+              `Save synchronized (${state.recruitedIds.size} heroes, ${state.acquiredRecipeIds.size} recipes)`,
+              'success'
+            );
+          } else {
+            setDialogStatus(
+              dom.saveActionsStatusHint,
+              `Save file not found at: ${state.saveConfig?.save_path || 'UserData0.dat'}`,
+              'error'
+            );
+          }
+        } else if (success && state.saveStatus?.file_exists) {
+          showToast(`Synchronized save file (${state.recruitedIds.size} recruited)`, 'success');
+        }
       } finally {
         dom.btnSync.disabled = false;
       }
@@ -871,6 +923,8 @@ function setupEventListeners() {
   // Settings Modal Open / Close
   if (dom.btnConfig && dom.configDialog) {
     dom.btnConfig.addEventListener('click', () => {
+      setDialogStatus(dom.detectStatusHint, '');
+      setDialogStatus(dom.saveActionsStatusHint, '');
       if (dom.configPathInput) {
         let activePath = state.saveConfig?.save_path;
         if (!activePath) {
@@ -951,6 +1005,7 @@ function setupEventListeners() {
   if (dom.btnUseSteam && dom.configPathInput) {
     dom.btnUseSteam.addEventListener('click', async () => {
       dom.btnUseSteam.disabled = true;
+      setDialogStatus(dom.detectStatusHint, '');
       try {
         const res = await fetch('/api/config');
         if (res.ok) {
@@ -959,12 +1014,12 @@ function setupEventListeners() {
         const detected = state.saveConfig?.detected_save_path || state.saveConfig?.detected_steam_path;
         if (detected) {
           dom.configPathInput.value = detected;
-          showToast('Auto-detected save path applied to input', 'info');
+          setDialogStatus(dom.detectStatusHint, `Save file found: ${detected}`, 'success');
         } else {
-          showToast('No save file detected automatically (try Browse instead)', 'info');
+          setDialogStatus(dom.detectStatusHint, 'No save file found in standard locations.', 'error');
         }
       } catch (err) {
-        showToast(`Error detecting save path: ${err.message}`, 'error');
+        setDialogStatus(dom.detectStatusHint, `Error detecting save path: ${err.message}`, 'error');
       } finally {
         dom.btnUseSteam.disabled = false;
       }
@@ -1144,6 +1199,7 @@ if (typeof module !== 'undefined' && module.exports) {
     dom,
     escapeHtml,
     showToast,
+    setDialogStatus,
     filterCharacter,
     filterRecipe,
     calculateProgress,
