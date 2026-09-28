@@ -16,6 +16,7 @@
         <p class="app-subtitle">Recruitment Guide, Recipes &amp; Progress Dashboard</p>
       </div>
       <div class="header-actions">
+        <button type="button" id="btn-sync" class="btn btn-primary" title="Re-read and synchronize with the active save file">Sync Save</button>
         <button type="button" id="btn-config" class="btn btn-secondary btn-settings" aria-label="Open settings" title="Configure save file location or perform save actions">
           <svg class="icon icon-gear" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
@@ -192,12 +193,11 @@
           <button type="button" id="btn-save-path" class="btn btn-primary" disabled>Save Path</button>
         </div>
 
-        <!-- Relocated Save Actions (Sync & Backup) -->
+        <!-- Save Actions (Backup) -->
         <div class="divider" role="separator"></div>
         <div class="form-group save-actions-group">
-          <label class="form-label">Save Actions</label>
+          <label class="form-label">Backup Save</label>
           <div class="save-actions-row">
-            <button type="button" id="btn-sync" class="btn btn-primary" title="Re-read and synchronize with the active save file">Sync Save Now</button>
             <button type="button" id="btn-backup" class="btn btn-secondary" title="Create a timestamped backup of the current save file">Backup Save Now</button>
           </div>
           <p id="save-actions-status-hint" class="dialog-status-hint" role="status" aria-live="polite" hidden></p>

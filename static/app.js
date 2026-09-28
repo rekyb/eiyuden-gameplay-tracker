@@ -889,6 +889,8 @@ function setupEventListeners() {
   if (dom.btnSync) {
     dom.btnSync.addEventListener('click', async () => {
       dom.btnSync.disabled = true;
+      const prevText = dom.btnSync.textContent;
+      dom.btnSync.textContent = 'Syncing...';
       setDialogStatus(dom.saveActionsStatusHint, '');
       try {
         const cfgRes = await fetch('/api/config');
@@ -904,6 +906,7 @@ function setupEventListeners() {
         showToast(`Sync error: ${err.message}`, 'error');
       } finally {
         dom.btnSync.disabled = false;
+        dom.btnSync.textContent = prevText;
       }
     });
   }
