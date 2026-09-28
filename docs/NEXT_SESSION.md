@@ -2,14 +2,14 @@
 
 - **Current Branch:** `feat/beigoma-tracker`
 - **Working Tree:** Clean (all commits up to date)
-- **Status:** All 6 Tasks implemented, verified, QA bugfix completed. Ready to merge to `main`.
+- **Status:** All Beigoma & Trainer features, Rarity column, and polish tasks completed. Ready to merge to `master`.
 
 ---
 
 ## 1. Quick Resume Instructions for Next Session
 
 To continue in the next session, instruct the agent:
-> *"Resume from `docs/NEXT_SESSION.md`. All Beigoma & Trainer tracker tasks and QA fixes are complete and tested (100 Python + 20 Node tests passing). Proceed to merge `feat/beigoma-tracker` to `main` using `finishing-a-development-branch`."*
+> *"Resume from `docs/NEXT_SESSION.md`. All Beigoma & Trainer tracker tasks, Rarity column, and QA fixes are complete and tested (102 Python + 25 Node tests passing). Proceed to merge `feat/beigoma-tracker` to `master` using `finishing-a-development-branch`."*
 
 ---
 
@@ -28,8 +28,10 @@ To continue in the next session, instruct the agent:
 | Data | Descriptive Trainer Locations & Reid Battle Notes | ✅ Done (tested) | `b429834` |
 | Format | Remove Em Dashes to Match Heroes/Recipes Format | ✅ Done (tested) | `854f107` |
 | Fix | Enable Save Path Button on Changing/Selecting Save File | ✅ Done (tested) | `68d78a2` |
+| Feat | Beigoma Rarity Column (1–4 Stars, a11y labels, CSS) | ✅ Done (reviewed) | `d7f97f2`, `c60cdd8`, `9719c28`, `f798c1d` |
+| Clean | Table Pagination Revert (Keep all tables non-paginated) | ✅ Done (tested) | `3a62902` |
 
-- **All tests passing:** 100 Python (`python -m unittest discover tests`) + 21 Node (`node --test tests/frontend/test_app.js`)
+- **All tests passing:** 102 Python (`python -m unittest discover tests`) + 25 Node (`node --test tests/frontend/test_app.js`)
 - **Live Save File Verified:** Exactly 23/60 Beigoma tops obtained, 14/44 opponent trainers defeated.
 
 ---

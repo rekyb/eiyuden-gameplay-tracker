@@ -2,7 +2,7 @@
 
 A clean, minimalist, distraction-free local gameplay tracker for **Eiyuden Chronicle: Hundred Heroes**.
 
-The tracker reads and decrypts your game save files (`UserData*.dat`) directly to monitor your progress in real time — covering all 121 heroes and all 93 Kurtz restaurant recipes.
+The tracker reads and decrypts your game save files (`UserData*.dat`) directly to monitor your progress in real time — covering all 121 heroes, all 93 Kurtz restaurant recipes, and all 60 Beigoma tops & 44 trainers.
 
 ---
 
@@ -19,6 +19,13 @@ The tracker reads and decrypts your game save files (`UserData*.dat`) directly t
 - **Acquired Status Detection**: Automatically detects collected recipes from your save data.
 - **Manual Cooked Tracking**: Interactive checklist to track dishes cooked for the **Gourmand Hero** achievement. Cooked states persist locally and server-side.
 - **Search & Filters**: Search across dishes, locations, and source guides. Filter by *All*, *Acquired*, *Not Acquired*, *Cooked*, and *Not Cooked*.
+
+### Beigoma & Trainer Tracker
+- **Complete 60-Top Collection**: Full catalog of all collectible tops with drop locations, verified 1–4 star rarity badges, and automatic *Obtained* / *Missing* save detection.
+- **Complete 44-Trainer Opponent Catalog**: Comprehensive guide to all duelable Beigoma trainers, their locations, and progression conditions to recruit Reid and Dr. Corque.
+- **Sub-Tab Navigation**: Seamlessly toggle between **Beigoma Collection** and **Trainers** views with live progress counters.
+- **Search & Filters**: Filter tops by *All*, *Obtained*, or *Missing*; filter trainers by *All*, *Defeated*, or *Not Battled*.
+- **Delta-Aware Sync Notifications**: Real-time toast feedback reporting exact progress deltas across heroes, recipes, beigoma, and trainers whenever your save file syncs.
 
 ### Fast & Lightweight
 - Zero framework overhead: built with pure HTML, CSS, and modern JavaScript backed by a lightweight Python local server.
@@ -71,6 +78,12 @@ The tracker will launch and automatically open `http://localhost:8000` in your d
 
 > **Tip:** The Cooked status is tracked manually because the save file does not store individual restaurant cooking history. Cooked selections are saved automatically.
 
+### Beigoma View
+1. **Switch to Beigoma**: Click the **Beigoma** tab in the top navigation.
+2. **Collection vs Trainers**: Toggle between **Beigoma Collection** (to check owned tops and rarity) and **Trainers** (to track defeated opponents).
+3. **Automatic Progress**: Save syncing automatically detects all obtained Beigoma tops and defeated trainers.
+4. **Search & Filter**: Search tops and trainers by name or location, and filter by status.
+
 ---
 
 ## Default Save File Locations
@@ -106,7 +119,9 @@ eiyuden-gameplay-tracker/
 │   └── config.json             # User settings (save paths, options)
 ├── data/                       # Game catalogs & static data
 │   ├── characters.json         # 121 heroes database
-│   └── recipes.json            # 93 recipes database
+│   ├── recipes.json            # 93 recipes database
+│   ├── beigoma.json            # 60 beigoma tops database (with 1-4 star rarity)
+│   └── beigoma_trainers.json   # 44 beigoma trainers database
 ├── src/                        # Modular application source code
 │   └── tracker/
 │       ├── config/             # Configuration & platform detection
@@ -114,8 +129,8 @@ eiyuden-gameplay-tracker/
 │       │   └── manager.py      # ConfigManager for loading/saving settings
 │       ├── core/               # Core business logic & data processing
 │       │   ├── crypto.py       # TripleDES-CBC save file decryption
-│       │   ├── models.py       # Character & recipe catalog loaders
-│       │   └── save_reader.py  # Save file parsing & summary extraction
+│       │   ├── models.py       # Catalog loaders (heroes, recipes, beigoma, trainers)
+│       │   └── save_reader.py  # Save file parsing & multi-tracker progress extraction
 │       └── server.py           # HTTP API server & static file host
 ├── static/                     # Frontend web interface (HTML, CSS, JS)
 │   ├── index.html              # Single-page application interface
@@ -123,7 +138,7 @@ eiyuden-gameplay-tracker/
 │   └── style.css               # Application styling & responsive layout
 └── tests/                      # Automated test suites
     ├── fixtures/               # Test save files and sample fixtures
-    ├── unit/                   # Unit tests (models, save reader, config)
+    ├── unit/                   # Unit tests (models, save reader, beigoma, config)
     ├── e2e/                    # End-to-end server & style tests
     └── frontend/               # Headless Node.js frontend tests
 ```
