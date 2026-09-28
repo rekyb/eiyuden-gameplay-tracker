@@ -177,7 +177,11 @@
           <label for="config-path-input" class="form-label">Save File Location</label>
           <div class="input-action-row">
             <input type="text" id="config-path-input" class="text-input" placeholder="e.g. C:\path\to\UserData0.dat, UserData1.dat..." spellcheck="false">
-            <button type="button" id="btn-browse-file" class="btn btn-secondary" title="Browse files on this computer">Browse...</button>
+            <button type="button" id="btn-browse-file" class="btn btn-secondary btn-icon-only" aria-label="Browse files on this computer" title="Browse files on this computer">
+              <svg class="icon icon-folder" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
             <button type="button" id="btn-save-path" class="btn btn-primary">Save Path</button>
           </div>
         </div>

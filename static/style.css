@@ -979,7 +979,8 @@ tr.is-recruited td.col-name .hero-name {
   display: none !important;
 }
 
-/* --- Settings Button with Gear Icon --- */
+/* --- Icon-Only Buttons --- */
+.btn-icon-only,
 .btn-settings {
   padding: 0.45rem;
   width: 32px;
@@ -987,6 +988,7 @@ tr.is-recruited td.col-name .hero-name {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .icon {
@@ -995,6 +997,11 @@ tr.is-recruited td.col-name .hero-name {
 }
 
 .icon-gear {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-folder {
   width: 16px;
   height: 16px;
 }

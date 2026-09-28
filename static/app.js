@@ -1030,8 +1030,8 @@ function setupEventListeners() {
   if (dom.btnBrowseFile) {
     dom.btnBrowseFile.addEventListener('click', async () => {
       dom.btnBrowseFile.disabled = true;
-      const prevText = dom.btnBrowseFile.textContent;
-      dom.btnBrowseFile.textContent = 'Browsing...';
+      const prevTitle = dom.btnBrowseFile.title;
+      dom.btnBrowseFile.title = 'Browsing files...';
 
       try {
         const res = await fetch('/api/save/browse', { method: 'POST' });
@@ -1074,7 +1074,7 @@ function setupEventListeners() {
         showToast(`Failed to browse file: ${err.message}`, 'error');
       } finally {
         dom.btnBrowseFile.disabled = false;
-        dom.btnBrowseFile.textContent = prevText;
+        dom.btnBrowseFile.title = prevTitle;
       }
     });
   }
