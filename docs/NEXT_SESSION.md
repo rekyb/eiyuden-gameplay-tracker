@@ -26,6 +26,7 @@ To continue in the next session, instruct the agent:
 | Fix | Delta-aware Sync Toast & QA Fixes | ✅ Done (tested) | `42b0c22`, `cce5794`, `d880713` |
 | UI | Remove Subtitle from Header | ✅ Done (tested) | `bbfd007` |
 | Data | Descriptive Trainer Locations & Reid Battle Notes | ✅ Done (tested) | `b429834` |
+| Format | Remove Em Dashes to Match Heroes/Recipes Format | ✅ Done (tested) | `854f107` |
 
 - **All tests passing:** 100 Python (`python -m unittest discover tests`) + 20 Node (`node --test tests/frontend/test_app.js`)
 - **Live Save File Verified:** Exactly 23/60 Beigoma tops obtained, 14/44 opponent trainers defeated.
