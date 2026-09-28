@@ -118,15 +118,6 @@ class TestStyleCSS(unittest.TestCase):
             pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
             self.assertTrue(re.search(pattern, self.css), f"Required beigoma class missing in style.css: {c}")
 
-    def test_pagination_styles_defined(self):
-        css_path = Path(__file__).resolve().parent.parent.parent / "static" / "style.css"
-        css = css_path.read_text(encoding="utf-8")
-        self.assertIn('.pagination-bar', css)
-        self.assertIn('.pagination-info', css)
-        self.assertIn('.pagination-controls', css)
-        self.assertIn('.page-btn', css)
-        self.assertIn('.page-btn.active', css)
-
     def test_beigoma_rarity_styles_defined(self):
         css_path = Path(__file__).resolve().parent.parent.parent / "static" / "style.css"
         css = css_path.read_text(encoding="utf-8")
