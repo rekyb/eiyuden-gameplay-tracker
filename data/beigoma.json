@@ -2,301 +2,361 @@
   {
     "id": 1,
     "name": "Plantvine",
+    "rarity": 1,
     "whereToObtain": "Dropped by Plantvine enemies in Grum County (North)."
   },
   {
     "id": 2,
     "name": "Rabbit Knight",
+    "rarity": 1,
     "whereToObtain": "Dropped by Rabbit Knight enemies in Grum County (North)."
   },
   {
     "id": 3,
     "name": "Huge Mite",
+    "rarity": 1,
     "whereToObtain": "Dropped by Huge Mite enemies in Northern Forest."
   },
   {
     "id": 4,
     "name": "Lizard",
+    "rarity": 1,
     "whereToObtain": "Dropped by Lizard enemies in Grum County."
   },
   {
     "id": 5,
     "name": "Wild Boar",
+    "rarity": 1,
     "whereToObtain": "Dropped by Wild Boar enemies in Redthroat Ridge."
   },
   {
     "id": 6,
     "name": "Hraesvelgr",
+    "rarity": 1,
     "whereToObtain": "Dropped by Hraesvelgr enemies in Redthroat Ridge."
   },
   {
     "id": 7,
     "name": "Cockatrice (Hatchling)",
+    "rarity": 1,
     "whereToObtain": "Dropped by Cockatrice (Hatchling) enemies in Mountain Path Homeward."
   },
   {
     "id": 8,
     "name": "Rabbit Mage",
+    "rarity": 1,
     "whereToObtain": "Dropped by Rabbit Mage enemies in Abandoned Mine."
   },
   {
     "id": 9,
     "name": "Titan Slug",
+    "rarity": 1,
     "whereToObtain": "Dropped by Titan Slug enemies in Abandoned Mine."
   },
   {
     "id": 10,
     "name": "Angry Bat",
+    "rarity": 1,
     "whereToObtain": "Dropped by Angry Bat enemies in Abandoned Mine."
   },
   {
     "id": 11,
     "name": "Wyvern",
+    "rarity": 2,
     "whereToObtain": "Dropped by Wyvern enemies around Headquarters."
   },
   {
     "id": 12,
     "name": "Killer Fungus",
+    "rarity": 2,
     "whereToObtain": "Dropped by Killer Fungus enemies in The Greatwood."
   },
   {
     "id": 13,
     "name": "Hellhound",
+    "rarity": 2,
     "whereToObtain": "Dropped by Hellhound enemies in The Greatwood."
   },
   {
     "id": 14,
     "name": "Pawn Demon",
+    "rarity": 2,
     "whereToObtain": "Dropped by Pawn Demon enemies in The Greatwood (South)."
   },
   {
     "id": 15,
     "name": "Bear Rider",
+    "rarity": 2,
     "whereToObtain": "Dropped by Bear Rider enemies in Bounty Hill."
   },
   {
     "id": 16,
     "name": "Sahagin",
+    "rarity": 2,
     "whereToObtain": "Dropped by Sahagin enemies in Euchrisse."
   },
   {
     "id": 17,
     "name": "Cactus Predator",
+    "rarity": 2,
     "whereToObtain": "Dropped by Cactus Predator enemies in Great Sandy Sea."
   },
   {
     "id": 18,
     "name": "Sea Ghost",
+    "rarity": 2,
     "whereToObtain": "Dropped by Sea Ghost enemies in Hishahn Old Town."
   },
   {
     "id": 19,
     "name": "Remora",
+    "rarity": 2,
     "whereToObtain": "Dropped by Remora enemies in Seaside Cavern."
   },
   {
     "id": 20,
     "name": "Desert Serval",
+    "rarity": 2,
     "whereToObtain": "Dropped by Desert Serval enemies in Great Sandy Sea."
   },
   {
     "id": 21,
     "name": "Desert Crab",
+    "rarity": 2,
     "whereToObtain": "Dropped by Desert Crab enemies in The Den of the Dunes."
   },
   {
     "id": 22,
     "name": "Scorpion Assassin",
+    "rarity": 2,
     "whereToObtain": "Dropped by Scorpion Assassin enemies in The Den of the Dunes."
   },
   {
     "id": 23,
     "name": "Gigas",
+    "rarity": 2,
     "whereToObtain": "Dropped by Gigas enemies in Chelonian Goliath, Vilashnu."
   },
   {
     "id": 24,
     "name": "Sandfish",
+    "rarity": 2,
     "whereToObtain": "Dropped by Sandfish enemies in Great Sandy Sea."
   },
   {
     "id": 25,
     "name": "Cockatrice (Adult)",
+    "rarity": 2,
     "whereToObtain": "Dropped by Cockatrice (Adult) enemies in The Eldroad."
   },
   {
     "id": 26,
     "name": "Tyrant Tortoise",
+    "rarity": 2,
     "whereToObtain": "Dropped by Tyrant Tortoise enemies in The Eldroad."
   },
   {
     "id": 27,
     "name": "Dragon Viper",
+    "rarity": 2,
     "whereToObtain": "Dropped by Dragon Viper enemies in The Eldroad."
   },
   {
     "id": 28,
     "name": "Grimeoid",
+    "rarity": 1,
     "whereToObtain": "Dropped by Grimeoid enemies in The Ice Cave."
   },
   {
     "id": 29,
     "name": "Carbuncle",
+    "rarity": 2,
     "whereToObtain": "Dropped by Carbuncle enemies in The Ice Cave."
   },
   {
     "id": 30,
     "name": "Corpse Rider",
+    "rarity": 2,
     "whereToObtain": "Dropped by Corpse Rider enemies in Athrabalt."
   },
   {
     "id": 31,
     "name": "Seed Conqueror",
+    "rarity": 2,
     "whereToObtain": "Dropped by Seed Conqueror enemies in Dappled Forest."
   },
   {
     "id": 32,
     "name": "Earth Dragon",
+    "rarity": 2,
     "whereToObtain": "Dropped by Earth Dragon enemies in Chelonian Goliath, Vilashnu."
   },
   {
     "id": 33,
     "name": "Azhdahag",
+    "rarity": 2,
     "whereToObtain": "Dropped by Azhdahag enemies in Snowpeak Pass."
   },
   {
     "id": 34,
     "name": "Nidhoggr",
+    "rarity": 3,
     "whereToObtain": "Dropped by Nidhoggr enemies in Snowpeak Pass."
   },
   {
     "id": 35,
     "name": "Snow Boxer",
+    "rarity": 2,
     "whereToObtain": "Dropped by Snow Boxer enemies in Snowpeak Pass."
   },
   {
     "id": 36,
     "name": "Assault Tiger",
+    "rarity": 2,
     "whereToObtain": "Dropped by Assault Tiger enemies in Castle Harganthia."
   },
   {
     "id": 37,
     "name": "Xibalba",
+    "rarity": 3,
     "whereToObtain": "Dropped by Xibalba enemies in Castle Harganthia."
   },
   {
     "id": 38,
     "name": "Petit Gargoyle",
+    "rarity": 2,
     "whereToObtain": "Dropped by Petit Gargoyle enemies in Castle Harganthia."
   },
   {
     "id": 39,
     "name": "Hellflower",
+    "rarity": 2,
     "whereToObtain": "Dropped by Hellflower enemies in Gardhaven Castle."
   },
   {
     "id": 40,
     "name": "Balor",
+    "rarity": 2,
     "whereToObtain": "Dropped by Balor enemies in Gardhaven Castle."
   },
   {
     "id": 41,
     "name": "Soul Reaper",
+    "rarity": 3,
     "whereToObtain": "Dropped by Soul Reaper enemies in Gardhaven Castle."
   },
   {
     "id": 42,
     "name": "Arch-Demon",
+    "rarity": 3,
     "whereToObtain": "Dropped by Arch-Demon enemies in Gardhaven Castle."
   },
   {
     "id": 500,
     "name": "Earthsmack",
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Thudd in Arenside."
   },
   {
     "id": 501,
     "name": "Trinity Cyclone",
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Zeph in The Treefolk Village."
   },
   {
     "id": 502,
     "name": "Azure Dragon",
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Flowe in Hishahn."
   },
   {
     "id": 503,
     "name": "Galactic Flame",
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Pyre in Impershi'arc."
   },
   {
     "id": 504,
     "name": "Devil of Destruction",
+    "rarity": 4,
     "whereToObtain": "Reward for defeating Crash in Ardinale City."
   },
   {
     "id": 505,
     "name": "Neo Absolute Zero",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Reid in the final battle at Headquarters (recruits Reid)."
   },
   {
     "id": 506,
     "name": "Infinity Force",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Dr. Corque in the secret room at Gardhaven Castle."
   },
   {
     "id": 507,
     "name": "Fenrir",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating the Beigoma Sage in Eltisweiss."
   },
   {
     "id": 508,
     "name": "Elder Dragon",
+    "rarity": 3,
     "whereToObtain": "Reward for completing the Mythic Tablet at the Slate of Seals (collect the 6 required gold tops and speak to Dr. Corque)."
   },
   {
     "id": 600,
     "name": "Dragon Fang",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Taq in Altverden Village."
   },
   {
     "id": 601,
     "name": "Gigas Fist",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Fender in Kyshiri Village."
   },
   {
     "id": 602,
     "name": "Cheetalita",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Celera in Werne Village."
   },
   {
     "id": 603,
     "name": "Snakebite",
+    "rarity": 3,
     "whereToObtain": "Reward for defeating Venom in Daphan Village."
   },
   {
     "id": 995,
     "name": "Fire Beigoma",
+    "rarity": 1,
     "whereToObtain": "Dropped by Flame Gel enemies in the Eastern Desert (or chosen during Reid's introduction quest in Eltisweiss)."
   },
   {
     "id": 996,
     "name": "Water Beigoma",
+    "rarity": 1,
     "whereToObtain": "Dropped by Shell Octopus enemies in Seaside Cavern (or chosen during Reid's introduction quest in Eltisweiss)."
   },
   {
     "id": 997,
     "name": "Wind Beigoma",
+    "rarity": 1,
     "whereToObtain": "Dropped by Sky Sahagin enemies in The Greatwood (East) or Road to Proving Grounds (or chosen during Reid's introduction quest in Eltisweiss)."
   },
   {
     "id": 998,
     "name": "Practice Beigoma",
+    "rarity": 1,
     "whereToObtain": "Starter top provided by Reid upon unlocking the Beigoma mini-game in Eltisweiss."
   },
   {
     "id": 999,
     "name": "Practice Beigoma",
+    "rarity": 1,
     "whereToObtain": "Second starter top provided by Reid upon unlocking the Beigoma mini-game in Eltisweiss."
   }
 ]
