@@ -425,7 +425,6 @@ function createRecipeRowHtml(recipe, isAcquired, isCooked) {
   return `
     <tr>
       <td class="col-recipe-name">${escapeHtml(recipe.name)}</td>
-      <td class="col-recipe-cat">${recipeCategoryBadge(recipe.category)}</td>
       <td class="col-recipe-loc">${escapeHtml(recipe.howToObtain || recipe.location || '—')}</td>
       <td class="col-recipe-status">${statusBadge}</td>
       <td class="col-recipe-cooked">

@@ -1044,9 +1044,8 @@ tr.is-recruited td.col-name .hero-name {
 }
 
 .col-recipe-loc {
-  width: 240px;
-  color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
+  color: var(--text-primary);
 }
 
 .col-recipe-status {
