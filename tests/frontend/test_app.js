@@ -175,6 +175,40 @@ test('updateSavePathButtonState keeps button disabled when candidate path is inv
   }
 });
 
+test('updateSavePathButtonState enables button when new save path does not exist yet (e.g. UserDataXYZ.dat)', async () => {
+  const origFetch = global.fetch;
+  try {
+    global.fetch = async () => ({
+      ok: true,
+      json: async () => ({
+        valid: false,
+        exists: false,
+        error: 'File does not exist: C:/saves/UserDataXYZ.dat',
+      }),
+    });
+
+    app.state.saveConfig = { save_path: 'C:/saves/UserData0.dat' };
+    app.dom.configPathInput = { value: 'C:/saves/UserDataXYZ.dat' };
+    app.dom.btnSavePath = { disabled: false };
+    app.dom.detectStatusHint = { textContent: '', className: '', hidden: true };
+
+    app.updateSavePathButtonState();
+    // Initially disabled while checking
+    assert.strictEqual(app.dom.btnSavePath.disabled, true);
+
+    // Wait for 350ms debounce
+    await new Promise((r) => setTimeout(r, 350));
+
+    // When file does not exist, user is allowed to save the path!
+    assert.strictEqual(app.dom.btnSavePath.disabled, false);
+    assert.strictEqual(app.dom.detectStatusHint.hidden, false);
+    assert.ok(app.dom.detectStatusHint.className.includes('hint-info'));
+    assert.ok(app.dom.detectStatusHint.textContent.includes('does not exist yet'));
+  } finally {
+    global.fetch = origFetch;
+  }
+});
+
 test('filterRecipe does not allow searching by category', () => {
   const recipe = {
     id: 3025,

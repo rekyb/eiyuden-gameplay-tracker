@@ -1195,7 +1195,7 @@ async function validateSavePath(candidatePath) {
       const data = await res.json().catch(() => ({}));
       return {
         valid: false,
-        exists: false,
+        exists: data.exists !== undefined ? data.exists : false,
         error: data.error || `Server error (${res.status})`,
       };
     }
@@ -1245,6 +1245,14 @@ function updateSavePathButtonState() {
         dom.detectStatusHint,
         `✓ Valid save file verified (${heroText}${playText})`,
         'success'
+      );
+    } else if (!val.exists) {
+      // File does not exist yet (e.g. UserDataXYZ.dat, new save slot) — allow user to save path
+      dom.btnSavePath.disabled = false;
+      setDialogStatus(
+        dom.detectStatusHint,
+        'Note: Save file does not exist yet at this path (path will be watched).',
+        'info'
       );
     } else {
       dom.btnSavePath.disabled = true;
@@ -1699,7 +1707,7 @@ function setupEventListeners() {
             applyProgress(data.summary);
           }
           if (dom.btnSavePath) {
-            dom.btnSavePath.disabled = true;
+            dom.btnSavePath.disabled = false;
           }
           const count = data.summary?.recruited_ids?.length || 0;
           const playtime = data.summary?.playtime_formatted || '';
