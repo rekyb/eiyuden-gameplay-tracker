@@ -1,0 +1,631 @@
+[
+  {
+    "id": 1,
+    "name": "Curry Mackerel",
+    "rarity": 1,
+    "spot_ids": [
+      6,
+      10,
+      52
+    ],
+    "location": "Seaside Cavern, Dabavin, Headquarters Spot #2",
+    "notes": "A mackerel flavored with curry to its very bones. Feeds primarily on spice plankton. Appearance and flavor varies depending on the quantity and type of food consumed. Beware of the rare extra hot variant."
+  },
+  {
+    "id": 2,
+    "name": "Crested Puffer",
+    "rarity": 1,
+    "spot_ids": [
+      6,
+      9,
+      11,
+      52
+    ],
+    "location": "Seaside Cavern, Seaside Cavern (Interior), Impershi'arc, Headquarters Spot #2",
+    "notes": "A pufferfish with horns resembling those of an East Reach helmet. When agitated, it inflates its body and discharges venom from the tips of its horns. In tanks, this can result in death from self-poisoning."
+  },
+  {
+    "id": 3,
+    "name": "Boost Mullet",
+    "rarity": 1,
+    "spot_ids": [
+      6,
+      7,
+      52
+    ],
+    "location": "Seaside Cavern, Hishahn, Headquarters Spot #2",
+    "notes": "A mullet that flies on a jet of compressed air. Propels itself by forcing compressed air out of a specially adapted part called a \"navel.\" Specimens that land on solid ground are a contested delicacy among stray cats."
+  },
+  {
+    "id": 4,
+    "name": "Scissor Seabass",
+    "rarity": 1,
+    "spot_ids": [
+      9,
+      10,
+      53
+    ],
+    "location": "Seaside Cavern (Interior), Dabavin, Headquarters Spot #3",
+    "notes": "A sea bass with razor-sharp fins and scales, which it scrapes against larger prey to tear them into bite-sized pieces for consumption. The fish spends most of its day rubbing itself on rasp kelp."
+  },
+  {
+    "id": 5,
+    "name": "Shock Saury",
+    "rarity": 2,
+    "spot_ids": [
+      9,
+      10,
+      53
+    ],
+    "location": "Seaside Cavern (Interior), Dabavin, Headquarters Spot #3",
+    "notes": "A mackerel capable of swimming at astonishing speed. Capable of accumulating solar energy in its body and using it for high-speed propulsion. Spends most of its day basking with its back above water."
+  },
+  {
+    "id": 6,
+    "name": "Spotted Ohagi Crab",
+    "rarity": 2,
+    "spot_ids": [
+      7,
+      8,
+      52
+    ],
+    "location": "Hishahn, Hishahn Palace, Headquarters Spot #2",
+    "notes": "A crab resembling an ohagi rice cake. Its carapace is covered in a sticky membrane, to which it cunningly uses its claws to attach chips of stone for camouflage. Some like to attach seaweed and shells as well."
+  },
+  {
+    "id": 7,
+    "name": "Armored Mackerel",
+    "rarity": 2,
+    "spot_ids": [
+      6,
+      9,
+      11,
+      52
+    ],
+    "location": "Seaside Cavern, Seaside Cavern (Interior), Impershi'arc, Headquarters Spot #2",
+    "notes": "A mackerel covered in an armor of mud. Able to attach mud from the seabed to the membrane on its scales. The longer and better the mud worn, the more mature and delicious the flesh becomes."
+  },
+  {
+    "id": 8,
+    "name": "Saber Squid",
+    "rarity": 2,
+    "spot_ids": [
+      6,
+      10,
+      52
+    ],
+    "location": "Seaside Cavern, Dabavin, Headquarters Spot #2",
+    "notes": "A squid with a blade-like appendage. In mating contests, males hurl their bodies against females, and each female only mates with a male she deems suitable. The \"blade\" is believed to have evolved from the bone."
+  },
+  {
+    "id": 9,
+    "name": "Eight-Eyed Octopus",
+    "rarity": 3,
+    "spot_ids": [
+      6,
+      9,
+      52
+    ],
+    "location": "Seaside Cavern, Seaside Cavern (Interior), Headquarters Spot #2",
+    "notes": "A timid octopus with eight clawed-tipped arms and eight eyes on its body. Its barbed, venomous claws make it dangerous to approach. When threatened, it will sever a tentacle to escape."
+  },
+  {
+    "id": 10,
+    "name": "Great Stealth Remora",
+    "rarity": 3,
+    "spot_ids": [
+      7,
+      9,
+      52
+    ],
+    "location": "Hishahn, Seaside Cavern (Interior), Headquarters Spot #2",
+    "notes": "A large remora that can assume the color of the sea. Uses the suction dish on its head to catch fish, which it uses to attract prey. Suckered fish are sometimes hauled in when the remora is caught."
+  },
+  {
+    "id": 11,
+    "name": "Coral Grouper",
+    "rarity": 3,
+    "spot_ids": [
+      6,
+      10,
+      52
+    ],
+    "location": "Seaside Cavern, Dabavin, Headquarters Spot #2",
+    "notes": "A grouper with multiple colonies on its body. Coral reefs form wherever this species goes. Their collective migration looks like a coral reef in motion, and is considered one of the three most beautiful sights in the world."
+  },
+  {
+    "id": 12,
+    "name": "Brilliant Filefish",
+    "rarity": 3,
+    "spot_ids": [
+      7,
+      11,
+      52
+    ],
+    "location": "Hishahn, Impershi'arc, Headquarters Spot #2",
+    "notes": "It harbors gems in its body. Crushes seafloor gems it finds with its sturdy teeth and swallows them, then excreting them with rounded edges. The liver, which shimmers in seven colors, contains a premium fat and is delicious."
+  },
+  {
+    "id": 13,
+    "name": "Twinhead Eel",
+    "rarity": 4,
+    "spot_ids": [
+      6,
+      8,
+      52
+    ],
+    "location": "Seaside Cavern, Hishahn Palace, Headquarters Spot #2",
+    "notes": "An eel with two heads. The heads have different personalities, with one leading and the other assisting. The heads sometimes fight over food, though they share the same stomach."
+  },
+  {
+    "id": 14,
+    "name": "Elder Mackerel",
+    "rarity": 4,
+    "spot_ids": [
+      7,
+      10,
+      52
+    ],
+    "location": "Hishahn, Dabavin, Headquarters Spot #2",
+    "notes": "It has an array of feelers (\"whiskers\") resembling a sage's beard. These whiskers are used to locate seafloor shells and sea urchins, which it crushes and consumes. Those with more whiskers are considered more delicious."
+  },
+  {
+    "id": 15,
+    "name": "Wheel-Eye Bream",
+    "rarity": 4,
+    "spot_ids": [
+      6,
+      9,
+      52
+    ],
+    "location": "Seaside Cavern, Seaside Cavern (Interior), Headquarters Spot #2",
+    "notes": "Rare spawn; required to recruit Huang. A sea bream with eyes resembling wheels. The eyes, considered to be a form of compound eye, permit it to see in all directions. The fish is prized at celebrations as a lucky fish."
+  },
+  {
+    "id": 16,
+    "name": "Super Chili Moray",
+    "rarity": 4,
+    "spot_ids": [
+      6,
+      10,
+      11,
+      52
+    ],
+    "location": "Seaside Cavern, Dabavin, Impershi'arc, Headquarters Spot #2",
+    "notes": "A moray with exceedingly spicy flesh. Feeds primarily on migratory curry mackerel. Specimens that favor especially hot curry mackerel develop bright red flesh. Commands high prices among spicy food connoisseurs."
+  },
+  {
+    "id": 17,
+    "name": "Lion Amberjack",
+    "rarity": 5,
+    "spot_ids": [
+      6,
+      9,
+      52
+    ],
+    "location": "Seaside Cavern, Seaside Cavern (Interior), Headquarters Spot #2",
+    "notes": "An amberjack that hosts sea anemones on its body. Hides its head with the anemones until prey draws near. The anemones around its face tend to grow larger due to the abundance of leftover food."
+  },
+  {
+    "id": 18,
+    "name": "Magma Tuna",
+    "rarity": 5,
+    "spot_ids": [
+      9,
+      53
+    ],
+    "location": "Seaside Cavern (Interior), Headquarters Spot #3",
+    "notes": "A tuna with a charred-looking black body. Roams warm waters near undersea volcanoes, acquiring an ash layer that gives its body a charred appearance. Has a high body temperature and gives off vapor when caught."
+  },
+  {
+    "id": 19,
+    "name": "Golden Demon Marlin",
+    "rarity": 5,
+    "spot_ids": [
+      9,
+      53
+    ],
+    "location": "Seaside Cavern (Interior), Headquarters Spot #3",
+    "notes": "A golden marlin with two spears. Uses its spears to impale its prey. Speared prey can obscure the marlin's vision, occasionally causing it to crash into walls."
+  },
+  {
+    "id": 20,
+    "name": "Armadillo Shark",
+    "rarity": 5,
+    "spot_ids": [
+      9,
+      53
+    ],
+    "location": "Seaside Cavern (Interior), Headquarters Spot #3",
+    "notes": "A shark capable of curling its body up like an armadillo. When attacked, it curls up and sinks to the sea floor, protected by its tough dorsal scales. Its meaty flesh is full of sinews, but tastes good in soups and stews."
+  },
+  {
+    "id": 21,
+    "name": "Moss Tadpole",
+    "rarity": 1,
+    "spot_ids": [
+      1,
+      2,
+      4,
+      51
+    ],
+    "location": "Grum County (North), Altverden Village, Kyshiri Village, Headquarters Spot #1",
+    "notes": "A tadpole that grows moss on the sunlit parts of its body. Basks in the daytime to promote moss growth. Specimens with particularly luxuriant moss fetch a high price among certain collectors."
+  },
+  {
+    "id": 22,
+    "name": "Tigerloach",
+    "rarity": 1,
+    "spot_ids": [
+      1,
+      2,
+      4,
+      5,
+      51
+    ],
+    "location": "Grum County (North), Altverden Village, Kyshiri Village, Near Headquarters, Headquarters Spot #1",
+    "notes": "An aggressive loach with tiger-like stripes. Its mouth resembles a steel trap. Always traveling in schools, it keenly seeks out blood and gangs up on small fish."
+  },
+  {
+    "id": 23,
+    "name": "Ironcarp",
+    "rarity": 1,
+    "spot_ids": [
+      5,
+      15,
+      52
+    ],
+    "location": "Near Headquarters, Athrabalt, Headquarters Spot #2",
+    "notes": "A carp with extraordinarily hard scales. Shields itself from larger predatory fish by armoring its body with metallic riverbed debris. Its metal armor hinders its ability to swim."
+  },
+  {
+    "id": 24,
+    "name": "Fruitigill",
+    "rarity": 1,
+    "spot_ids": [
+      2,
+      3,
+      14,
+      51
+    ],
+    "location": "Altverden Village, Eltisweiss, Yarnaan, Headquarters Spot #1",
+    "notes": "A gill that feeds primarily on fruit. Eats holes in fruits that float downstream. Flavor can be sweet or tart, reflecting the flavor of the fruit consumed."
+  },
+  {
+    "id": 25,
+    "name": "Shovel Lobster",
+    "rarity": 2,
+    "spot_ids": [
+      1,
+      4,
+      5,
+      51
+    ],
+    "location": "Grum County (North), Kyshiri Village, Near Headquarters, Headquarters Spot #1",
+    "notes": "A crayfish with prominently curved claws. Skillfully uses its claws to dig a burrow, to which it transports prey for consumption. The burrows are sometimes stolen by other shovel crayfish."
+  },
+  {
+    "id": 26,
+    "name": "Porter Chub",
+    "rarity": 2,
+    "spot_ids": [
+      3,
+      14,
+      51
+    ],
+    "location": "Eltisweiss, Yarnaan, Headquarters Spot #1",
+    "notes": "A chub that carries a nest on its back. Uses any kind of river debris to build its nest. Nests built of fruit may be consumed by fruitigills. Its flesh is sweet with a subtle fruity aroma."
+  },
+  {
+    "id": 27,
+    "name": "Melon Sweetfish",
+    "rarity": 2,
+    "spot_ids": [
+      1,
+      2,
+      5,
+      51
+    ],
+    "location": "Grum County (North), Altverden Village, Near Headquarters, Headquarters Spot #1",
+    "notes": "A sweetfish with a melon-like flavor. Primarily consumes melons that drift down from upstream melon groves. Popular as a bar snack."
+  },
+  {
+    "id": 28,
+    "name": "Hammerhead Bass",
+    "rarity": 3,
+    "spot_ids": [
+      5,
+      14,
+      52
+    ],
+    "location": "Near Headquarters, Yarnaan, Headquarters Spot #2",
+    "notes": "A bass with a hammer-shaped head. Smashes small fish with its hammer-like head and feeds upon them. Occasionally gets its head trapped between rocks when swinging it to stun small fish."
+  },
+  {
+    "id": 29,
+    "name": "Webclaw Turtle",
+    "rarity": 3,
+    "spot_ids": [
+      1,
+      5,
+      15,
+      51
+    ],
+    "location": "Grum County (North), Near Headquarters, Athrabalt, Headquarters Spot #1",
+    "notes": "A pond slider with net-like webbing on its claws. Uses the nets on its claws to catch small fish. Occasionally snags larger fish, which results in the turtle being carried away."
+  },
+  {
+    "id": 30,
+    "name": "Drill Turtle",
+    "rarity": 3,
+    "spot_ids": [
+      2,
+      3,
+      8,
+      15,
+      51
+    ],
+    "location": "Altverden Village, Eltisweiss, Hishahn Palace, Athrabalt, Headquarters Spot #1",
+    "notes": "A softshell turtle that evolved a head that rotates with ease. Bites prey with its sturdy teeth, then rotates its head to tear chunks away. Its neck skin hangs loose at rest and twists like a wrung cloth when the head rotates."
+  },
+  {
+    "id": 31,
+    "name": "Death-Scythe Salmon",
+    "rarity": 4,
+    "spot_ids": [
+      3,
+      14,
+      51
+    ],
+    "location": "Eltisweiss, Yarnaan, Headquarters Spot #1",
+    "notes": "A salmon with scythe-like horns. The horns on its head are so exceedingly sharp that some make them into knives. The flesh is laden with fat, so overindulgence should be avoided despite its deliciousness."
+  },
+  {
+    "id": 32,
+    "name": "Big-Mouthed Pelican Perch",
+    "rarity": 5,
+    "spot_ids": [
+      3,
+      15,
+      51
+    ],
+    "location": "Eltisweiss, Athrabalt, Headquarters Spot #1",
+    "notes": "A perch with a large mouth resembling a pelican's. Swallows small fish and turtles whole. Will attempt to swallow creatures larger than its own body, assessing their edibility only after snapping them up."
+  },
+  {
+    "id": 33,
+    "name": "Sand Goby",
+    "rarity": 1,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A goby that slides across sandy wastes on \"sleds.\" The sleds are pieces of wood or grass that it suckers onto its abdominal suction cup. Large specimens often steal sleds from smaller ones they encounter."
+  },
+  {
+    "id": 34,
+    "name": "Mewing Gurnard",
+    "rarity": 2,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A gurnard with a cat-like cry and fins resembling cat ears. Often uses its fins to walk. Some people keep mewing gurnards as pets, but feeding one is prohibited."
+  },
+  {
+    "id": 35,
+    "name": "Cow Flounder",
+    "rarity": 2,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A flounder with cow-like horns and skin markings. Has a docile temperament and spends much of its time asleep at the bottom of the Sandy Sea. Skin markings vary between specimens, with some exhibiting heart-shaped spots."
+  },
+  {
+    "id": 36,
+    "name": "Hippo Halibut",
+    "rarity": 3,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A halibut with tusks like those of a hippopotamus. Remarkably ferocious, it bites any fish that enters its territory. Its venomous tusks inflict a lethal wound. The mild-flavored white flesh is delicious if boiled."
+  },
+  {
+    "id": 37,
+    "name": "Anchor Ray",
+    "rarity": 3,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A ray resembling a boat anchor in shape and weight. Often mistaken for other large fish when hauled in. Normal fishing methods may be used to catch it, but snagging is prohibited."
+  },
+  {
+    "id": 38,
+    "name": "Wolf Coelacanth",
+    "rarity": 4,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "A coelacanth with the ferocity of a wolf. Travels in small packs and prioritizes species survival, readily dismissing members that slow the group down. Its fatty flesh is often served grilled."
+  },
+  {
+    "id": 39,
+    "name": "Dragon Seahorse",
+    "rarity": 5,
+    "spot_ids": [
+      12,
+      54
+    ],
+    "location": "Sandfish Island, Headquarters Spot #4",
+    "notes": "Armored with dragon's scales. Also known as the \"sand dragon.\" So seldom seen that sightings are considered good omens. Only those who have eaten it know how it tastes."
+  },
+  {
+    "id": 40,
+    "name": "Fountain Minnow",
+    "rarity": 1,
+    "spot_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      16,
+      51
+    ],
+    "location": "Grum County (North), Altverden Village, Eltisweiss, Kyshiri Village, Near Headquarters, Hishahn Palace, Skriss Village, Headquarters Spot #1",
+    "notes": "A minnow that spits balls of water. Strikes insects in midair or on foliage to knock them into the water to eat. Its poor eyesight restricts it to targeting fireflies at night."
+  },
+  {
+    "id": 41,
+    "name": "Lantern Catfish",
+    "rarity": 1,
+    "spot_ids": [
+      4,
+      8,
+      14,
+      51
+    ],
+    "location": "Kyshiri Village, Hishahn Palace, Yarnaan, Headquarters Spot #1",
+    "notes": "A catfish with a glowing lure on its head. Hides in the mud, waving its lure to simulate an insect and attract small fish, which it preys upon. The flesh has a muddy, unpalatable flavor only enjoyed by a handful of enthusiasts."
+  },
+  {
+    "id": 42,
+    "name": "Meteor Carp",
+    "rarity": 2,
+    "spot_ids": [
+      8,
+      52
+    ],
+    "location": "Hishahn Palace, Headquarters Spot #2",
+    "notes": "A carp with glowing markings on its body. The carp is able to manipulate the markings to match its surroundings. At night, the markings glow, giving the appearance of meteors. The mild flesh is delicious grilled or fried."
+  },
+  {
+    "id": 43,
+    "name": "Flat Snakehead",
+    "rarity": 3,
+    "spot_ids": [
+      4,
+      5,
+      8,
+      14,
+      51
+    ],
+    "location": "Kyshiri Village, Near Headquarters, Hishahn Palace, Yarnaan, Headquarters Spot #1",
+    "notes": "A snakehead that can store lightning in its body. Holds its tail above the water on stormy days and waits for lightning to strike. Emits light from its body to attract small fish for predation."
+  },
+  {
+    "id": 44,
+    "name": "Sawgar",
+    "rarity": 4,
+    "spot_ids": [
+      8,
+      52
+    ],
+    "location": "Hishahn Palace, Headquarters Spot #2",
+    "notes": "A gar with fine, sharp scales resembling the teeth of a saw. The scales cover its entire body from head to tail and cut like razors. When threatened, the gar vibrates its scales as an intimidation tactic."
+  },
+  {
+    "id": 45,
+    "name": "Alligator Pirarucu",
+    "rarity": 5,
+    "spot_ids": [
+      8,
+      14,
+      52
+    ],
+    "location": "Hishahn Palace, Yarnaan, Headquarters Spot #2",
+    "notes": "A pirarucu with crocodilian teeth and limbs. Despite having four limbs, it primarily lives underwater, often leaving its snout above the surface to snatch small animals, which it pulls into the water when they come to drink."
+  },
+  {
+    "id": 46,
+    "name": "Frostbite Smelt",
+    "rarity": 1,
+    "spot_ids": [
+      15,
+      16,
+      54
+    ],
+    "location": "Athrabalt, Skriss Village, Headquarters Spot #4",
+    "notes": "A smelt with an extremely low body temperature. Its body temperature is so low that skin contact is reputed to cause frostbite. Forms schools and is often fished in cold regions. Deliciously edible down to the bone when fried."
+  },
+  {
+    "id": 47,
+    "name": "Rune Clione",
+    "rarity": 5,
+    "spot_ids": [
+      16,
+      54
+    ],
+    "location": "Skriss Village, Headquarters Spot #4",
+    "notes": "A sea angel that congregates around runes. Said to gather around seabed runes, which it consumes and transforms into energy. The tasteless flesh is unsuitable for eating."
+  },
+  {
+    "id": 48,
+    "name": "Ice Char",
+    "rarity": 2,
+    "spot_ids": [
+      16,
+      54
+    ],
+    "location": "Skriss Village, Headquarters Spot #4",
+    "notes": "An ice-covered char. Covers its scales with ice by leaping into the air to freeze water onto its scales. The ice coating enables it to slide around on land, where it is often seen leaping during spawning season."
+  },
+  {
+    "id": 49,
+    "name": "Icicle Trout",
+    "rarity": 3,
+    "spot_ids": [
+      15,
+      16,
+      54
+    ],
+    "location": "Athrabalt, Skriss Village, Headquarters Spot #4",
+    "notes": "A rainbow trout with icicles on every fin. Its frigid fins freeze the surrounding water, forming icicles that cover its body. When attacked by predators, the trout can detach icicles to escape."
+  },
+  {
+    "id": 50,
+    "name": "Snowball Taimen",
+    "rarity": 4,
+    "spot_ids": [
+      16,
+      54
+    ],
+    "location": "Skriss Village, Headquarters Spot #4",
+    "notes": "A taimen that defends against enemies by covering its body in snow. Leaps onto land and rolls on the ground to cover itself with snow, and piles up snow near the water to build a nest called an \"igloo.\""
+  },
+  {
+    "id": 51,
+    "name": "Extra Hot Curry Mackerel",
+    "rarity": 2,
+    "spot_ids": [
+      6,
+      52
+    ],
+    "location": "Seaside Cavern, Headquarters Spot #2",
+    "notes": "An extremely rare mutant variant of the curry mackerel. Famed for its extreme spiciness, the mackerel has scorched the tongues of numerous challengers, yet its popularity never wanes."
+  },
+  {
+    "id": 52,
+    "name": "Human-Faced Fish",
+    "rarity": 5,
+    "spot_ids": [
+      51,
+      52,
+      53,
+      54
+    ],
+    "location": "Headquarters Spot #1, Headquarters Spot #2, Headquarters Spot #3, Headquarters Spot #4",
+    "notes": "Mythical fish appearing at Headquarters fishing spots. Details unknown. Considered mythical among anglers. Only a few sightings have been reported, and its true nature remains a mystery."
+  }
+]
