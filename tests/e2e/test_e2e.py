@@ -48,6 +48,13 @@ class TestEndToEndSaveTracker(unittest.TestCase):
         cls.http_server.shutdown()
         cls.http_server.server_close()
         shutil.rmtree(cls.temp_dir, ignore_errors=True)
+        from src.tracker.server import PROJECT_ROOT
+        uploaded_file = PROJECT_ROOT / "uploads" / "UserData0.dat"
+        if uploaded_file.exists():
+            try:
+                uploaded_file.unlink()
+            except OSError:
+                pass
 
     def _url(self, path: str) -> str:
         return f"http://127.0.0.1:{self.port}{path}"
@@ -112,6 +119,24 @@ class TestEndToEndSaveTracker(unittest.TestCase):
             self.assertIn("switchView", js)
             self.assertIn("renderRecipesTable", js)
             self.assertIn("cookedRecipeIds", js)
+
+    def test_e2e_save_upload_project_root(self):
+        """POST /api/save/upload saves file under project root uploads/ directory."""
+        from src.tracker.server import PROJECT_ROOT
+        raw_bytes = create_synthetic_save(hero_ids=[10, 20])
+        req = urllib.request.Request(
+            self._url("/api/save/upload"),
+            data=raw_bytes,
+            headers={"Content-Type": "application/octet-stream"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertTrue(data.get("success"))
+            expected_uploads_dir = os.path.normpath(str(PROJECT_ROOT / "uploads"))
+            self.assertEqual(os.path.normpath(os.path.dirname(data["save_path"])), expected_uploads_dir)
+            self.assertTrue(os.path.isfile(data["save_path"]))
 
 
 if __name__ == "__main__":

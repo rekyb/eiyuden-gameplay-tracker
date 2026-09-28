@@ -30,6 +30,7 @@ from src.tracker.core.save_reader import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATIC_DIR = PROJECT_ROOT / "static"
+DEFAULT_UPLOADS_DIR = PROJECT_ROOT / "uploads"
 
 
 def detect_save_path() -> Optional[str]:
@@ -48,11 +49,11 @@ def detect_save_path() -> Optional[str]:
 detect_steam_save_path = detector_detect_steam
 
 
-def load_config(config_path: Optional[Union[str, Path]] = "config.json") -> Dict[str, Any]:
+def load_config(config_path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
     """Load configuration from disk, falling back to defaults if not found.
 
     Args:
-        config_path: Path to config JSON file.
+        config_path: Path to config JSON file. Defaults to config/config.json.
 
     Returns:
         Configuration dictionary containing 'save_path'.
@@ -86,12 +87,12 @@ def load_config(config_path: Optional[Union[str, Path]] = "config.json") -> Dict
     return cfg
 
 
-def save_config(config_data: Dict[str, Any], config_path: Optional[Union[str, Path]] = "config.json") -> None:
+def save_config(config_data: Dict[str, Any], config_path: Optional[Union[str, Path]] = None) -> None:
     """Save configuration dictionary to JSON file.
 
     Args:
         config_data: Dictionary containing configuration settings.
-        config_path: Destination path for config.json.
+        config_path: Destination path for config.json. Defaults to config/config.json.
     """
     cm = ConfigManager(config_path)
     cm.save_config(config_data)
@@ -555,8 +556,7 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
 
-            base_dir = os.path.dirname(os.path.abspath(str(self.server.config_manager.config_path)))
-            uploads_dir = os.path.join(base_dir, "uploads")
+            uploads_dir = getattr(self.server, "uploads_dir", str(DEFAULT_UPLOADS_DIR))
             os.makedirs(uploads_dir, exist_ok=True)
             saved_path = os.path.join(uploads_dir, "UserData0.dat")
 
@@ -592,6 +592,7 @@ class SaveTrackerServer(ThreadingHTTPServer):
         config_path: Optional[Union[str, Path]] = None,
         characters_path: Optional[Union[str, Path]] = None,
         recipes_path: Optional[Union[str, Path]] = None,
+        uploads_dir: Optional[Union[str, Path]] = None,
     ):
         super().__init__(server_address, RequestHandlerClass)
         if config_manager is not None:
@@ -603,6 +604,7 @@ class SaveTrackerServer(ThreadingHTTPServer):
 
         self.config_path = str(self.config_manager.config_path)
         self.static_dir = str(static_dir) if static_dir is not None else str(DEFAULT_STATIC_DIR)
+        self.uploads_dir = str(uploads_dir) if uploads_dir is not None else str(DEFAULT_UPLOADS_DIR)
         self.characters_path = str(characters_path) if characters_path is not None else None
         self.recipes_path = str(recipes_path) if recipes_path is not None else None
 
@@ -615,6 +617,7 @@ def create_server(
     config_path: Optional[Union[str, Path]] = None,
     characters_path: Optional[Union[str, Path]] = None,
     recipes_path: Optional[Union[str, Path]] = None,
+    uploads_dir: Optional[Union[str, Path]] = None,
 ) -> SaveTrackerServer:
     """Create a configured SaveTrackerServer instance.
 
@@ -626,6 +629,7 @@ def create_server(
         config_path: Optional path to config JSON file (legacy/convenience).
         characters_path: Optional path to characters JSON file (legacy/convenience).
         recipes_path: Optional path to recipes JSON file (legacy/convenience).
+        uploads_dir: Optional directory for uploaded save files (default: uploads/).
 
     Returns:
         SaveTrackerServer instance.
@@ -638,6 +642,7 @@ def create_server(
         config_path=config_path,
         characters_path=characters_path,
         recipes_path=recipes_path,
+        uploads_dir=uploads_dir,
     )
 
 
@@ -647,6 +652,7 @@ def run_server(
     open_browser: bool = False,
     static_dir: Optional[Union[str, Path]] = None,
     config_manager: Optional[ConfigManager] = None,
+    uploads_dir: Optional[Union[str, Path]] = None,
 ) -> None:
     """Run the Save Tracker HTTP API server until interrupted.
 
@@ -656,12 +662,14 @@ def run_server(
         open_browser: Whether to open default browser on start.
         static_dir: Optional path to frontend static directory.
         config_manager: Optional ConfigManager instance.
+        uploads_dir: Optional path to uploads directory.
     """
     server = create_server(
         host=host,
         port=port,
         static_dir=static_dir,
         config_manager=config_manager,
+        uploads_dir=uploads_dir,
     )
 
     actual_port = server.server_address[1]

@@ -61,6 +61,12 @@ class TestServerAPI(unittest.TestCase):
         cls.httpd.shutdown()
         cls.httpd.server_close()
         shutil.rmtree(cls.temp_dir, ignore_errors=True)
+        uploaded_file = server.PROJECT_ROOT / "uploads" / "UserData0.dat"
+        if uploaded_file.exists():
+            try:
+                uploaded_file.unlink()
+            except OSError:
+                pass
 
     def _url(self, path: str) -> str:
         return f"http://127.0.0.1:{self.server_port}{path}"
@@ -334,6 +340,9 @@ class TestServerAPI(unittest.TestCase):
             self.assertTrue(data.get("success"))
             self.assertIn("summary", data)
             self.assertGreater(len(data["summary"]["recruited_ids"]), 0)
+            expected_uploads_dir = os.path.normpath(str(server.PROJECT_ROOT / "uploads"))
+            self.assertEqual(os.path.normpath(os.path.dirname(data["save_path"])), expected_uploads_dir)
+            self.assertTrue(os.path.isfile(data["save_path"]))
 
     def test_post_save_upload_multipart(self):
         """POST /api/save/upload accepts multipart/form-data upload."""
@@ -356,6 +365,9 @@ class TestServerAPI(unittest.TestCase):
             data = json.loads(resp.read().decode("utf-8"))
             self.assertTrue(data.get("success"))
             self.assertGreater(len(data["summary"]["recruited_ids"]), 0)
+            expected_uploads_dir = os.path.normpath(str(server.PROJECT_ROOT / "uploads"))
+            self.assertEqual(os.path.normpath(os.path.dirname(data["save_path"])), expected_uploads_dir)
+            self.assertTrue(os.path.isfile(data["save_path"]))
 
     def test_post_save_upload_invalid(self):
         """POST /api/save/upload rejects invalid/corrupted save bytes."""
@@ -502,6 +514,23 @@ class TestConfigHelpers(unittest.TestCase):
         server.save_config({"save_path": "custom/path.dat"}, self.config_path)
         cfg = server.load_config(self.config_path)
         self.assertEqual(cfg["save_path"], "custom/path.dat")
+
+    def test_load_config_default_none_uses_config_manager(self):
+        """load_config() with no args passes None to ConfigManager, defaulting to config/config.json."""
+        with mock.patch("src.tracker.server.ConfigManager") as mock_cm_cls:
+            mock_cm_instance = mock_cm_cls.return_value
+            mock_cm_instance.get_config.return_value = {"save_path": "mocked.dat"}
+            cfg = server.load_config()
+            mock_cm_cls.assert_called_once_with(None)
+            self.assertEqual(cfg["save_path"], "mocked.dat")
+
+    def test_save_config_default_none_uses_config_manager(self):
+        """save_config() with no config_path passes None to ConfigManager."""
+        with mock.patch("src.tracker.server.ConfigManager") as mock_cm_cls:
+            mock_cm_instance = mock_cm_cls.return_value
+            server.save_config({"save_path": "test.dat"})
+            mock_cm_cls.assert_called_once_with(None)
+            mock_cm_instance.save_config.assert_called_once_with({"save_path": "test.dat"})
 
     def test_detect_save_path(self):
         result = server.detect_save_path()
