@@ -1478,9 +1478,32 @@ tr.is-recruited td.col-name .hero-name {
   color: var(--text-primary);
 }
 
+.col-beigoma-rarity {
+  width: 90px;
+  white-space: nowrap;
+}
+
 .col-beigoma-status {
   width: 140px;
   white-space: nowrap;
+}
+
+.rarity-stars {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  user-select: none;
+}
+
+.star-filled {
+  color: #f59e0b;
+}
+
+.star-empty {
+  color: var(--text-muted);
+  opacity: 0.35;
 }
 
 .col-trainer-name {

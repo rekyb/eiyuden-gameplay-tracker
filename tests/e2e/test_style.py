@@ -127,6 +127,14 @@ class TestStyleCSS(unittest.TestCase):
         self.assertIn('.page-btn', css)
         self.assertIn('.page-btn.active', css)
 
+    def test_beigoma_rarity_styles_defined(self):
+        css_path = Path(__file__).resolve().parent.parent.parent / "static" / "style.css"
+        css = css_path.read_text(encoding="utf-8")
+        self.assertIn('.col-beigoma-rarity', css)
+        self.assertIn('.rarity-stars', css)
+        self.assertIn('.star-filled', css)
+        self.assertIn('.star-empty', css)
+
 
 if __name__ == '__main__':
     unittest.main()
