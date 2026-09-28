@@ -3,6 +3,7 @@
     "id": 10,
     "name": "Nowa",
     "role": "Battle",
+    "chapter": "Prologue",
     "location": "Starting Character",
     "howToRecruit": "Joins automatically at the start of the game as the main protagonist.",
     "missable": false
@@ -11,54 +12,61 @@
     "id": 20,
     "name": "Seign",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
-    "howToRecruit": "Joins automatically after the battle for Hishahn Front when he breaks away from the Imperial army.",
+    "howToRecruit": "Joins automatically following the battle at Hishahn Front when he breaks away from the Imperial army to ally with Nowa.",
     "missable": false
   },
   {
     "id": 30,
     "name": "Melridge",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
-    "howToRecruit": "Joins automatically after the battle for Hishahn Front as the Alliance's tactician.",
+    "howToRecruit": "Joins automatically after the battle for Hishahn Front as the Alliance's lead tactician and military adviser.",
     "missable": false
   },
   {
     "id": 40,
     "name": "Garr",
     "role": "Battle",
+    "chapter": "Prologue",
     "location": "Starting Character",
-    "howToRecruit": "Joins automatically at the start of the game alongside Lian and Mio.",
+    "howToRecruit": "Joins automatically at the start of the game alongside Lian and Mio as a veteran mercenary squad leader.",
     "missable": false
   },
   {
     "id": 50,
     "name": "Lian",
     "role": "Battle",
+    "chapter": "Prologue",
     "location": "Starting Character",
-    "howToRecruit": "Joins automatically at the start of the game as part of Nowa's initial squad.",
+    "howToRecruit": "Joins automatically at the start of the game as part of Nowa's initial expedition squad in Arenside.",
     "missable": false
   },
   {
     "id": 60,
     "name": "Mio",
     "role": "Battle",
+    "chapter": "Prologue",
     "location": "Starting Character",
-    "howToRecruit": "Joins automatically at the start of the game as part of Nowa's initial squad.",
+    "howToRecruit": "Joins automatically at the start of the game as part of Nowa's initial expedition squad in Arenside.",
     "missable": false
   },
   {
     "id": 70,
     "name": "Perrielle",
     "role": "Battle",
-    "location": "Euchrisse (Story)",
-    "howToRecruit": "Joins automatically during the main story events in Euchrisse (usable in Battle or Support).",
+    "chapter": "Eucrisse Arc",
+    "location": "Eucrisse (Story)",
+    "howToRecruit": "Joins automatically during the main story campaign in Eucrisse (usable in Battle or Support).",
     "missable": false
   },
   {
     "id": 80,
     "name": "Hildi",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
     "howToRecruit": "Joins automatically alongside Seign Kesling following the battle at Hishahn Front.",
     "missable": false
@@ -67,38 +75,43 @@
     "id": 90,
     "name": "Rody",
     "role": "Support",
+    "chapter": "Shi'arc Arc",
     "location": "Dabavin (Town Center)",
-    "howToRecruit": "Speak to him in the center of Dabavin; select 'Can I talk you into joining us?' and bring him a Pearl Pocketwatch (found in Seaside Cavern).",
+    "howToRecruit": "Speak to him in the center of Dabavin, select 'Can I talk you into joining us?', and bring him a Pearl Pocketwatch (found in Seaside Cavern or dropped by enemies in Eastern Desert).",
     "missable": false
   },
   {
     "id": 100,
     "name": "Maxim",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Castle HQ - Great Hall",
-    "howToRecruit": "Joins automatically in the Great Hall after repelling the Imperial invasion before the Final Battle.",
+    "howToRecruit": "Joins automatically in the Great Hall during the Athrabalt War storyline to aid the Alliance.",
     "missable": false
   },
   {
     "id": 110,
     "name": "Mellore",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Eltisweiss -> Redthroat Ridge",
-    "howToRecruit": "Speak with her in Eltisweiss during 'The Watch Captain's First Job', then track her to Redthroat Ridge and defeat the Nerthus boss.",
+    "howToRecruit": "Speak with her on the central street of Eltisweiss during 'The Watch Captain's First Job', track her to Redthroat Ridge, and defeat the Nerthus boss to recruit her.",
     "missable": false
   },
   {
     "id": 120,
     "name": "Yuferius",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc (Story)",
-    "howToRecruit": "Joins automatically after competing in the sandcraft race during 'Shi'arcs of a Scale'.",
+    "howToRecruit": "Joins automatically following the sandcraft race competition during 'Shi'arcs of a Scale'.",
     "missable": false
   },
   {
     "id": 130,
     "name": "Iris",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle HQ - Great Hall",
     "howToRecruit": "Joins automatically during the 'Hoist the Alliance Banner' story scene to manage castle drafting and blueprints.",
     "missable": false
@@ -107,6 +120,7 @@
     "id": 140,
     "name": "Gocteau",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle HQ - Great Hall",
     "howToRecruit": "Joins automatically during the 'Hoist the Alliance Banner' story scene to manage guild dispatch missions.",
     "missable": false
@@ -115,6 +129,7 @@
     "id": 150,
     "name": "Marisa",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Journey to Norristar (Story)",
     "howToRecruit": "Playable earlier in the campaign, but officially joins the Alliance roster during the journey to Norristar.",
     "missable": false
@@ -123,22 +138,25 @@
     "id": 160,
     "name": "Dr. Corque",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Eltisweiss",
-    "howToRecruit": "Talk to him in Eltisweiss to begin the Beigoma storyline, then defeat Reid in a Beigoma top battle to recruit him (usable in Battle or Support).",
+    "howToRecruit": "Speak to Reid in southwest Eltisweiss, then visit Dr. Corque's lab in the southeast. Defeat the three spinadiers (Taq in Altverden, Fender in Kyshiri, Celera in Werne) in Beigoma battles and return to Dr. Corque to recruit him.",
     "missable": false
   },
   {
     "id": 170,
     "name": "Huang",
     "role": "Attendant",
+    "chapter": "Eucrisse Arc",
     "location": "Arenside -> Hishahn",
-    "howToRecruit": "Speak to him in Arenside to obtain the Bamboo Rod, then catch a Wheel-Eye Bream and deliver it to him at the southwest docks in Hishahn.",
+    "howToRecruit": "Speak to him in Arenside and answer 'Love it' to receive the Bamboo Rod. Later in Hishahn, speak to him near the docks and deliver a Wheel-Eye Bream caught at the seaside fishing spot in southwest Eucrisse.",
     "missable": false
   },
   {
     "id": 180,
     "name": "Wayve",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "A Secret Plan (Story)",
     "howToRecruit": "Joins automatically as the Guardians' liaison during the 'A Secret Plan' story conference.",
     "missable": false
@@ -147,6 +165,7 @@
     "id": 190,
     "name": "Markus",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "The Next Steps (Story)",
     "howToRecruit": "Joins automatically during 'The Next Steps' story quest when assisting him in investigating his ancestral castle.",
     "missable": false
@@ -155,6 +174,7 @@
     "id": 200,
     "name": "Hakugin",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Daphan Village (East Side)",
     "howToRecruit": "Speak to her on the east side of Daphan Village with Mio in your active battle party, and accept her request to join.",
     "missable": false
@@ -163,6 +183,7 @@
     "id": 210,
     "name": "Ivy",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Rune-Lens Research Laboratory (Story)",
     "howToRecruit": "Joins automatically at the conclusion of Seign's infiltration of the imperial Rune-Lens Research Laboratory (usable in Battle or Support).",
     "missable": false
@@ -171,30 +192,34 @@
     "id": 220,
     "name": "Yusuke",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Fort Xialuke",
-    "howToRecruit": "Speak to him near the entrance gate of Fort Xialuke during or after 'The Watch Captain's First Job' and recruit him directly.",
+    "howToRecruit": "Speak to him in pink armor near the entrance gate of Fort Xialuke during or after 'The Watch Captain's First Job' and invite him to join.",
     "missable": false
   },
   {
     "id": 230,
     "name": "Yume",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "Werne -> Redthroat Ridge",
-    "howToRecruit": "Talk to the worried grandmother in Werne, then travel to Redthroat Ridge to find Yume and Friend, and escort them back.",
+    "howToRecruit": "After recruiting Mellore, speak to Yume's grandmother in Werne, then travel to Redthroat Ridge to find Yume and Friend at the large crater to recruit them.",
     "missable": false
   },
   {
     "id": 240,
     "name": "Maureus",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Mountain Path Homeward",
-    "howToRecruit": "Speak to him on the Mountain Path with a character in your party whose MP is 300 or higher (e.g. Francesca, Mellore, or Momo).",
+    "howToRecruit": "Speak to him on the Mountain Path with a character in your party whose MP is 300 or higher (e.g. Francesca, Mellore, or Falward with accessories).",
     "missable": false
   },
   {
     "id": 250,
     "name": "Yaelu",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Rune-Lens Research Laboratory (Story)",
     "howToRecruit": "Joins automatically alongside Ivy at the end of Seign's mission in the Rune-Lens Research Laboratory (usable in Battle or Support).",
     "missable": false
@@ -203,14 +228,16 @@
     "id": 260,
     "name": "Reyna",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Dabavin (Docks)",
-    "howToRecruit": "Speak to her at Dabavin harbor and accept her challenge to deal at least 1,500 total damage to her within 3 turns.",
+    "howToRecruit": "Speak to her at Dabavin harbor and accept her challenge. Reduce her HP by half within 2-3 turns (using charged physical attacks or dark runes), then speak to her again and select 'Let's join forces'.",
     "missable": false
   },
   {
     "id": 270,
     "name": "Barnard",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
     "howToRecruit": "Joins automatically following the battle for Hishahn Front alongside Melridge and Seign.",
     "missable": false
@@ -219,22 +246,25 @@
     "id": 280,
     "name": "Gigina",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Arenside (Southeast Corner)",
-    "howToRecruit": "Talk to this beastfolk fighter across the wooden bridge in southeast Arenside and invite him to join.",
+    "howToRecruit": "Talk to this beastfolk fighter across the wooden bridge near the tents in southeast Arenside (requires Nowa at level 9+) and invite him to join.",
     "missable": false
   },
   {
     "id": 290,
     "name": "Wyler",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Bounty Hill",
-    "howToRecruit": "Speak to him near the entrance of Bounty Hill and agree to help search for his sister Marin, then find her deeper in the hills.",
+    "howToRecruit": "Speak to him near the entrance of Bounty Hill and agree to help search for his sister Marin, then locate her deeper in the hills.",
     "missable": false
   },
   {
     "id": 300,
     "name": "Marin",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Bounty Hill",
     "howToRecruit": "Recruited alongside her brother Wyler in Bounty Hill after finding her west of the silver chest (usable in Battle or Support).",
     "missable": false
@@ -243,23 +273,26 @@
     "id": 310,
     "name": "Pieter",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Werne (Northwest Farm)",
-    "howToRecruit": "Speak to him tending vegetables in the northwest farm of Werne and answer his questions positively about food and farming.",
+    "howToRecruit": "Speak to him tending vegetables in the northwest farm of Werne and answer his questions positively about food and farming to recruit him.",
     "missable": false
   },
   {
     "id": 320,
     "name": "Squash",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Treefolk Village (Trading Post)",
-    "howToRecruit": "Speak to him near the Trading Post in Treefolk Village; bring him a Sparklegem (dropped by Phantombird enemies in the Greatwood).",
+    "howToRecruit": "Speak to him near the Trading Post in Treefolk Village; bring him a Sparklestone (dropped by Phantombirds or Red Wyverns in Dappled Forest).",
     "missable": false
   },
   {
     "id": 330,
     "name": "Ormond",
     "role": "Support",
-    "location": "Abandoned Mine (Castle Basement Entrance)",
+    "chapter": "The Alliance and Treefolk Arc",
+    "location": "Abandoned Mine (Western Chamber)",
     "howToRecruit": "Speak to him in the Abandoned Mine accessible from the castle basement well, and deliver 3 Iron Ore to him.",
     "missable": false
   },
@@ -267,14 +300,16 @@
     "id": 340,
     "name": "Kerrin",
     "role": "Support",
+    "chapter": "The Watch Arc",
     "location": "Dappled Forest",
-    "howToRecruit": "Speak to her inside the Dappled Forest outside your castle headquarters and deliver 20 Lumber to her.",
+    "howToRecruit": "Speak to her inside the Dappled Forest east of the entrance and deliver 20 Lumber to her.",
     "missable": false
   },
   {
     "id": 350,
     "name": "Douglas",
     "role": "Support",
+    "chapter": "Eltisweiss War Arc",
     "location": "Eltisweiss (Smithy)",
     "howToRecruit": "Talk to him inside the Eltisweiss smithy during or after 'New Forces' and deliver 10 Iron Ore to him.",
     "missable": false
@@ -283,38 +318,43 @@
     "id": 360,
     "name": "Syd",
     "role": "Attendant",
-    "location": "Hishahn (East Docks)",
-    "howToRecruit": "Upgrade HQ to Level 3, speak to him on the east docks in Hishahn, and bring him 1 Iron Ore, 1 Mystic Lumber, and 1 Dire Beastbone.",
+    "chapter": "Eucrisse Arc",
+    "location": "Hishahn (Smithy)",
+    "howToRecruit": "Upgrade HQ to Level 3, speak to him outside the Smithy in Hishahn with 1 Iron Ore, 1 Mystic Lumber, and 1 Dire Beastbone in your stowpack inventory.",
     "missable": false
   },
   {
     "id": 370,
     "name": "Kurtz",
     "role": "Support",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn (Outside Smithy)",
-    "howToRecruit": "Speak to him outside the Hishahn smithy; deliver the Grilled Tutuva recipe (obtained from an NPC in Treefolk Village).",
+    "howToRecruit": "Speak to him outside the Hishahn smithy; deliver the Grilled Tutuva recipe (obtained from an NPC near the stairs south of Trading Post in Treefolk Village).",
     "missable": false
   },
   {
     "id": 380,
     "name": "Code L",
     "role": "Support",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Daphan Village (Rune Shop)",
-    "howToRecruit": "Talk to him in the Daphan Village rune shop and bring him a Rune of Currents (obtained by defeating the dragon boss in the Old Keep).",
+    "howToRecruit": "Talk to him in the Daphan Village rune shop and bring him a Rune of Currents (guaranteed drop from the Pagurian boss in Hishahn Old Town).",
     "missable": false
   },
   {
     "id": 390,
     "name": "Hogan",
     "role": "Support",
+    "chapter": "Eucrisse Arc",
     "location": "Twinhorne West (Pier)",
-    "howToRecruit": "Speak to him on the pier in Twinhorne West after generating a cumulative trade profit of 50,000 Baqua across regional trading posts.",
+    "howToRecruit": "Speak to him on the pier in Twinhorne West, then generate 50,000 Baqua in cumulative trade profits across regional trading posts and speak to him again.",
     "missable": false
   },
   {
     "id": 400,
     "name": "Cassandra",
     "role": "Support",
+    "chapter": "Eltisweiss War Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically following the retreat from Eltisweiss to establish the headquarters Inn.",
     "missable": false
@@ -323,14 +363,16 @@
     "id": 410,
     "name": "Carrie",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Hishahn (Bridges)",
-    "howToRecruit": "Encounter her clumsy teleportation attempts around Hishahn multiple times (near palace and bridge) until she formally joins.",
+    "howToRecruit": "Encounter her clumsy teleportation attempts three times across the bridges of Hishahn (northwest, northeast, and southeast) until she formally joins.",
     "missable": false
   },
   {
     "id": 420,
     "name": "Stadler",
     "role": "Support",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc (Beach)",
     "howToRecruit": "Speak to him in yellow attire on the beach in Impershi'arc and defeat his military squadron in a mock war battle.",
     "missable": false
@@ -339,70 +381,79 @@
     "id": 430,
     "name": "Nell",
     "role": "Support",
-    "location": "Hishahn (Northeast Stall)",
-    "howToRecruit": "Inspect the suspiciously moving large sack behind a market stall in northeast Hishahn to discover and recruit him.",
+    "chapter": "Eucrisse Arc",
+    "location": "Hishahn (Market Stalls)",
+    "howToRecruit": "Inspect the suspiciously moving large sack hidden behind market stalls near the northwest bridge in Hishahn to recruit him.",
     "missable": false
   },
   {
     "id": 440,
     "name": "Paquia",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Arenside (Lower Path)",
-    "howToRecruit": "Speak to her at the foot of the stairs in Arenside and bring her 5 Eggfoot Eggs (dropped by Eggfoot enemies).",
+    "howToRecruit": "Speak to her near the lower bridge in Arenside and bring her 5 Regular Eggs (dropped by Eggfoot enemies).",
     "missable": false
   },
   {
     "id": 450,
     "name": "Frida",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Werne (Armor Stall)",
-    "howToRecruit": "Visit Werne once fast travel is unlocked, speak to her at the armor stall to the left of the entrance, and let her inspect Nowa's styling.",
+    "howToRecruit": "Visit Werne once fast travel is unlocked, speak to her at the armor stall to the left of the entrance, and let her inspect Nowa's styling to recruit her.",
     "missable": false
   },
   {
     "id": 460,
     "name": "Quinn",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc -> The Great Sandy Sea",
-    "howToRecruit": "Speak to her in Impershi'arc after the sandcraft race, then help her explore the ancient ruins in the Great Sandy Sea.",
+    "howToRecruit": "Requires Nowa at Level 37+. Speak to her outside the Inn in Impershi'arc, then at the harbor. Explore the Den of the Dunes in the Great Sandy Sea and defeat the boss at all sinkholes to recruit her.",
     "missable": false
   },
   {
     "id": 470,
     "name": "Goldsmid",
     "role": "Support",
+    "chapter": "Guardians Arc",
     "location": "Yarnaan (2nd Floor)",
-    "howToRecruit": "Speak to him on the second tier of Yarnaan with a hero whose physical strength stat is over 300 (or select the stalwart warrior dialogue).",
+    "howToRecruit": "Speak to him on the second floor of Yarnaan with a party member whose PWR (Power) stat is 180 or higher (e.g. Yusuke or Yuferius) and select 'I'm looking for stalwart allies'.",
     "missable": false
   },
   {
     "id": 480,
     "name": "Kuroto",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Altverden Village",
-    "howToRecruit": "Speak to him on the west side of Altverden during or after 'The Watch Captain's First Job', then defeat 3 Wild Boars on the world map.",
+    "howToRecruit": "Speak to him on the southwest side of Altverden during or after 'The Watch Captain's First Job', then defeat 3 Wild Boars in Redthroat Ridge and report back.",
     "missable": false
   },
   {
     "id": 490,
     "name": "Clarke",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Ardinale (Plaza Fountain)",
-    "howToRecruit": "Speak to him near the fountain in Ardinale, purchase the 'Star-Cross'd Lovers' play script from the Ardinale general store, and deliver it.",
+    "howToRecruit": "Speak to him near the fountain in Ardinale, acquire 'The Star-Cross'd Lovers' script (a rare find at the Ardinale City Tool Shop), and deliver it to him.",
     "missable": false
   },
   {
     "id": 500,
     "name": "Mariette",
     "role": "Attendant",
+    "chapter": "Eucrisse Arc",
     "location": "Twinhorne East (Waterfront Bench)",
-    "howToRecruit": "Speak to her on the bench in Twinhorne East; retrieve her lost keepsake charm from Greatwood South (dropped by Rabbit Archwitches).",
+    "howToRecruit": "Speak to her on the bench in Twinhorne East, then retrieve Mariette's Charm from a chest gimmick during battle against a Rabbit Archwitch in The Greatwood-South.",
     "missable": false
   },
   {
     "id": 510,
     "name": "Ymir",
     "role": "Attendant",
+    "chapter": "The Watch Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically following the retreat from Eltisweiss to serve as chief castle administrator.",
     "missable": false
@@ -411,38 +462,43 @@
     "id": 520,
     "name": "Selbineth",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle HQ - Mysterious Room",
-    "howToRecruit": "Build the Mysterious Room in the castle basement (requires HQ Level 3), enter through the red portal, and complete her combat trial.",
+    "howToRecruit": "Requires HQ Level 3 and 80+ recruited allies. Build the Mysterious Room in the castle basement via Drafting Studio, enter the red portal, and complete her combat trial.",
     "missable": false
   },
   {
     "id": 530,
     "name": "Leon",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town (West Exit)",
-    "howToRecruit": "Upgrade HQ to Level 2; find him collapsed near the western exit of Castle Town, give him food and water, and bring him a Rune of Currents.",
+    "howToRecruit": "Upgrade HQ to Level 2 or above; find him collapsed outside the western entrance of Headquarters and speak to him to recruit him.",
     "missable": false
   },
   {
     "id": 540,
     "name": "Aoi",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Twinhorne East",
-    "howToRecruit": "After completing the Athrabalt Summit, speak to her at the lower level of Twinhorne East with Iugo in your party, and defeat her in a duel.",
+    "howToRecruit": "After completing the Athrabalt Summit, speak to her near the ramp in lower Twinhorne East with Iugo in your party, and defeat her in a one-on-one duel with Iugo.",
     "missable": false
   },
   {
     "id": 550,
     "name": "Riufan",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn (West Pier)",
-    "howToRecruit": "Speak to him by the water wheel on the west dock in Hishahn and defeat him in a one-on-one duel with Nowa.",
+    "howToRecruit": "Requires Nowa at Level 32+. Speak to him by the water wheel on the dock in northern Hishahn and defeat him in a one-on-one duel with Nowa.",
     "missable": false
   },
   {
     "id": 560,
     "name": "B'baba",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Daphan Village (Northwest House)",
     "howToRecruit": "Visit the northwest house in Daphan Village during or after 'New Forces' and invite the fortune teller to HQ.",
     "missable": false
@@ -451,22 +507,25 @@
     "id": 570,
     "name": "Faye",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town",
-    "howToRecruit": "Recruit B'baba first, consult B'baba in HQ to locate Faye, then play hide-and-seek around Castle Town to catch her.",
+    "howToRecruit": "Requires recruiting B'baba, Yusuke, Francesca, and Yume. Speak to B'baba in her divination parlor at HQ, then speak to Yusuke on the rooftop, Francesca on 1F, and Yume on 2F outside Great Hall to recruit Faye.",
     "missable": false
   },
   {
     "id": 580,
     "name": "Lam",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "Daphan Village",
-    "howToRecruit": "Recruit Riufan first, place Riufan in your active party, speak to Lam in Daphan Village, then deliver a Dragon Gem Herb from the Mountain Path.",
+    "howToRecruit": "Recruit Riufan first, speak to Riufan at HQ inn, then travel to Daphan Village with Riufan in your party and speak to Lam near the Rune Shop to recruit her.",
     "missable": false
   },
   {
     "id": 590,
     "name": "Valentin",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
     "howToRecruit": "Joins automatically alongside Seign Kesling following the battle at Hishahn Front.",
     "missable": false
@@ -475,14 +534,16 @@
     "id": 600,
     "name": "Foxiel",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Athrabalt (East Stall)",
-    "howToRecruit": "Speak to her at an east market stall in Athrabalt; consult chef Kurtz at HQ to prepare the requested soup and deliver it to her.",
+    "howToRecruit": "Speak to her near the fountain and yellow stall in eastern Athrabalt. Consult chef Kurtz at HQ to prepare Vegetable Milk Soup and deliver it to her.",
     "missable": false
   },
   {
     "id": 610,
     "name": "Iugo",
     "role": "Battle",
+    "chapter": "The Watch Arc",
     "location": "Eltisweiss (Tavern)",
     "howToRecruit": "Enter the tavern in eastern Eltisweiss during 'The Watch Captain's First Job' and speak with him to recruit him.",
     "missable": false
@@ -491,38 +552,43 @@
     "id": 620,
     "name": "Aire",
     "role": "Support",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn (Southwest Exit)",
-    "howToRecruit": "Talk to her on the path to the southwest exit in Hishahn and win a footrace against her (requires Nowa at level 36+ or high agility).",
+    "howToRecruit": "Speak to her near the southwest exit in Hishahn and defeat her in a footrace (requires Nowa to have 135+ SPD, typically reached at Level 36 or via speed accessories).",
     "missable": false
   },
   {
     "id": 630,
     "name": "Rohan",
     "role": "Support",
+    "chapter": "Athrabalt War Arc",
     "location": "Twinhorne West (Inn)",
-    "howToRecruit": "Upgrade HQ to Level 3 and complete the Athrabalt Front, then speak to him inside the Twinhorne West Inn.",
+    "howToRecruit": "Upgrade HQ to Level 3, reach a castle population of 5,000+, complete the Athrabalt Front, and speak to him inside the Twinhorne West Inn.",
     "missable": false
   },
   {
     "id": 640,
     "name": "Glen",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Arenside (West House)",
-    "howToRecruit": "Return to Arenside once fast travel is unlocked, talk to him outside the western residence, and defeat a challenger in Card Battle.",
+    "howToRecruit": "Return to Arenside once fast travel is unlocked, talk to him outside the western residence, and defeat a challenger in a Card Battle.",
     "missable": false
   },
   {
     "id": 650,
     "name": "Lakian",
     "role": "Battle",
+    "chapter": "Alliance War Arc",
     "location": "Storming Castle Harganthia (Story)",
-    "howToRecruit": "Joins automatically before the final battle after his brother Alwe convinces him to defect to the Alliance.",
+    "howToRecruit": "Joins automatically before the final battle after his brother Alwe convinces him to defect to the Alliance during the storming of Castle Harganthia.",
     "missable": false
   },
   {
     "id": 660,
     "name": "Lilwn",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Yarnaan (Story)",
     "howToRecruit": "Joins automatically during the story mission 'The Revenant Army Returns' in Yarnaan.",
     "missable": false
@@ -531,22 +597,25 @@
     "id": 670,
     "name": "Jorhan",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn (Trading Post)",
-    "howToRecruit": "Speak to him outside Hishahn Trading Post; appraise Unknown Antiques gathered from Desert Scarabs until you obtain a Yellow Rose Censer.",
+    "howToRecruit": "Speak to him outside Hishahn Trading Post with Perrielle in your party. Appraise Unknown Antiques gathered from Scarabs in Eastern Desert to find a Yellow Rose Censer and deliver it.",
     "missable": false
   },
   {
     "id": 680,
     "name": "Falward",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Altverden Village (Northwest House)",
-    "howToRecruit": "Speak to him inside the clinic in northwest Altverden during or after 'Reveal Harlan's Schemes' and deliver 15 Healing Herbs.",
+    "howToRecruit": "Speak to him inside the clinic in northwest Altverden during or after 'Reveal Harlan's Schemes' and deliver 15 Healing Herbs to him.",
     "missable": false
   },
   {
     "id": 690,
     "name": "Nil",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Journey to Norristar (Story)",
     "howToRecruit": "Joins automatically during the journey to Norristar after visiting the forest Rune Barrow with Nowa, Marisa, and Garoo.",
     "missable": false
@@ -555,30 +624,34 @@
     "id": 700,
     "name": "Chandra",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Eldroad",
-    "howToRecruit": "Inspect the Drill Ground at HQ with Code L to hear rumors of a dragon, then travel to Eldroad and defeat Chandra in combat.",
+    "howToRecruit": "Build the Training Grounds at HQ (requires Code L), trigger the rumor about a dragon, put Code L in party as Support, head to Eldroad northern ruins fork, and defeat Chandra.",
     "missable": false
   },
   {
     "id": 710,
     "name": "Aleior",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Abandoned Mine",
-    "howToRecruit": "MISSABLE: Speak to Marisa at HQ during 'To Norristar, the Western Nation' to hear about a griffin, then find and defeat Aleior in the Abandoned Mine before Marisa departs for Castle Harganthia.",
+    "howToRecruit": "MISSABLE: During 'To Norristar, the Western Nation', place Marisa in your active battle party, travel to the Abandoned Mine boss chamber, and defeat Aleior before departing for Castle Harganthia.",
     "missable": true
   },
   {
     "id": 720,
     "name": "Dijkstra",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Twinhorne East (Pier)",
-    "howToRecruit": "Speak to him on the west pier in Twinhorne East after the Athrabalt Front, and complete his treacherous escort quest through the Chelonian Ruins.",
+    "howToRecruit": "After completing the Athrabalt Front, speak to him on the west pier in Twinhorne East. Traverse the Chelonian Goliath (Vilashnu) dungeon and defeat the Goblomancer boss to recruit him.",
     "missable": false
   },
   {
     "id": 730,
     "name": "Alwe",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Journey to Norristar (Story)",
     "howToRecruit": "Joins automatically as the elven representative during the Alliance journey to Norristar.",
     "missable": false
@@ -587,6 +660,7 @@
     "id": 740,
     "name": "Pohl",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "The Hishahn Front (Story)",
     "howToRecruit": "Joins automatically alongside Seign Kesling following the battle at Hishahn Front.",
     "missable": false
@@ -595,38 +669,43 @@
     "id": 750,
     "name": "Francesca",
     "role": "Battle",
+    "chapter": "The Watch Arc",
     "location": "Altverden Village",
-    "howToRecruit": "Walk up the left stairs in Altverden Village during 'The Watch Captain's First Job' to trigger a cutscene defending her.",
+    "howToRecruit": "Walk up the left stairs in Altverden Village during 'The Watch Captain's First Job' to trigger a cutscene defending her, then recruit her.",
     "missable": false
   },
   {
     "id": 760,
     "name": "Momo",
     "role": "Battle",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn -> Seaside Cavern",
-    "howToRecruit": "Speak to Momo by the Hishahn armor shop bridge, enter the Seaside Cavern to defeat the kraken boss, and invite Momo to HQ.",
+    "howToRecruit": "Speak to Momo by the bridge south of the Hishahn Smithy, enter Seaside Cavern, and defeat the Kraken boss to recruit Momo.",
     "missable": false
   },
   {
     "id": 770,
     "name": "El Alicanto",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Snowpeak Pass (North Trail)",
-    "howToRecruit": "Return to Snowpeak Pass after completing its story events, travel up the hidden north trail, and defeat El Alicanto in a duel.",
+    "howToRecruit": "After the war council decision in Athrabalt War Arc, travel north to the dead end in Snowpeak Pass where the bomb was planted and defeat El Alicanto in a one-on-one duel with Nowa.",
     "missable": false
   },
   {
     "id": 780,
     "name": "Gieran",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Greatwood East",
-    "howToRecruit": "Find him at a campfire on the spiral river island in Greatwood East; deliver a Rune of Conversion (dropped by Treefolk in Greatwood).",
+    "howToRecruit": "Find him at a campfire on the spiral river island in Greatwood East; deliver a Rune of Conservation (dropped by the Ancient Seed sub-boss in The Proving Grounds).",
     "missable": false
   },
   {
     "id": 790,
     "name": "Mihlu",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Castle HQ (Story)",
     "howToRecruit": "Joins automatically at Castle HQ after completing both 'Shi'arcs of a Scale' and 'The Rune-Lens Research Laboratory'.",
     "missable": false
@@ -635,14 +714,16 @@
     "id": 800,
     "name": "Milana",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town (Rune Shop)",
-    "howToRecruit": "Upgrade the Castle Rune Shop via Drafting Studio to unlock Runeshards, then enter the shop to trigger her recruitment scene.",
+    "howToRecruit": "Upgrade the Castle Rune Shop to Level 2 via Drafting Studio to unlock Runeshards, then enter the shop to trigger her recruitment scene.",
     "missable": false
   },
   {
     "id": 810,
     "name": "Sabine",
     "role": "Battle",
+    "chapter": "The Watch Arc",
     "location": "Eltisweiss (Story)",
     "howToRecruit": "Joins automatically during the early story conference with Lady Perrielle after the burning of Kyshiri Village.",
     "missable": false
@@ -651,6 +732,7 @@
     "id": 820,
     "name": "Kallathor",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "The Proving Grounds (Story)",
     "howToRecruit": "Joins automatically after helping the Treefolk cleanse the Dendriarch in the Greatwood and clearing the Proving Grounds.",
     "missable": false
@@ -659,30 +741,34 @@
     "id": 830,
     "name": "Rudy",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Athrabalt -> Ice Cave",
-    "howToRecruit": "When Rudy interrupts the summit in Athrabalt seeking help for trapped village children, accompany him through the Ice Cave and defeat the boss.",
+    "howToRecruit": "When Rudy interrupts the summit in Athrabalt seeking help for trapped village children, accompany him through the Ice Cave and defeat the Fenrir boss.",
     "missable": false
   },
   {
     "id": 840,
     "name": "CJ",
     "role": "Battle",
-    "location": "Castle HQ -> Southern Runebarrows",
-    "howToRecruit": "Place Garoo and Isha in your active party, head to the HQ south exit during 'To Norristar', and help CJ clear the Southern Runebarrows.",
+    "chapter": "Guardians Arc",
+    "location": "Castle HQ -> Northern Runebarrows",
+    "howToRecruit": "Place Garoo and Isha in your active party, speak to CJ at the HQ central entrance during the Guardians Arc, and defeat the Prometheus boss in Northern Runebarrows (Grum County).",
     "missable": false
   },
   {
     "id": 850,
     "name": "Isha",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Eltisweiss (Southeast Plaza)",
-    "howToRecruit": "Speak to her near the fountain in southeast Eltisweiss; locate a lost black cat in town, purchase Cat's Eye jewels, and bring them back.",
+    "howToRecruit": "Speak to her near the fountain in southeast Eltisweiss: locate a lost black cat in southwest town, obtain a Cockatrice Egg from Mountain Path, and deliver a package to Arenside general store.",
     "missable": false
   },
   {
     "id": 860,
     "name": "Garoo",
     "role": "Battle",
+    "chapter": "Guardians Arc",
     "location": "Journey to Norristar (Story)",
     "howToRecruit": "Playable earlier in the campaign, but officially joins the Alliance roster alongside Marisa during the journey to Norristar.",
     "missable": false
@@ -691,6 +777,7 @@
     "id": 870,
     "name": "Chron",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town (South Gate)",
     "howToRecruit": "Speak to him standing on the road near the south gate of Castle Town after returning from the Proving Grounds to build the castle gate.",
     "missable": false
@@ -699,6 +786,7 @@
     "id": 880,
     "name": "Sumire",
     "role": "Attendant",
+    "chapter": "The Watch Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically following the retreat from Eltisweiss to operate castle item storage.",
     "missable": false
@@ -707,6 +795,7 @@
     "id": 890,
     "name": "Caine",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle HQ - Great Hall",
     "howToRecruit": "Joins automatically during 'Hoist the Alliance Banner' to establish fast-travel appraisal and town development.",
     "missable": false
@@ -715,6 +804,7 @@
     "id": 900,
     "name": "Hiro",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Abandoned Mine (Mid-Point)",
     "howToRecruit": "Encounter him in the eastern cavern of the Abandoned Mine mid-point; assist him in clearing cave-in rubble to establish his medicine shop.",
     "missable": false
@@ -723,30 +813,34 @@
     "id": 910,
     "name": "Allaby",
     "role": "Support",
-    "location": "Castle Town (Inn)",
-    "howToRecruit": "Speak to her beside the counter in the Castle Town Inn during or after 'An Unexpected Ally' to recruit her directly.",
+    "chapter": "Athrabalt War Arc",
+    "location": "Castle HQ - Hero's Den",
+    "howToRecruit": "After completing the regional story events in Athrabalt / Norristar, speak to her near the piano in the Headquarters Inn (Hero's Den) to recruit her.",
     "missable": false
   },
   {
     "id": 920,
     "name": "Galladur",
     "role": "Support",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "The Proving Grounds",
-    "howToRecruit": "Travel to the depths of the Proving Grounds after clearing Snowpeak Pass, and defeat 3 waves of subterranean trials.",
+    "howToRecruit": "After completing Snowpeak Pass, return to The Proving Grounds near the rotating device room. Speak to Galladur sitting outside and defeat a group of enemies in a single turn to recruit him.",
     "missable": false
   },
   {
     "id": 930,
     "name": "Cabana",
     "role": "Support",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc (East of Inn)",
-    "howToRecruit": "Speak to Cabana and Pyba beside the Inn in Impershi'arc, and invite him to establish a hot spring bath at Castle HQ.",
+    "howToRecruit": "Requires HQ Level 2+. Speak to Cabana and Pyba beside the Inn in Impershi'arc, and invite him to establish a hot spring bath at Castle HQ.",
     "missable": false
   },
   {
     "id": 940,
     "name": "Martha",
     "role": "Support",
+    "chapter": "The Watch Arc",
     "location": "Castle Town (East Pasture)",
     "howToRecruit": "Speak to her on the eastern grounds of Castle Town during 'Hoist the Alliance Banner' to unlock pasture farming.",
     "missable": false
@@ -755,14 +849,16 @@
     "id": 950,
     "name": "Scarlet",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc (Harbor)",
-    "howToRecruit": "Speak to her at the sandcraft dock in Impershi'arc and defeat her record time in a head-to-head sandcraft race.",
+    "howToRecruit": "Speak to her at the sandcraft dock in Impershi'arc and beat her record time in a head-to-head sandcraft race (finish in under 01:12:00).",
     "missable": false
   },
   {
     "id": 960,
     "name": "Mandie",
     "role": "Support",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Arenside (Lower Path)",
     "howToRecruit": "Joins automatically immediately after recruiting Paquia in Arenside to serve as race commentator for the eggfoot track.",
     "missable": false
@@ -771,14 +867,16 @@
     "id": 970,
     "name": "Celia",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town (Restaurant)",
-    "howToRecruit": "Complete 15 cooking duel battles against rival chefs hosted by Kurtz at HQ restaurant; Celia joins automatically after the 15th battle.",
+    "howToRecruit": "Build the kitchen at HQ with Kurtz, then win 15 cooking duel battles against rival chefs hosted by Kurtz at the HQ restaurant; Celia joins upon winning the 15th battle.",
     "missable": false
   },
   {
     "id": 980,
     "name": "Reid",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle HQ / World Tour",
     "howToRecruit": "Progress through Dr. Corque's Beigoma questline, collect high-tier tops, defeat all regional spinning top masters, and beat Reid in battle.",
     "missable": false
@@ -787,6 +885,7 @@
     "id": 990,
     "name": "Shixeen",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Castle Town (Card Shop)",
     "howToRecruit": "Build the Card Shop with Glen, upgrade it to Level 3, collect at least 120 unique cards, and defeat Shixeen in a card match.",
     "missable": false
@@ -795,6 +894,7 @@
     "id": 1000,
     "name": "Euma",
     "role": "Support",
+    "chapter": "Athrabalt War Arc",
     "location": "The Meeting of Kings (Story)",
     "howToRecruit": "Joins automatically during the summit of allied rulers at Athrabalt.",
     "missable": false
@@ -803,6 +903,7 @@
     "id": 1010,
     "name": "Kassius",
     "role": "Support",
+    "chapter": "Athrabalt War Arc",
     "location": "The Meeting of Kings (Story)",
     "howToRecruit": "Joins automatically alongside Euma during the summit of allied rulers at Athrabalt.",
     "missable": false
@@ -811,14 +912,16 @@
     "id": 1020,
     "name": "Janquis",
     "role": "Support",
-    "location": "Euchrisse (Story)",
-    "howToRecruit": "Joins automatically alongside Lady Perrielle during the main story campaign in Euchrisse.",
+    "chapter": "Eucrisse Arc",
+    "location": "Eucrisse (Story)",
+    "howToRecruit": "Joins automatically alongside Lady Perrielle during the main story campaign in Eucrisse.",
     "missable": false
   },
   {
     "id": 1040,
     "name": "Elektra",
     "role": "Battle",
+    "chapter": "Finale Arc",
     "location": "Castle HQ - Great Hall",
     "howToRecruit": "Joins automatically in the Great Hall after repelling the Imperial invasion before the Final Battle.",
     "missable": false
@@ -827,22 +930,25 @@
     "id": 1050,
     "name": "Vorrdice",
     "role": "Attendant",
+    "chapter": "Athrabalt War Arc",
     "location": "Castle HQ - Great Hall",
-    "howToRecruit": "Joins automatically in the Great Hall after repelling the Imperial invasion before the Final Battle.",
+    "howToRecruit": "Joins automatically in the Great Hall during the Athrabalt War storyline to aid the Alliance.",
     "missable": false
   },
   {
     "id": 1060,
     "name": "Viesskin",
     "role": "Battle",
+    "chapter": "Athrabalt War Arc",
     "location": "Castle HQ - Great Hall",
-    "howToRecruit": "Joins automatically in the Great Hall following the defense of the fortress against the imperial forces.",
+    "howToRecruit": "Joins automatically in the Great Hall during the Athrabalt War storyline to aid the Alliance.",
     "missable": false
   },
   {
     "id": 1070,
     "name": "Kogen",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically with his bandit crew following the battle and retreat from Eltisweiss.",
     "missable": false
@@ -851,6 +957,7 @@
     "id": 1080,
     "name": "Yuthus",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically alongside Kogen following the battle and retreat from Eltisweiss.",
     "missable": false
@@ -859,6 +966,7 @@
     "id": 1090,
     "name": "Zabi",
     "role": "Battle",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "The Eltisweiss Front (Story)",
     "howToRecruit": "Joins automatically alongside Kogen and Yuthus following the retreat from Eltisweiss.",
     "missable": false
@@ -867,6 +975,7 @@
     "id": 1100,
     "name": "Yulin",
     "role": "Support",
+    "chapter": "Athrabalt War Arc",
     "location": "Athrabalt Front (Story)",
     "howToRecruit": "Joins automatically during the climax of the Athrabalt Front when she arrives with the Shi'arc fleet.",
     "missable": false
@@ -875,6 +984,7 @@
     "id": 1110,
     "name": "Skyd",
     "role": "Attendant",
+    "chapter": "Shi'arc Arc",
     "location": "Impershi'arc (Story)",
     "howToRecruit": "Joins automatically following the sandcraft race competition during 'Shi'arcs of a Scale'.",
     "missable": false
@@ -883,22 +993,25 @@
     "id": 1120,
     "name": "Pastole",
     "role": "Support",
+    "chapter": "Eucrisse Arc",
     "location": "Twinhorne East (Market Stall)",
-    "howToRecruit": "Speak to him beside his blue and teal canopy stall next to the Tool Shop in Twinhorne East to recruit him directly.",
+    "howToRecruit": "Speak to him beside the Tool Shop in Twinhorne East during the Eucrisse Arc to recruit him directly.",
     "missable": false
   },
   {
     "id": 1130,
     "name": "Galdorf",
     "role": "Battle",
+    "chapter": "Eltisweiss War Arc",
     "location": "Abandoned Mine (Entrance)",
-    "howToRecruit": "Speak to him at the Abandoned Mine entrance during or after 'Reveal Harlan's Schemes'; bring him Palenight Mail armor (found in mine chest or crafted).",
+    "howToRecruit": "Speak to him at the Abandoned Mine entrance during or after 'Reveal Harlan's Schemes'; bring him Palenight Mail armor (found in the mine near Ormond or crafted at HQ).",
     "missable": false
   },
   {
     "id": 1140,
     "name": "Prunella",
     "role": "Battle",
+    "chapter": "Shi'arc Arc",
     "location": "Dabavin (Inn)",
     "howToRecruit": "Speak to her inside the Dabavin Inn during or after 'New Forces' and pay her fee of 100,000 Baqua (she refunds 50,000 immediately).",
     "missable": false
@@ -907,6 +1020,7 @@
     "id": 1150,
     "name": "Fume",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Dappled Forest (Northeast)",
     "howToRecruit": "Recruit Enoe and establish the Mission Guild first, then speak to Fume in the northeast section of Dappled Forest.",
     "missable": false
@@ -915,6 +1029,7 @@
     "id": 1160,
     "name": "Enoe",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Daphan Village",
     "howToRecruit": "Build the Mission Guild via Drafting Studio, then speak to Enoe in Daphan Village to recruit him.",
     "missable": false
@@ -923,6 +1038,7 @@
     "id": 1170,
     "name": "Dalton",
     "role": "Attendant",
+    "chapter": "Eucrisse Arc",
     "location": "Twinhorne East (Inn)",
     "howToRecruit": "Upgrade HQ to Level 3, build the Mission Guild, place Sabine in your party, and speak to Dalton outside the Twinhorne East Inn.",
     "missable": false
@@ -931,6 +1047,7 @@
     "id": 1180,
     "name": "Durlan",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Abandoned Mine (Deep Chamber)",
     "howToRecruit": "Upgrade HQ to Level 3; enter the Abandoned Mine from the castle basement well and navigate to the deepest western rock wall to find him chiseling.",
     "missable": false
@@ -939,6 +1056,7 @@
     "id": 1190,
     "name": "Larla",
     "role": "Attendant",
+    "chapter": "The Alliance and Treefolk Arc",
     "location": "Eltisweiss (Inn)",
     "howToRecruit": "Recruit Enoe and Fume, dispatch guild mission squads until achieving an 'Epic Success', then speak to Larla at the counter in Eltisweiss Inn.",
     "missable": false
@@ -947,14 +1065,16 @@
     "id": 1200,
     "name": "Leene",
     "role": "Battle",
+    "chapter": "Alliance War Arc",
     "location": "Castle HQ - Great Hall",
-    "howToRecruit": "MISSABLE: You must recruit all other 119 base-game characters before initiating the war battle at Castle Harganthia. Leene then appears in Castle HQ before the final assault.",
+    "howToRecruit": "MISSABLE: You must recruit all other 119 base-game characters before initiating the war council meeting at the castle for the assault on Castle Harganthia. Leene then appears in Castle HQ before the final battle.",
     "missable": true
   },
   {
     "id": 1210,
     "name": "Grace",
     "role": "Battle",
+    "chapter": "DLC / Extra",
     "location": "Seign's Chapter (DLC)",
     "howToRecruit": "Joins automatically during the story chapters of the Seign DLC expansion (requires recapturing Eltisweiss in the main storyline).",
     "missable": false
@@ -963,6 +1083,7 @@
     "id": 1520,
     "name": "Goldwyn",
     "role": "Attendant",
+    "chapter": "Finale Arc",
     "location": "Castle HQ - Great Hall",
     "howToRecruit": "Joins automatically in the Great Hall after repelling the Imperial invasion before the Final Battle.",
     "missable": false
