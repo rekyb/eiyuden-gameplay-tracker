@@ -1014,7 +1014,7 @@ function setupEventListeners() {
         const detected = state.saveConfig?.detected_save_path || state.saveConfig?.detected_steam_path;
         if (detected) {
           dom.configPathInput.value = detected;
-          setDialogStatus(dom.detectStatusHint, `Save file found: ${detected}`, 'success');
+          setDialogStatus(dom.detectStatusHint, 'Save file found', 'success');
         } else {
           setDialogStatus(dom.detectStatusHint, 'No save file found in standard locations.', 'error');
         }
