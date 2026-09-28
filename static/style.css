@@ -1015,6 +1015,7 @@ tr.is-recruited td.col-name .hero-name {
 /* --- Sync Save Button & Icon --- */
 .btn-sync {
   gap: 0.45rem;
+  transition: opacity 0.15s ease;
 }
 
 .btn-text {
@@ -1024,6 +1025,14 @@ tr.is-recruited td.col-name .hero-name {
 .icon-sync {
   width: 15px;
   height: 15px;
+  transform-origin: center;
+}
+
+.btn-sync.is-syncing,
+.btn-sync.is-syncing:disabled {
+  opacity: 0.85;
+  cursor: wait;
+  pointer-events: none;
 }
 
 .btn-sync.is-syncing .icon-sync {

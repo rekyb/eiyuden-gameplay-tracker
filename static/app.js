@@ -849,7 +849,7 @@ function updateSavePathButtonState() {
  * Registers all user interaction event listeners.
  */
 function setupEventListeners() {
-  // Sync Save Button
+  // Sync Save Button (with 3-second loading indicator delay)
   if (dom.btnSync) {
     dom.btnSync.addEventListener('click', async () => {
       dom.btnSync.disabled = true;
@@ -863,13 +863,27 @@ function setupEventListeners() {
       }
 
       try {
-        const cfgRes = await fetch('/api/config');
-        if (cfgRes.ok) {
-          state.saveConfig = await cfgRes.json();
+        const delayPromise = new Promise(resolve => setTimeout(resolve, 3000));
+        let syncError = null;
+        const syncPromise = (async () => {
+          try {
+            const cfgRes = await fetch('/api/config');
+            if (cfgRes.ok) {
+              state.saveConfig = await cfgRes.json();
+            }
+            await syncSave({ silent: true });
+          } catch (err) {
+            syncError = err;
+          }
+        })();
+
+        await Promise.all([syncPromise, delayPromise]);
+
+        if (syncError) {
+          showToast(`Sync error: ${syncError.message}`, 'error');
+        } else if (state.saveStatus) {
+          handleSaveFileStatus(state.saveStatus, { silent: false });
         }
-        await syncSave({ silent: false });
-      } catch (err) {
-        showToast(`Sync error: ${err.message}`, 'error');
       } finally {
         dom.btnSync.disabled = false;
         dom.btnSync.classList.remove('is-syncing');
