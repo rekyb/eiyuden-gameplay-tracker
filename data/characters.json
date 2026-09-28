@@ -93,7 +93,7 @@
     "id": 110,
     "name": "Mellore",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "The Watch Arc",
     "location": "Eltisweiss -> Redthroat Ridge",
     "howToRecruit": "Speak with her on the central street of Eltisweiss during 'The Watch Captain's First Job', track her to Redthroat Ridge, and defeat the Nerthus boss to recruit her.",
     "missable": false
@@ -192,7 +192,7 @@
     "id": 220,
     "name": "Yusuke",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "The Watch Arc",
     "location": "Fort Xialuke",
     "howToRecruit": "Speak to him in pink armor near the entrance gate of Fort Xialuke during or after 'The Watch Captain's First Job' and invite him to join.",
     "missable": false
@@ -246,7 +246,7 @@
     "id": 280,
     "name": "Gigina",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "The Watch Arc",
     "location": "Arenside (Southeast Corner)",
     "howToRecruit": "Talk to this beastfolk fighter across the wooden bridge near the tents in southeast Arenside (requires Nowa at level 9+) and invite him to join.",
     "missable": false
@@ -318,7 +318,7 @@
     "id": 360,
     "name": "Syd",
     "role": "Attendant",
-    "chapter": "Eucrisse Arc",
+    "chapter": "Athrabalt War Arc",
     "location": "Hishahn (Smithy)",
     "howToRecruit": "Upgrade HQ to Level 3, speak to him outside the Smithy in Hishahn with 1 Iron Ore, 1 Mystic Lumber, and 1 Dire Beastbone in your stowpack inventory.",
     "missable": false
@@ -363,7 +363,7 @@
     "id": 410,
     "name": "Carrie",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "Eucrisse Arc",
     "location": "Hishahn (Bridges)",
     "howToRecruit": "Encounter her clumsy teleportation attempts three times across the bridges of Hishahn (northwest, northeast, and southeast) until she formally joins.",
     "missable": false
@@ -426,7 +426,7 @@
     "id": 480,
     "name": "Kuroto",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "The Watch Arc",
     "location": "Altverden Village",
     "howToRecruit": "Speak to him on the southwest side of Altverden during or after 'The Watch Captain's First Job', then defeat 3 Wild Boars in Redthroat Ridge and report back.",
     "missable": false
@@ -435,7 +435,7 @@
     "id": 490,
     "name": "Clarke",
     "role": "Attendant",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "Shi'arc Arc",
     "location": "Ardinale (Plaza Fountain)",
     "howToRecruit": "Speak to him near the fountain in Ardinale, acquire 'The Star-Cross'd Lovers' script (a rare find at the Ardinale City Tool Shop), and deliver it to him.",
     "missable": false
@@ -462,7 +462,7 @@
     "id": 520,
     "name": "Selbineth",
     "role": "Attendant",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "Athrabalt War Arc",
     "location": "Castle HQ - Mysterious Room",
     "howToRecruit": "Requires HQ Level 3 and 80+ recruited allies. Build the Mysterious Room in the castle basement via Drafting Studio, enter the red portal, and complete her combat trial.",
     "missable": false
@@ -867,7 +867,7 @@
     "id": 970,
     "name": "Celia",
     "role": "Battle",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "Eucrisse Arc",
     "location": "Castle Town (Restaurant)",
     "howToRecruit": "Build the kitchen at HQ with Kurtz, then win 15 cooking duel battles against rival chefs hosted by Kurtz at the HQ restaurant; Celia joins upon winning the 15th battle.",
     "missable": false
@@ -1047,7 +1047,7 @@
     "id": 1180,
     "name": "Durlan",
     "role": "Attendant",
-    "chapter": "The Alliance and Treefolk Arc",
+    "chapter": "Athrabalt War Arc",
     "location": "Abandoned Mine (Deep Chamber)",
     "howToRecruit": "Upgrade HQ to Level 3; enter the Abandoned Mine from the castle basement well and navigate to the deepest western rock wall to find him chiseling.",
     "missable": false
