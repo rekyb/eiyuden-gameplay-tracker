@@ -143,6 +143,55 @@ class TestSaveReader(unittest.TestCase):
         # Verify starter recipe (3000 Poached Egg) is present
         self.assertIn(3000, summary["acquired_recipe_ids"])
 
+    def test_beigoma_and_trainer_extraction(self):
+        """Verify extraction of usable Beigomas and defeated trainers from save."""
+        save_data = {
+            "_unitData": {"_units": [{"_id": 10}]},
+            "_miniGameBeigoma": {
+                "_usableBeigomaIDs": [6, 14, 15, 500, 604, 999],
+                "_matchResult": [
+                    {"_characterParamId": 1000, "_winCount": 1},
+                    {"_characterParamId": 5, "_winCount": 2},
+                    {"_characterParamId": 1, "_winCount": 5},  # Nowa avatar - excluded
+                    {"_characterParamId": 6, "_winCount": 0},  # Not won yet - excluded
+                ],
+            },
+        }
+        raw_bytes = encrypt_save(save_data)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".dat") as tf:
+            tf.write(raw_bytes)
+            tf_path = tf.name
+
+        try:
+            summary = read_save_summary(tf_path)
+            self.assertEqual(summary["beigoma_collected_ids"], [6, 14, 15, 500, 999])
+            self.assertEqual(summary["beigoma_collected_count"], 5)
+            self.assertEqual(summary["beigoma_defeated_trainer_ids"], [5, 1000])
+            self.assertEqual(summary["beigoma_defeated_trainer_count"], 2)
+        finally:
+            if os.path.exists(tf_path):
+                os.remove(tf_path)
+
+    def test_beigoma_extraction_empty_or_missing(self):
+        """Verify safe defaults when _miniGameBeigoma is missing or empty."""
+        save_data = {
+            "_unitData": {"_units": [{"_id": 10}]},
+        }
+        raw_bytes = encrypt_save(save_data)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".dat") as tf:
+            tf.write(raw_bytes)
+            tf_path = tf.name
+
+        try:
+            summary = read_save_summary(tf_path)
+            self.assertEqual(summary["beigoma_collected_ids"], [])
+            self.assertEqual(summary["beigoma_collected_count"], 0)
+            self.assertEqual(summary["beigoma_defeated_trainer_ids"], [])
+            self.assertEqual(summary["beigoma_defeated_trainer_count"], 0)
+        finally:
+            if os.path.exists(tf_path):
+                os.remove(tf_path)
+
     def test_read_save_summary_nonexistent_file(self):
         """Verify read_save_summary gracefully handles non-existent file."""
         nonexistent_path = os.path.join(
@@ -154,6 +203,10 @@ class TestSaveReader(unittest.TestCase):
         self.assertEqual(summary.get("recruited_ids"), [])
         self.assertEqual(summary.get("acquired_recipe_ids"), [])
         self.assertEqual(summary.get("acquired_recipe_count"), 0)
+        self.assertEqual(summary.get("beigoma_collected_ids"), [])
+        self.assertEqual(summary.get("beigoma_collected_count"), 0)
+        self.assertEqual(summary.get("beigoma_defeated_trainer_ids"), [])
+        self.assertEqual(summary.get("beigoma_defeated_trainer_count"), 0)
         self.assertEqual(summary.get("money"), 0)
         self.assertEqual(summary.get("town_level"), 0)
         self.assertEqual(summary.get("population"), 0)
