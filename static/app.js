@@ -797,8 +797,8 @@ function createBeigomaRowHtml(top, isObtained) {
   const emptyStars = '☆'.repeat(4 - rarity);
 
   const rarityHtml = `
-    <span class="rarity-stars" aria-label="Rarity: ${rarity} of 4 stars" title="${rarity} of 4 stars">
-      <span class="star-filled">${filledStars}</span><span class="star-empty">${emptyStars}</span>
+    <span class="rarity-stars" role="img" aria-label="Rarity: ${rarity} of 4 stars" title="${rarity} of 4 stars">
+      <span class="star-filled" aria-hidden="true">${filledStars}</span><span class="star-empty" aria-hidden="true">${emptyStars}</span>
     </span>
   `;
 

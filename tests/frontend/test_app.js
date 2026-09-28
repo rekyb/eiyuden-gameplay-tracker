@@ -305,17 +305,23 @@ test('createBeigomaRowHtml produces correct markup with rarity stars', () => {
   const html = app.createBeigomaRowHtml(top3Star, true);
 
   assert.ok(html.includes('col-beigoma-rarity'));
+  assert.ok(html.includes('role="img"'));
   assert.ok(html.includes('aria-label="Rarity: 3 of 4 stars"'));
-  assert.ok(html.includes('<span class="star-filled">★★★</span>'));
-  assert.ok(html.includes('<span class="star-empty">☆</span>'));
+  assert.ok(html.includes('<span class="star-filled" aria-hidden="true">★★★</span>'));
+  assert.ok(html.includes('<span class="star-empty" aria-hidden="true">☆</span>'));
   assert.ok(html.includes('badge-obtained'));
+  assert.ok(html.includes('Soul Reaper'));
+  assert.ok(html.includes('Drop in Deadworld'));
 
   const top1Star = { id: 1, name: 'Plantvine', whereToObtain: 'Drop in Forest', rarity: 1 };
   const html1 = app.createBeigomaRowHtml(top1Star, false);
+  assert.ok(html1.includes('role="img"'));
   assert.ok(html1.includes('aria-label="Rarity: 1 of 4 stars"'));
-  assert.ok(html1.includes('<span class="star-filled">★</span>'));
-  assert.ok(html1.includes('<span class="star-empty">☆☆☆</span>'));
+  assert.ok(html1.includes('<span class="star-filled" aria-hidden="true">★</span>'));
+  assert.ok(html1.includes('<span class="star-empty" aria-hidden="true">☆☆☆</span>'));
   assert.ok(html1.includes('badge-missing'));
+  assert.ok(html1.includes('Plantvine'));
+  assert.ok(html1.includes('Drop in Forest'));
 });
 
 test('createTrainerRowHtml produces correct markup for defeated and unbattled trainers', () => {
