@@ -77,6 +77,28 @@ class TestStyleCSS(unittest.TestCase):
         # Check responsive media query
         self.assertIn('@media', self.css)
 
+    def test_section_headers_present(self):
+        """Classes for section header banners, titles, and descriptions must be styled."""
+        required = [
+            'section-header',
+            'section-title',
+            'section-desc',
+        ]
+        for c in required:
+            pattern = rf'(\.{re.escape(c)}[\s,\.\:\[\{{\>])'
+            self.assertTrue(re.search(pattern, self.css), f"Required class missing in style.css: {c}")
+
+    def test_section_headers_in_html(self):
+        """index.html must contain section titles for all primary views."""
+        required = [
+            'Hero Recruitment',
+            'Cooking Recipes',
+            'Beigoma Collection &amp; Trainers',
+            'Fish Collection',
+        ]
+        for h in required:
+            self.assertIn(h, self.html, f"Required section header missing in index.html: {h}")
+
     def test_recipes_and_navigation_classes_present(self):
         """Classes for navigation, recipe categories, and footer must be styled."""
         required = [
