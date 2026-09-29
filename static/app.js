@@ -38,8 +38,16 @@ const state = {
   beigomaCollectedIds: [],          // Array of collected beigoma IDs from save file
   beigomaDefeatedTrainerIds: [],    // Array of defeated trainer IDs from save file
 
+  // --- Fish Tracker ---
+  fishList: [],                     // Array of 52 fish definition objects
+  fishCaughtIds: new Set(),         // Set of caught fish IDs from save file
+  discoveredSpotIds: new Set(),     // Set of discovered fishing spot IDs from save file
+  activeFishFilter: 'all',          // 'all' | 'caught' | 'catchable' | 'undiscovered'
+  activeFishRarity: 'all',          // 'all' | '1' | '2' | '3' | '4' | '5'
+  fishSearchQuery: '',              // Lowercase trimmed search string
+
   // --- App ---
-  activeView: 'heroes',    // 'heroes' | 'recipes' | 'beigoma'
+  activeView: 'heroes',    // 'heroes' | 'recipes' | 'beigoma' | 'fish'
   saveConfig: null,        // Server config: { save_path, file_exists, detected_steam_path }
   saveStatus: null,        // Save summary: { file_exists, recruited_ids, playtime_formatted, money, ... }
 };
@@ -48,6 +56,13 @@ const state = {
 Object.defineProperty(state, 'beigomaSubview', {
   get() { return this.beigomaSubView; },
   set(v) { this.beigomaSubView = v; },
+  enumerable: true,
+  configurable: true,
+});
+
+Object.defineProperty(state, 'fish', {
+  get() { return this.fishList; },
+  set(v) { this.fishList = v; },
   enumerable: true,
   configurable: true,
 });
@@ -72,11 +87,13 @@ const dom = {
   tabNavHeroes: null,
   tabNavRecipes: null,
   tabNavBeigoma: null,
+  tabNavFish: null,
 
   // View Panels
   viewHeroes: null,
   viewRecipes: null,
   viewBeigoma: null,
+  viewFish: null,
 
   // Stats Display
   statSavePath: null,
@@ -120,6 +137,7 @@ const dom = {
   navCountHeroes: null,
   navCountRecipes: null,
   navCountBeigoma: null,
+  navCountFish: null,
 
   // Beigoma Sub-Navigation
   beigomaSubnav: null,
@@ -150,6 +168,18 @@ const dom = {
   trainerTable: null,
   trainerList: null,
   trainerEmptyState: null,
+
+  // Fish Tracker
+  fishFilterTabs: [],
+  countFishAll: null,
+  countFishCaught: null,
+  countFishCatchable: null,
+  countFishUndiscovered: null,
+  fishRarityFilter: null,
+  searchFishInput: null,
+  fishTable: null,
+  fishTbody: null,
+  fishEmptyState: null,
 
   // Configuration Dialog & Upload
   configDialog: null,
@@ -409,8 +439,8 @@ function renderTable() {
 // =============================================================================
 
 /**
- * Switches the active top-level view (Heroes or Recipes).
- * @param {'heroes'|'recipes'} viewName
+ * Switches the active top-level view (Heroes, Recipes, Beigoma, or Fish).
+ * @param {'heroes'|'recipes'|'beigoma'|'fish'} viewName
  */
 function switchView(viewName) {
   state.activeView = viewName;
@@ -419,9 +449,10 @@ function switchView(viewName) {
   if (dom.viewHeroes) dom.viewHeroes.hidden = (viewName !== 'heroes');
   if (dom.viewRecipes) dom.viewRecipes.hidden = (viewName !== 'recipes');
   if (dom.viewBeigoma) dom.viewBeigoma.hidden = (viewName !== 'beigoma');
+  if (dom.viewFish) dom.viewFish.hidden = (viewName !== 'fish');
 
   // Toggle nav tab active state
-  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma].forEach(tab => {
+  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma, dom.tabNavFish].forEach(tab => {
     if (!tab) return;
     const isActive = tab.dataset.view === viewName;
     tab.classList.toggle('active', isActive);
@@ -432,6 +463,10 @@ function switchView(viewName) {
     switchBeigomaSubview(state.beigomaSubView || 'collection');
     renderBeigoma();
     renderTrainers();
+  }
+
+  if (viewName === 'fish') {
+    renderFishTable();
   }
 
   // Persist active view
@@ -828,9 +863,192 @@ function renderTrainers() {
   updateBeigomaStats();
 }
 
+// =============================================================================
+// Fish Tracker Logic & Rendering
+// =============================================================================
+
+/**
+ * Computes fish status: 'caught' | 'catchable' | 'undiscovered'.
+ * @param {object} fish
+ * @param {Set<number>|Array<number>} [caughtIds=state.fishCaughtIds]
+ * @param {Set<number>|Array<number>} [discoveredSpotIds=state.discoveredSpotIds]
+ * @returns {'caught'|'catchable'|'undiscovered'}
+ */
+function getFishStatus(fish, caughtIds = state.fishCaughtIds, discoveredSpotIds = state.discoveredSpotIds) {
+  if (!fish) return 'undiscovered';
+  const cSet = caughtIds instanceof Set ? caughtIds : new Set(caughtIds || []);
+  const sSet = discoveredSpotIds instanceof Set ? discoveredSpotIds : new Set(discoveredSpotIds || []);
+
+  if (cSet.has(fish.id)) {
+    return 'caught';
+  }
+  if (Array.isArray(fish.spot_ids) && fish.spot_ids.some(sid => sSet.has(sid))) {
+    return 'catchable';
+  }
+  return 'undiscovered';
+}
+
+/**
+ * Filters a fish item based on status, rarity, and text search.
+ * @param {object} fish
+ * @param {Set<number>|Array<number>} [caughtIds=state.fishCaughtIds]
+ * @param {Set<number>|Array<number>} [discoveredSpotIds=state.discoveredSpotIds]
+ * @param {string} [filter=state.activeFishFilter]
+ * @param {string} [searchQuery=state.fishSearchQuery]
+ * @param {string} [rarityFilter=state.activeFishRarity]
+ * @returns {boolean}
+ */
+function filterFish(
+  fish,
+  caughtIds = state.fishCaughtIds,
+  discoveredSpotIds = state.discoveredSpotIds,
+  filter = state.activeFishFilter,
+  searchQuery = state.fishSearchQuery,
+  rarityFilter = state.activeFishRarity
+) {
+  if (!fish) return false;
+
+  const status = getFishStatus(fish, caughtIds, discoveredSpotIds);
+
+  // Status Filter: 'all' | 'caught' | 'catchable' | 'undiscovered'
+  if (filter && filter !== 'all' && status !== filter) {
+    return false;
+  }
+
+  // Rarity Filter: 'all' | '1' | '2' | '3' | '4' | '5'
+  if (rarityFilter && rarityFilter !== 'all') {
+    if (String(fish.rarity) !== String(rarityFilter)) {
+      return false;
+    }
+  }
+
+  // Text Search (name, location, notes)
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = (fish.name || '').toLowerCase().includes(q);
+    const locMatch = (fish.location || '').toLowerCase().includes(q);
+    const notesMatch = (fish.notes || '').toLowerCase().includes(q);
+    if (!nameMatch && !locMatch && !notesMatch) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Generates table row HTML for a single fish.
+ * @param {object} fish
+ * @param {'caught'|'catchable'|'undiscovered'} status
+ * @returns {string}
+ */
+function createFishRowHtml(fish, status) {
+  let badgeClass = 'status-undiscovered';
+  let badgeLabel = 'Undiscovered';
+
+  if (status === 'caught') {
+    badgeClass = 'status-caught';
+    badgeLabel = 'Caught';
+  } else if (status === 'catchable') {
+    badgeClass = 'status-catchable';
+    badgeLabel = 'Catchable';
+  }
+
+  const rarity = Math.max(1, Math.min(5, parseInt(fish.rarity, 10) || 1));
+  const filledStars = '★'.repeat(rarity);
+  const emptyStars = '☆'.repeat(5 - rarity);
+
+  const rarityHtml = `
+    <span class="rarity-stars" role="img" aria-label="Rarity: ${rarity} of 5 stars" title="${rarity} of 5 stars">
+      <span class="star-filled" aria-hidden="true">${filledStars}</span><span class="star-empty" aria-hidden="true">${emptyStars}</span>
+    </span>
+  `;
+
+  return `
+    <tr class="${status === 'caught' ? 'is-recruited' : ''}">
+      <td class="col-fish-name">${escapeHtml(fish.name)}</td>
+      <td class="col-fish-location">${escapeHtml(fish.location || '—')}</td>
+      <td class="col-fish-rarity">${rarityHtml}</td>
+      <td class="col-fish-status"><span class="status-badge ${badgeClass}">${badgeLabel}</span></td>
+    </tr>
+  `;
+}
+
+/**
+ * Updates fish counters in top navigation and filter tabs.
+ */
+function updateFishCounts() {
+  const total = state.fishList.length || 52;
+  let caught = 0;
+  let catchable = 0;
+  let undiscovered = 0;
+
+  for (const f of state.fishList) {
+    const st = getFishStatus(f, state.fishCaughtIds, state.discoveredSpotIds);
+    if (st === 'caught') caught++;
+    else if (st === 'catchable') catchable++;
+    else undiscovered++;
+  }
+
+  if (dom.navCountFish) {
+    dom.navCountFish.textContent = `${caught}/${total}`;
+  }
+  if (dom.countFishAll) dom.countFishAll.textContent = String(total);
+  if (dom.countFishCaught) dom.countFishCaught.textContent = String(caught);
+  if (dom.countFishCatchable) dom.countFishCatchable.textContent = String(catchable);
+  if (dom.countFishUndiscovered) dom.countFishUndiscovered.textContent = String(undiscovered);
+}
+
+const updateFishStatusCounts = updateFishCounts;
+
+/**
+ * Filters fish collection and renders table rows.
+ */
+function renderFishTable() {
+  if (!dom.fishTbody) return;
+
+  const filtered = state.fishList.filter(f =>
+    filterFish(
+      f,
+      state.fishCaughtIds,
+      state.discoveredSpotIds,
+      state.activeFishFilter,
+      state.fishSearchQuery,
+      state.activeFishRarity
+    )
+  );
+
+  if (filtered.length === 0) {
+    dom.fishTbody.innerHTML = '';
+    if (dom.fishEmptyState) dom.fishEmptyState.hidden = false;
+  } else {
+    if (dom.fishEmptyState) dom.fishEmptyState.hidden = true;
+    dom.fishTbody.innerHTML = filtered
+      .map(f => createFishRowHtml(f, getFishStatus(f, state.fishCaughtIds, state.discoveredSpotIds)))
+      .join('');
+  }
+}
+
+/**
+ * Fetches fish catalog data from server.
+ * @returns {Promise<Array<object>>}
+ */
+async function fetchFishData() {
+  try {
+    const res = await fetch('/api/fish');
+    if (res.ok) {
+      state.fishList = await res.json();
+      return state.fishList;
+    }
+  } catch (err) {
+    showToast(`Could not load fish catalog: ${err.message}`, 'error');
+  }
+  return [];
+}
+
 /**
  * Synchronizes save progress across all tracker domains:
- * Heroes, Recipes, Beigoma collection, and Beigoma trainers.
+ * Heroes, Recipes, Beigoma collection, Beigoma trainers, and Fish.
  * @param {object} data - Save summary object
  */
 function applyProgress(data) {
@@ -860,15 +1078,29 @@ function applyProgress(data) {
     state.beigomaDefeatedTrainerIds = [];
   }
 
+  if (Array.isArray(data.fish_caught_ids)) {
+    state.fishCaughtIds = new Set(data.fish_caught_ids);
+  } else if (data.file_exists === false) {
+    state.fishCaughtIds = new Set();
+  }
+
+  if (Array.isArray(data.discovered_spot_ids)) {
+    state.discoveredSpotIds = new Set(data.discovered_spot_ids);
+  } else if (data.file_exists === false) {
+    state.discoveredSpotIds = new Set();
+  }
+
   updateStats();
   updateProgress();
   if (typeof updateRecipesProgress === 'function') updateRecipesProgress();
   if (typeof updateBeigomaStats === 'function') updateBeigomaStats();
+  if (typeof updateFishCounts === 'function') updateFishCounts();
 
   renderTable();
   if (typeof renderRecipesTable === 'function') renderRecipesTable();
   if (typeof renderBeigoma === 'function') renderBeigoma();
   if (typeof renderTrainers === 'function') renderTrainers();
+  if (typeof renderFishTable === 'function') renderFishTable();
 }
 
 // =============================================================================
@@ -930,15 +1162,16 @@ function handleSaveFileStatus(statusData, { silent = false, statusTarget = null,
   const recipeCount = (statusData.acquired_recipe_ids || []).length;
   const beigomaCount = (statusData.beigoma_collected_ids || []).length;
   const trainerCount = (statusData.beigoma_defeated_trainer_ids || []).length;
+  const fishCount = (statusData.fish_caught_ids || []).length;
 
   if (statusTarget) {
     setDialogStatus(
       statusTarget,
-      `Save synchronized · ${heroCount} heroes · ${recipeCount} recipes · ${beigomaCount}/60 tops · ${trainerCount}/44 trainers`,
+      `Save synchronized · ${heroCount} heroes · ${recipeCount} recipes · ${beigomaCount}/60 tops · ${trainerCount}/44 trainers · ${fishCount}/52 fish`,
       'success'
     );
   } else if (!silent) {
-    showToast(buildSyncToast(prevCounts, { heroCount, recipeCount, beigomaCount, trainerCount }), 'success');
+    showToast(buildSyncToast(prevCounts, { heroCount, recipeCount, beigomaCount, trainerCount, fishCount }), 'success');
   }
 
   return { ok: true, reason: 'synced' };
@@ -954,6 +1187,7 @@ const SYNC_TRACKERS = [
   { label: 'recipe',  labelPlural: 'recipes',           key: 'recipeCount' },
   { label: 'beigoma', labelPlural: 'beigoma',           key: 'beigomaCount' },
   { label: 'trainer', labelPlural: 'trainers defeated', key: 'trainerCount' },
+  { label: 'fish',    labelPlural: 'fish',             key: 'fishCount' },
 ];
 
 /**
@@ -1210,6 +1444,21 @@ function cacheDomElements() {
   dom.trainerList = document.getElementById('trainer-list');
   dom.trainerEmptyState = document.getElementById('trainer-empty-state');
 
+  // Fish Navigation & View Panel
+  dom.tabNavFish = document.getElementById('tab-nav-fish');
+  dom.navCountFish = document.getElementById('nav-count-fish');
+  dom.viewFish = document.getElementById('view-fish');
+  dom.fishFilterTabs = Array.from(document.querySelectorAll('#fish-filter-tabs .filter-tab'));
+  dom.countFishAll = document.getElementById('count-fish-all');
+  dom.countFishCaught = document.getElementById('count-fish-caught');
+  dom.countFishCatchable = document.getElementById('count-fish-catchable');
+  dom.countFishUndiscovered = document.getElementById('count-fish-undiscovered');
+  dom.fishRarityFilter = document.getElementById('fish-rarity-filter');
+  dom.searchFishInput = document.getElementById('search-fish-input');
+  dom.fishTable = document.getElementById('fish-table');
+  dom.fishTbody = document.getElementById('fish-tbody');
+  dom.fishEmptyState = document.getElementById('fish-empty-state');
+
   // Config Dialog & Upload
   dom.configDialog = document.getElementById('config-dialog');
   dom.configPathInput = document.getElementById('config-path-input');
@@ -1370,12 +1619,52 @@ function setupEventListeners() {
   }
 
   // Top Navigation Tab Switching
-  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma].forEach(tab => {
+  [dom.tabNavHeroes, dom.tabNavRecipes, dom.tabNavBeigoma, dom.tabNavFish].forEach(tab => {
     if (!tab) return;
     tab.addEventListener('click', () => {
       switchView(tab.dataset.view || 'heroes');
     });
   });
+
+  // Fish Filter Tabs
+  if (dom.fishFilterTabs) {
+    dom.fishFilterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        dom.fishFilterTabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        state.activeFishFilter = tab.dataset.filter || 'all';
+        renderFishTable();
+      });
+    });
+  }
+
+  // Fish Search Input
+  if (dom.searchFishInput) {
+    dom.searchFishInput.addEventListener('input', (e) => {
+      state.fishSearchQuery = e.target.value.trim().toLowerCase();
+      renderFishTable();
+    });
+
+    dom.searchFishInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.searchFishInput.value) {
+        dom.searchFishInput.value = '';
+        state.fishSearchQuery = '';
+        renderFishTable();
+      }
+    });
+  }
+
+  // Fish Rarity Filter Dropdown
+  if (dom.fishRarityFilter) {
+    dom.fishRarityFilter.addEventListener('change', (e) => {
+      state.activeFishRarity = e.target.value;
+      renderFishTable();
+    });
+  }
 
   // Beigoma Sub-Navigation (Collection vs Trainers)
   [dom.subtabBeigomaCollection, dom.subtabBeigomaTrainers].forEach(tab => {
@@ -1799,14 +2088,15 @@ async function init() {
   setupEventListeners();
 
   try {
-    // Fetch server configuration, characters, recipes, cooked state, beigoma, and trainers in parallel
-    const [cfgRes, charRes, recipeRes, cookedRes, beigomaRes, trainerRes] = await Promise.all([
+    // Fetch server configuration, characters, recipes, cooked state, beigoma, trainers, and fish in parallel
+    const [cfgRes, charRes, recipeRes, cookedRes, beigomaRes, trainerRes, fishRes] = await Promise.all([
       fetch('/api/config'),
       fetch('/api/characters'),
       fetch('/api/recipes'),
       fetch('/api/recipes/cooked'),
       fetch('/api/beigoma'),
       fetch('/api/beigoma/trainers'),
+      fetch('/api/fish'),
     ]);
 
     if (cfgRes.ok) {
@@ -1837,6 +2127,12 @@ async function init() {
       state.beigomaTrainers = await trainerRes.json();
     } else {
       showToast('Could not load beigoma trainers catalog', 'error');
+    }
+
+    if (fishRes && fishRes.ok) {
+      state.fishList = await fishRes.json();
+    } else {
+      showToast('Could not load fish catalog', 'error');
     }
 
     // Restore cooked IDs: merge localStorage + server config
@@ -1897,6 +2193,8 @@ async function init() {
         switchView('recipes');
       } else if (savedView === 'beigoma') {
         switchView('beigoma');
+      } else if (savedView === 'fish') {
+        switchView('fish');
       } else {
         switchView('heroes');
       }
@@ -1925,6 +2223,8 @@ async function init() {
     updateBeigomaStats();
     renderBeigoma();
     renderTrainers();
+    updateFishCounts();
+    renderFishTable();
   }
 }
 
@@ -1968,6 +2268,13 @@ if (typeof module !== 'undefined' && module.exports) {
     renderRecipesTable,
     renderBeigoma,
     renderTrainers,
+    getFishStatus,
+    filterFish,
+    createFishRowHtml,
+    updateFishCounts,
+    updateFishStatusCounts,
+    renderFishTable,
+    fetchFishData,
     switchView,
     switchBeigomaSubview,
     applyProgress,
