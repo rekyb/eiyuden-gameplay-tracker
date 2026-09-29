@@ -983,6 +983,19 @@ tr.is-recruited td.col-name .hero-name {
   .table-wrapper {
     max-height: calc(100vh - 200px);
   }
+
+  .section-header {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.05rem;
+  }
+
+  .section-desc {
+    font-size: 0.775rem;
+  }
 }
 
 /* Accessibility: User Prefers Reduced Motion */
@@ -1052,6 +1065,28 @@ tr.is-recruited td.col-name .hero-name {
   background-color: var(--bg-hover);
   color: var(--text-primary);
   border-color: var(--border-medium);
+}
+
+/* --- Section Header Banners --- */
+.section-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.section-desc {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* --- View Panels (Heroes / Recipes) --- */
