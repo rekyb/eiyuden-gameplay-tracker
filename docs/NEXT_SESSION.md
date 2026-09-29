@@ -31,7 +31,9 @@ To continue in the next session, instruct the agent:
 | Fish Server | Added `GET /api/fish` endpoint & included fish progress in `/api/progress` with E2E tests | ✅ Done (verified) | `fc693bb` |
 | Fish Markup | Added top navigation tab, `#view-fish` panel, status tabs, rarity dropdown, table, & CSS styles | ✅ Done (verified) | `db32f8e` |
 | Fish Client | Implemented filtering, 5-star rating rendering, reactive status badges, and save sync | ✅ Done (verified) | `79ed801` |
-| Verification | Full regression testing across backend, frontend, and live player save `UserData999.dat` | ✅ Done (verified) | Pending commit |
+| UI Polish | Refined `.select-filter` to match searchbar in resting state and elevate on focus/click | ✅ Done (verified) | `fa94413` |
+| UX Polish | Added save slot 0-based indexing quick instruction in Settings dialog | ✅ Done (verified) | `3e7f275` |
+| Verification | Full regression testing across backend, frontend, and live player save `UserData999.dat` | ✅ Done (verified) | `9653347` |
 
 - **All tests passing:** 114 Python (`python -m unittest discover tests`) + 40 Node.js (`node --test tests/frontend/test_app.js`)
 - **Zero regressions:** Existing Heroes, Recipes, and Beigoma tracking unaffected.
