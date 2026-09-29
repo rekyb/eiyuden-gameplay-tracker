@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 const app = require('../../static/app.js');
 
 test('handleSaveFileStatus handles null/empty status as not_found', () => {
@@ -982,9 +984,19 @@ test('fetchFishData loads fish catalog into state.fishList', async () => {
   }
 });
 
+test('index.html contains section headers and descriptions for all views', () => {
+  const htmlPath = path.join(__dirname, '../../static/index.html');
+  const html = fs.readFileSync(htmlPath, 'utf-8');
 
+  assert.ok(html.includes('section-header'), 'Missing section-header class');
+  assert.ok(html.includes('section-title'), 'Missing section-title class');
+  assert.ok(html.includes('section-desc'), 'Missing section-desc class');
 
-
-
-
-
+  assert.ok(html.includes('Hero Recruitment'), 'Missing Hero Recruitment header');
+  assert.ok(html.includes('Cooking Recipes'), 'Missing Cooking Recipes header');
+  assert.ok(
+    html.includes('Beigoma Collection &amp; Trainers') || html.includes('Beigoma Collection & Trainers'),
+    'Missing Beigoma Collection & Trainers header'
+  );
+  assert.ok(html.includes('Fish Collection'), 'Missing Fish Collection header');
+});
