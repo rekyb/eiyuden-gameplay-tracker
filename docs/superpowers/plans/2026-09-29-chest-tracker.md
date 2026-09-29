@@ -17,7 +17,7 @@
 - No new dependencies (`requirements.txt` remains `cryptography>=41.0.0`).
 - Test commands: `python -m unittest discover -s tests -p "test_*.py"` (baseline: 116 passing) and `node --test tests/frontend/test_app.js` (baseline: 41 passing).
 - Conventional commits (`feat:`, `fix:`, `docs:`) matching git history.
-- Never stage: `config/config.json`, `docs/CODE_REVIEW.md`, `docs/SENIOR_CODE_REVIEW.md` (unrelated uncommitted user files). `docs/NEXT_SESSION.md` → `docs/MEMORY.md` rename is user work committed only in Task 7.
+- Never stage: `config/config.json`, `docs/CODE_REVIEW.md`, `docs/SENIOR_CODE_REVIEW.md` (unrelated uncommitted user files). The `docs/NEXT_SESSION.md` → `docs/MEMORY.md` rename is already committed; Task 7 only updates `docs/MEMORY.md` content.
 - Every task ends with both suites green before committing.
 
 ## Review Focus
@@ -471,11 +471,13 @@ Run: `node --test tests/frontend/test_app.js` → all green (report count; basel
 
 Follow its existing structure: current branch `feat/chest-tracker`; status line (all tests passing with exact counts, ready for PR); progress table rows for each task's commits; key design decisions for the Chest Tracker (save-derived status, calibration registry, `snapshotCounts` consolidation); reference links to the spec and this plan. Note the fish save-sync fix under a **fix** (not feature) heading.
 
-- [ ] **Step 3: Commit (including the user's rename — spec/plan reference MEMORY.md)**
+- [ ] **Step 3: Commit**
+
+The `NEXT_SESSION.md` → `MEMORY.md` rename was already committed in the session checkpoint that produced this plan's handover entry — only content changes are staged here:
 
 ```bash
-git add docs/MEMORY.md docs/NEXT_SESSION.md
-git commit -m "docs: record chest tracker completion and rename handover to MEMORY.md"
+git add docs/MEMORY.md
+git commit -m "docs: record chest tracker completion in MEMORY.md"
 ```
 
 Do **not** stage `docs/CODE_REVIEW.md` / `docs/SENIOR_CODE_REVIEW.md` — that rename is unrelated and left for the user.
