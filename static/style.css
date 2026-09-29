@@ -777,6 +777,16 @@ tr.is-recruited td.col-name .hero-name {
   margin: 0.15rem 0 0 0;
 }
 
+.form-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
 .input-action-row {
   display: flex;
   gap: 0.5rem;
