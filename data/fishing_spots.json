@@ -1,0 +1,116 @@
+[
+  {
+    "id": 1,
+    "name": "Grum County (North)",
+    "region": "Grum County",
+    "description": "Riverbank north of Arenside"
+  },
+  {
+    "id": 2,
+    "name": "Altverden Village",
+    "region": "Grum County",
+    "description": "Southwest riverbank in Altverden Village"
+  },
+  {
+    "id": 3,
+    "name": "Eltisweiss",
+    "region": "Grum County",
+    "description": "Canal fishing pier in south Eltisweiss"
+  },
+  {
+    "id": 4,
+    "name": "Kyshiri Village",
+    "region": "Grum County",
+    "description": "River dock in Kyshiri Village"
+  },
+  {
+    "id": 5,
+    "name": "Near Headquarters",
+    "region": "Grum County",
+    "description": "Riverbank near the Abandoned Mine and Headquarters"
+  },
+  {
+    "id": 6,
+    "name": "Seaside Cavern",
+    "region": "Coast",
+    "description": "Outside Seaside Cavern on the Euchrisse coast"
+  },
+  {
+    "id": 7,
+    "name": "Hishahn",
+    "region": "Euchrisse",
+    "description": "Canal dock near the market in Hishahn"
+  },
+  {
+    "id": 8,
+    "name": "Hishahn Palace",
+    "region": "Euchrisse",
+    "description": "Royal pond inside Hishahn Palace grounds"
+  },
+  {
+    "id": 9,
+    "name": "Seaside Cavern (Interior)",
+    "region": "Coast",
+    "description": "Underground magma pools inside Seaside Cavern"
+  },
+  {
+    "id": 10,
+    "name": "Dabavin",
+    "region": "Eastern Desert",
+    "description": "Harbor boardwalk in Dabavin"
+  },
+  {
+    "id": 11,
+    "name": "Impershi'arc",
+    "region": "Great Sandy Sea",
+    "description": "Sand dunes wharf in Impershi'arc"
+  },
+  {
+    "id": 12,
+    "name": "Sandfish Island",
+    "region": "Great Sandy Sea",
+    "description": "Fishing spot on Sandfish Island in the Great Sandy Sea"
+  },
+  {
+    "id": 14,
+    "name": "Yarnaan",
+    "region": "Yarnaan",
+    "description": "Waterfall basin on the lower tier of Yarnaan"
+  },
+  {
+    "id": 15,
+    "name": "Athrabalt",
+    "region": "Norristar",
+    "description": "Riverbank dock in the capital of Athrabalt"
+  },
+  {
+    "id": 16,
+    "name": "Skriss Village",
+    "region": "Norristar",
+    "description": "Frozen lake dock in Skriss Village"
+  },
+  {
+    "id": 51,
+    "name": "Headquarters Spot #1",
+    "region": "Headquarters",
+    "description": "Base fishing pond (Level 1)"
+  },
+  {
+    "id": 52,
+    "name": "Headquarters Spot #2",
+    "region": "Headquarters",
+    "description": "Base fishing pond (Level 2 upgrade)"
+  },
+  {
+    "id": 53,
+    "name": "Headquarters Spot #3",
+    "region": "Headquarters",
+    "description": "Base fishing pond (Level 3 upgrade)"
+  },
+  {
+    "id": 54,
+    "name": "Headquarters Spot #4",
+    "region": "Headquarters",
+    "description": "Base fishing pond (Level 4 upgrade)"
+  }
+]

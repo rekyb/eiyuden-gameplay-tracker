@@ -78,3 +78,22 @@ def load_beigoma_trainers(data_dir: Optional[Union[Path, str]] = None) -> List[D
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
+def load_fish(data_dir: Optional[Union[Path, str]] = None) -> List[Dict[str, Any]]:
+    """Load fish database from fish.json.
+
+    Args:
+        data_dir: Optional directory or file path for fish.json. Defaults to project data/.
+
+    Returns:
+        List of fish dictionaries.
+    """
+    if data_dir is not None:
+        p = Path(data_dir)
+        path = p if p.is_file() else p / "fish.json"
+    else:
+        path = DATA_DIR / "fish.json"
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+

@@ -98,6 +98,10 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
         "beigoma_collected_count": 0,
         "beigoma_defeated_trainer_ids": [],
         "beigoma_defeated_trainer_count": 0,
+        "fish_caught_ids": [],
+        "fish_caught_count": 0,
+        "fish_total_count": 52,
+        "discovered_spot_ids": [],
         "playtime_seconds": 0.0,
         "playtime_formatted": "0h 0m 0s",
         "money": 0,
@@ -236,6 +240,27 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
 
     beigoma_defeated_trainer_ids = sorted(list(defeated_trainer_ids))
 
+    # Fish & Fishing Spots extraction
+    fishes_data = save_data.get("_fishesRegistrations", [])
+    caught_ids_set = set()
+    if isinstance(fishes_data, list):
+        for entry in fishes_data:
+            if isinstance(entry, dict):
+                fid = entry.get("_fishId")
+                if type(fid) is int and 1 <= fid <= 52:
+                    caught_ids_set.add(fid)
+    fish_caught_ids = sorted(list(caught_ids_set))
+
+    spots_data = save_data.get("_fishingSpots", [])
+    discovered_spots_set = set()
+    if isinstance(spots_data, list):
+        for s in spots_data:
+            if isinstance(s, dict):
+                sid = s.get("_id")
+                if type(sid) is int and s.get("_isDiscoverd") is True:
+                    discovered_spots_set.add(sid)
+    discovered_spot_ids = sorted(list(discovered_spots_set))
+
     # Playtime
     raw_seconds = save_data.get("_seconds")
     if raw_seconds is None and isinstance(user_data, dict):
@@ -302,6 +327,10 @@ def read_save_summary(filepath: Optional[str]) -> Dict[str, Any]:
         "beigoma_collected_count": len(beigoma_collected_ids),
         "beigoma_defeated_trainer_ids": beigoma_defeated_trainer_ids,
         "beigoma_defeated_trainer_count": len(beigoma_defeated_trainer_ids),
+        "fish_caught_ids": fish_caught_ids,
+        "fish_caught_count": len(fish_caught_ids),
+        "fish_total_count": 52,
+        "discovered_spot_ids": discovered_spot_ids,
         "playtime_seconds": seconds,
         "playtime_formatted": playtime_formatted,
         "money": money,

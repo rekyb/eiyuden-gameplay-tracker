@@ -698,6 +698,291 @@ test('renderBeigoma respects state.beigomaRarityFilter', () => {
   app.state.beigomaRarityFilter = originalFilter;
 });
 
+test('getFishStatus computes caught, catchable, and undiscovered statuses correctly', () => {
+  const fish = { id: 1, name: 'Curry Mackerel', spot_ids: [6, 10, 52] };
+
+  // 1. Caught when in caughtIds
+  assert.strictEqual(app.getFishStatus(fish, new Set([1]), new Set()), 'caught');
+  // Caught takes precedence even if spots are discovered
+  assert.strictEqual(app.getFishStatus(fish, new Set([1]), new Set([6, 10])), 'caught');
+  // Works with array as well
+  assert.strictEqual(app.getFishStatus(fish, [1], [6]), 'caught');
+
+  // 2. Catchable when not caught and at least one spot is discovered
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set([6])), 'catchable');
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set([10])), 'catchable');
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set([52])), 'catchable');
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set([99, 52])), 'catchable');
+
+  // 3. Undiscovered when not caught and no spot is discovered
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set()), 'undiscovered');
+  assert.strictEqual(app.getFishStatus(fish, new Set(), new Set([99, 100])), 'undiscovered');
+
+  // Edge cases: null or missing spot_ids
+  const fishNoSpots = { id: 2, name: 'Mystery Fish' };
+  assert.strictEqual(app.getFishStatus(fishNoSpots, new Set(), new Set([1, 2, 3])), 'undiscovered');
+  assert.strictEqual(app.getFishStatus(null), 'undiscovered');
+});
+
+test('filterFish correctly filters by status, rarity, and search text', () => {
+  const fish1 = {
+    id: 1,
+    name: 'Curry Mackerel',
+    rarity: 1,
+    spot_ids: [6, 10],
+    location: 'Seaside Cavern, Dabavin',
+    notes: 'A mackerel flavored with curry.',
+  };
+  const fish2 = {
+    id: 2,
+    name: 'Crested Puffer',
+    rarity: 5,
+    spot_ids: [9],
+    location: 'Impershi\'arc',
+    notes: 'East Reach helmet fish.',
+  };
+
+  const caughtIds = new Set([1]);
+  const discoveredSpots = new Set([9]);
+
+  // Status: all
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'all', '', 'all'), true);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', '', 'all'), true);
+
+  // Status: caught
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'caught', '', 'all'), true);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'caught', '', 'all'), false);
+
+  // Status: catchable
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'catchable', '', 'all'), false);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'catchable', '', 'all'), true);
+
+  // Status: undiscovered
+  assert.strictEqual(app.filterFish(fish2, caughtIds, new Set(), 'undiscovered', '', 'all'), true);
+
+  // Rarity filter
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'all', '', '1'), true);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', '', '1'), false);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', '', '5'), true);
+
+  // Search by name
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'all', 'mackerel', 'all'), true);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', 'mackerel', 'all'), false);
+
+  // Search by location
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'all', 'dabavin', 'all'), true);
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', 'dabavin', 'all'), false);
+
+  // Search by notes
+  assert.strictEqual(app.filterFish(fish2, caughtIds, discoveredSpots, 'all', 'helmet', 'all'), true);
+  assert.strictEqual(app.filterFish(fish1, caughtIds, discoveredSpots, 'all', 'helmet', 'all'), false);
+});
+
+test('createFishRowHtml produces accessible markup with stars and status badge', () => {
+  const fish5Star = {
+    id: 42,
+    name: 'Megalopiranha',
+    rarity: 5,
+    location: 'The Great Sandy Sea',
+  };
+
+  const htmlCaught = app.createFishRowHtml(fish5Star, 'caught');
+  assert.ok(htmlCaught.includes('is-recruited'));
+  assert.ok(htmlCaught.includes('col-fish-name'));
+  assert.ok(htmlCaught.includes('Megalopiranha'));
+  assert.ok(htmlCaught.includes('The Great Sandy Sea'));
+  assert.ok(htmlCaught.includes('aria-label="Rarity: 5 of 5 stars"'));
+  assert.ok(htmlCaught.includes('<span class="star-filled" aria-hidden="true">★★★★★</span>'));
+  assert.ok(!htmlCaught.includes('<span class="star-empty" aria-hidden="true">★'));
+  assert.ok(htmlCaught.includes('status-caught'));
+  assert.ok(htmlCaught.includes('Caught'));
+
+  const fish1Star = {
+    id: 1,
+    name: 'Curry Mackerel',
+    rarity: 1,
+    location: 'Seaside Cavern',
+  };
+  const htmlCatchable = app.createFishRowHtml(fish1Star, 'catchable');
+  assert.ok(!htmlCatchable.includes('is-recruited'));
+  assert.ok(htmlCatchable.includes('aria-label="Rarity: 1 of 5 stars"'));
+  assert.ok(htmlCatchable.includes('<span class="star-filled" aria-hidden="true">★</span>'));
+  assert.ok(htmlCatchable.includes('<span class="star-empty" aria-hidden="true">☆☆☆☆</span>'));
+  assert.ok(htmlCatchable.includes('status-catchable'));
+  assert.ok(htmlCatchable.includes('Catchable'));
+
+  const htmlUndiscovered = app.createFishRowHtml(fish1Star, 'undiscovered');
+  assert.ok(htmlUndiscovered.includes('status-undiscovered'));
+  assert.ok(htmlUndiscovered.includes('Undiscovered'));
+});
+
+test('updateFishCounts updates counters and badges accurately', () => {
+  const origFish = app.state.fishList;
+  const origCaught = app.state.fishCaughtIds;
+  const origSpots = app.state.discoveredSpotIds;
+
+  app.state.fishList = [
+    { id: 1, name: 'Fish 1', spot_ids: [10] },
+    { id: 2, name: 'Fish 2', spot_ids: [20] },
+    { id: 3, name: 'Fish 3', spot_ids: [30] },
+    { id: 4, name: 'Fish 4', spot_ids: [40] },
+  ];
+  app.state.fishCaughtIds = new Set([1]);
+  app.state.discoveredSpotIds = new Set([20]); // fish 2 is catchable, fish 3 & 4 undiscovered
+
+  app.dom.navCountFish = { textContent: '' };
+  app.dom.countFishAll = { textContent: '' };
+  app.dom.countFishCaught = { textContent: '' };
+  app.dom.countFishCatchable = { textContent: '' };
+  app.dom.countFishUndiscovered = { textContent: '' };
+
+  app.updateFishCounts();
+
+  assert.strictEqual(app.dom.navCountFish.textContent, '1/4');
+  assert.strictEqual(app.dom.countFishAll.textContent, '4');
+  assert.strictEqual(app.dom.countFishCaught.textContent, '1');
+  assert.strictEqual(app.dom.countFishCatchable.textContent, '1');
+  assert.strictEqual(app.dom.countFishUndiscovered.textContent, '2');
+
+  app.state.fishList = origFish;
+  app.state.fishCaughtIds = origCaught;
+  app.state.discoveredSpotIds = origSpots;
+});
+
+test('renderFishTable renders all 52 fish rows without pagination and handles empty state', () => {
+  const origFish = app.state.fishList;
+  const origFilter = app.state.activeFishFilter;
+  const origRarity = app.state.activeFishRarity;
+  const origQuery = app.state.fishSearchQuery;
+  const origTbody = app.dom.fishTbody;
+  const origEmpty = app.dom.fishEmptyState;
+
+  app.state.fishList = Array.from({ length: 52 }, (_, i) => ({
+    id: i + 1,
+    name: `Fish ${i + 1}`,
+    rarity: (i % 5) + 1,
+    spot_ids: [i + 1],
+    location: `Spot ${i + 1}`,
+    notes: 'A sample fish note.',
+  }));
+  app.state.fishCaughtIds = new Set();
+  app.state.discoveredSpotIds = new Set();
+  app.state.activeFishFilter = 'all';
+  app.state.activeFishRarity = 'all';
+  app.state.fishSearchQuery = '';
+
+  const mockTbody = { innerHTML: '' };
+  const mockEmpty = { hidden: false };
+  app.dom.fishTbody = mockTbody;
+  app.dom.fishEmptyState = mockEmpty;
+
+  app.renderFishTable();
+  assert.strictEqual(mockEmpty.hidden, true);
+  assert.strictEqual((mockTbody.innerHTML.match(/<tr/g) || []).length, 52);
+
+  // Test empty state
+  app.state.fishSearchQuery = 'nonexistent fish name query';
+  app.renderFishTable();
+  assert.strictEqual(mockEmpty.hidden, false);
+  assert.strictEqual(mockTbody.innerHTML, '');
+
+  // Cleanup
+  app.state.fishList = origFish;
+  app.state.activeFishFilter = origFilter;
+  app.state.activeFishRarity = origRarity;
+  app.state.fishSearchQuery = origQuery;
+  app.dom.fishTbody = origTbody;
+  app.dom.fishEmptyState = origEmpty;
+});
+
+test('switchView toggles to fish view correctly', () => {
+  const mockClassList = (initialActive) => {
+    let active = initialActive;
+    return {
+      toggle: (cls, val) => { if (cls === 'active') active = val; },
+      contains: (cls) => cls === 'active' && active,
+    };
+  };
+
+  app.dom.viewHeroes = { hidden: false };
+  app.dom.viewRecipes = { hidden: true };
+  app.dom.viewBeigoma = { hidden: true };
+  app.dom.viewFish = { hidden: true };
+
+  app.dom.tabNavHeroes = { dataset: { view: 'heroes' }, classList: mockClassList(true), setAttribute: () => {} };
+  app.dom.tabNavRecipes = { dataset: { view: 'recipes' }, classList: mockClassList(false), setAttribute: () => {} };
+  app.dom.tabNavBeigoma = { dataset: { view: 'beigoma' }, classList: mockClassList(false), setAttribute: () => {} };
+  app.dom.tabNavFish = { dataset: { view: 'fish' }, classList: mockClassList(false), setAttribute: () => {} };
+
+  app.switchView('fish');
+
+  assert.strictEqual(app.state.activeView, 'fish');
+  assert.strictEqual(app.dom.viewFish.hidden, false);
+  assert.strictEqual(app.dom.viewHeroes.hidden, true);
+  assert.strictEqual(app.dom.viewRecipes.hidden, true);
+  assert.strictEqual(app.dom.viewBeigoma.hidden, true);
+  assert.strictEqual(app.dom.tabNavFish.classList.contains('active'), true);
+  assert.strictEqual(app.dom.tabNavHeroes.classList.contains('active'), false);
+});
+
+test('applyProgress updates fish state and triggers count and render updates', () => {
+  const origCaught = app.state.fishCaughtIds;
+  const origSpots = app.state.discoveredSpotIds;
+
+  const savePayload = {
+    file_exists: true,
+    recruited_ids: [1],
+    acquired_recipe_ids: [3001],
+    beigoma_collected_ids: [1],
+    beigoma_defeated_trainer_ids: [1],
+    fish_caught_ids: [10, 20, 30],
+    discovered_spot_ids: [5, 6, 7],
+  };
+
+  app.applyProgress(savePayload);
+
+  assert.strictEqual(app.state.fishCaughtIds.has(10), true);
+  assert.strictEqual(app.state.fishCaughtIds.has(20), true);
+  assert.strictEqual(app.state.fishCaughtIds.has(30), true);
+  assert.strictEqual(app.state.fishCaughtIds.has(99), false);
+  assert.strictEqual(app.state.discoveredSpotIds.has(5), true);
+  assert.strictEqual(app.state.discoveredSpotIds.has(6), true);
+  assert.strictEqual(app.state.discoveredSpotIds.has(7), true);
+
+  // Test reset on file_exists: false
+  app.applyProgress({ file_exists: false });
+  assert.strictEqual(app.state.fishCaughtIds.size, 0);
+  assert.strictEqual(app.state.discoveredSpotIds.size, 0);
+
+  app.state.fishCaughtIds = origCaught;
+  app.state.discoveredSpotIds = origSpots;
+});
+
+test('fetchFishData loads fish catalog into state.fishList', async () => {
+  const origFetch = global.fetch;
+  const mockFish = Array.from({ length: 52 }, (_, i) => ({ id: i + 1, name: `Fish ${i + 1}` }));
+
+  try {
+    global.fetch = async (url) => {
+      if (url === '/api/fish') {
+        return {
+          ok: true,
+          json: async () => mockFish,
+        };
+      }
+      return { ok: false, status: 404 };
+    };
+
+    const data = await app.fetchFishData();
+    assert.strictEqual(data.length, 52);
+    assert.strictEqual(app.state.fishList.length, 52);
+    assert.strictEqual(app.state.fishList[0].name, 'Fish 1');
+  } finally {
+    global.fetch = origFetch;
+  }
+});
+
+
 
 
 

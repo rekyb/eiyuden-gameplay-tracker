@@ -27,6 +27,7 @@ from src.tracker.core.models import (
     load_recipes,
     load_beigoma,
     load_beigoma_trainers,
+    load_fish,
 )
 from src.tracker.core.save_reader import (
     decrypt_save,
@@ -38,6 +39,7 @@ DEFAULT_STATIC_DIR = PROJECT_ROOT / "static"
 DEFAULT_UPLOADS_DIR = PROJECT_ROOT / "uploads"
 BEIGOMA_FILE = PROJECT_ROOT / "data" / "beigoma.json"
 BEIGOMA_TRAINERS_FILE = PROJECT_ROOT / "data" / "beigoma_trainers.json"
+FISH_FILE = PROJECT_ROOT / "data" / "fish.json"
 
 
 def detect_save_path() -> Optional[str]:
@@ -160,6 +162,10 @@ def validate_save_file(filepath: Optional[Union[str, Path]]) -> Dict[str, Any]:
         summary["beigoma_total_trainers"] = len(load_beigoma_trainers())
     except Exception:
         summary["beigoma_total_trainers"] = 44
+    try:
+        summary["fish_total_count"] = len(load_fish())
+    except Exception:
+        summary["fish_total_count"] = 52
     return {
         "valid": True,
         "exists": True,
@@ -426,6 +432,31 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Failed reading beigoma trainers: {exc}"}, status=500)
                 return
 
+        if path == "/api/fish":
+            if getattr(self.server, "fish_path", None) is not None:
+                if os.path.isfile(self.server.fish_path):
+                    try:
+                        with open(self.server.fish_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.send_json(data)
+                        return
+                    except Exception as exc:
+                        self.send_json({"error": f"Failed reading fish: {exc}"}, status=500)
+                        return
+                else:
+                    self.send_json([], status=200)
+                    return
+            if getattr(self.server, "fish_data", None) is not None:
+                self.send_json(self.server.fish_data)
+                return
+            try:
+                data = load_fish()
+                self.send_json(data)
+                return
+            except Exception as exc:
+                self.send_json({"error": f"Failed reading fish: {exc}"}, status=500)
+                return
+
         if path in ("/api/save/status", "/api/progress"):
             cfg = self.server.config_manager.get_config()
             save_path = cfg.get("save_path", "")
@@ -435,6 +466,7 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
 
             beigoma_file = getattr(self.server, "beigoma_path", None) or BEIGOMA_FILE
             trainers_file = getattr(self.server, "beigoma_trainers_path", None) or BEIGOMA_TRAINERS_FILE
+            fish_file = getattr(self.server, "fish_path", None) or FISH_FILE
             try:
                 total_beigoma = len(load_beigoma(beigoma_file))
             except Exception:
@@ -446,9 +478,18 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                 total_trainers = 44
 
             try:
+                if getattr(self.server, "fish_data", None) is not None and getattr(self.server, "fish_path", None) is None:
+                    total_fish = len(self.server.fish_data)
+                else:
+                    total_fish = len(load_fish(fish_file))
+            except Exception:
+                total_fish = 52
+
+            try:
                 summary = read_save_summary(save_path)
                 summary["beigoma_total_count"] = total_beigoma
                 summary["beigoma_total_trainers"] = total_trainers
+                summary["fish_total_count"] = total_fish
                 self.send_json(summary, status=200)
             except Exception as exc:
                 self.send_json({
@@ -463,6 +504,10 @@ class SaveTrackerRequestHandler(BaseHTTPRequestHandler):
                     "beigoma_defeated_trainer_ids": [],
                     "beigoma_defeated_trainer_count": 0,
                     "beigoma_total_trainers": total_trainers,
+                    "fish_caught_ids": [],
+                    "fish_caught_count": 0,
+                    "fish_total_count": total_fish,
+                    "discovered_spot_ids": [],
                     "playtime_seconds": 0.0,
                     "playtime_formatted": "0h 0m 0s",
                     "money": 0,
@@ -673,6 +718,7 @@ class SaveTrackerServer(ThreadingHTTPServer):
         recipes_path: Optional[Union[str, Path]] = None,
         beigoma_path: Optional[Union[str, Path]] = None,
         beigoma_trainers_path: Optional[Union[str, Path]] = None,
+        fish_path: Optional[Union[str, Path]] = None,
         uploads_dir: Optional[Union[str, Path]] = None,
     ):
         super().__init__(server_address, RequestHandlerClass)
@@ -690,6 +736,21 @@ class SaveTrackerServer(ThreadingHTTPServer):
         self.recipes_path = str(recipes_path) if recipes_path is not None else None
         self.beigoma_path = str(beigoma_path) if beigoma_path is not None else None
         self.beigoma_trainers_path = str(beigoma_trainers_path) if beigoma_trainers_path is not None else None
+        self.fish_path = str(fish_path) if fish_path is not None else None
+
+        # Load fish dataset at startup
+        target_fish_file = self.fish_path or FISH_FILE
+        try:
+            if os.path.isfile(target_fish_file):
+                with open(target_fish_file, "r", encoding="utf-8") as f:
+                    self.fish_data = json.load(f)
+            else:
+                self.fish_data = load_fish()
+        except Exception:
+            self.fish_data = []
+
+
+TrackerServer = SaveTrackerServer
 
 
 def create_server(
@@ -702,6 +763,7 @@ def create_server(
     recipes_path: Optional[Union[str, Path]] = None,
     beigoma_path: Optional[Union[str, Path]] = None,
     beigoma_trainers_path: Optional[Union[str, Path]] = None,
+    fish_path: Optional[Union[str, Path]] = None,
     uploads_dir: Optional[Union[str, Path]] = None,
 ) -> SaveTrackerServer:
     """Create a configured SaveTrackerServer instance.
@@ -716,6 +778,7 @@ def create_server(
         recipes_path: Optional path to recipes JSON file (legacy/convenience).
         beigoma_path: Optional path to beigoma JSON file (legacy/convenience).
         beigoma_trainers_path: Optional path to beigoma_trainers JSON file (legacy/convenience).
+        fish_path: Optional path to fish JSON file (legacy/convenience).
         uploads_dir: Optional directory for uploaded save files (default: uploads/).
 
     Returns:
@@ -731,6 +794,7 @@ def create_server(
         recipes_path=recipes_path,
         beigoma_path=beigoma_path,
         beigoma_trainers_path=beigoma_trainers_path,
+        fish_path=fish_path,
         uploads_dir=uploads_dir,
     )
 
@@ -746,6 +810,7 @@ def run_server(
     recipes_path: Optional[Union[str, Path]] = None,
     beigoma_path: Optional[Union[str, Path]] = None,
     beigoma_trainers_path: Optional[Union[str, Path]] = None,
+    fish_path: Optional[Union[str, Path]] = None,
 ) -> None:
     """Run the Save Tracker HTTP API server until interrupted.
 
@@ -760,6 +825,7 @@ def run_server(
         recipes_path: Optional path to recipes JSON file.
         beigoma_path: Optional path to beigoma JSON file.
         beigoma_trainers_path: Optional path to beigoma_trainers JSON file.
+        fish_path: Optional path to fish JSON file.
     """
     server = create_server(
         host=host,
@@ -771,6 +837,7 @@ def run_server(
         recipes_path=recipes_path,
         beigoma_path=beigoma_path,
         beigoma_trainers_path=beigoma_trainers_path,
+        fish_path=fish_path,
     )
 
     actual_port = server.server_address[1]
@@ -801,6 +868,7 @@ def main() -> None:
     parser.add_argument("--recipes", default=None, help="Path to recipes.json (default: data/recipes.json)")
     parser.add_argument("--beigoma", default=None, help="Path to beigoma.json (default: data/beigoma.json)")
     parser.add_argument("--beigoma-trainers", default=None, help="Path to beigoma_trainers.json (default: data/beigoma_trainers.json)")
+    parser.add_argument("--fish", default=None, help="Path to fish.json (default: data/fish.json)")
     parser.add_argument("--static", default=None, help="Path to static assets directory (default: static)")
     parser.add_argument("--open", action="store_true", help="Automatically open browser on launch")
 
@@ -816,6 +884,7 @@ def main() -> None:
         recipes_path=args.recipes,
         beigoma_path=args.beigoma,
         beigoma_trainers_path=args.beigoma_trainers,
+        fish_path=args.fish,
     )
 
 

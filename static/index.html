@@ -32,7 +32,7 @@
   </header>
 
   <!-- Top Navigation Bar (Tabs for Features) -->
-  <nav class="top-nav" role="tablist" aria-label="Tracker Sections">
+  <nav class="top-nav" id="main-nav" role="tablist" aria-label="Tracker Sections">
     <button type="button" id="tab-nav-heroes" class="nav-tab active" role="tab" aria-selected="true" data-view="heroes">
       Heroes <span class="nav-badge" id="nav-count-heroes">0/121</span>
     </button>
@@ -41,6 +41,9 @@
     </button>
     <button type="button" id="tab-nav-beigoma" class="nav-tab" role="tab" aria-selected="false" data-view="beigoma">
       Beigoma <span class="nav-badge" id="nav-count-beigoma">0/60</span>
+    </button>
+    <button type="button" id="tab-nav-fish" class="nav-tab" role="tab" aria-selected="false" data-view="fish">
+      Fish <span class="nav-badge" id="nav-count-fish">0/52</span>
     </button>
   </nav>
 
@@ -325,6 +328,75 @@
       </div>
 
     </div>
+
+    <!-- VIEW: FISH TRACKER -->
+    <div id="view-fish" class="view-panel" hidden>
+
+      <!-- Filters Toolbar -->
+      <nav class="toolbar" aria-label="Fish filters and search">
+        <div class="filter-group" role="tablist" id="fish-filter-tabs" aria-label="Filter fish status">
+          <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+            All <span class="badge" id="count-fish-all">52</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="caught" role="tab" aria-selected="false">
+            Caught <span class="badge" id="count-fish-caught">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="catchable" role="tab" aria-selected="false">
+            Catchable <span class="badge" id="count-fish-catchable">0</span>
+          </button>
+          <button type="button" class="filter-tab" data-filter="undiscovered" role="tab" aria-selected="false">
+            Undiscovered <span class="badge" id="count-fish-undiscovered">0</span>
+          </button>
+        </div>
+
+        <div class="search-filter-controls">
+          <div class="select-box">
+            <label for="fish-rarity-filter" class="sr-only">Filter by Rarity</label>
+            <select id="fish-rarity-filter" class="select-filter" aria-label="Filter by rarity">
+              <option value="all">All Rarities</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+          </div>
+          <div class="search-box">
+            <svg class="icon icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <label for="search-fish-input" class="sr-only">Search fish</label>
+            <input type="search" id="search-fish-input" class="search-input" placeholder="Search here" autocomplete="off">
+          </div>
+        </div>
+      </nav>
+
+      <!-- Fish Table Section -->
+      <section class="table-section" aria-label="Fish collection list">
+        <div class="table-wrapper">
+          <table id="fish-table" class="characters-table fish-table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-fish-name">Fish Name</th>
+                <th scope="col" class="col-fish-location">Where to Catch</th>
+                <th scope="col" class="col-fish-rarity">Rarity</th>
+                <th scope="col" class="col-fish-status">Status</th>
+              </tr>
+            </thead>
+            <tbody id="fish-tbody">
+              <!-- Populated dynamically via static/app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="fish-empty-state" class="empty-state" hidden>
+          <p class="empty-title">No fish found</p>
+          <p class="empty-desc">No fish match your active filter and search query.</p>
+        </div>
+      </section>
+    </div>
   </main>
 
   <!-- Configuration Dialog (Modal) -->
@@ -348,6 +420,7 @@
             </button>
             <button type="button" id="btn-use-steam" class="btn btn-secondary">Auto-detect</button>
           </div>
+          <p class="form-hint">Note: Save slots start at 0 (<code>UserData0.dat</code> is Slot 1, <code>UserData1.dat</code> is Slot 2, and so on).</p>
           <p id="detect-status-hint" class="dialog-status-hint" role="status" aria-live="polite" hidden></p>
         </div>
 

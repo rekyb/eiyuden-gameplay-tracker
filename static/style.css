@@ -408,7 +408,7 @@ body {
   border-color: var(--border-focus);
 }
 
-/* Chapter Select Filter */
+/* Dropdown Select Filters (Chapter, Beigoma Rarity, Fish Rarity) */
 .select-box {
   position: relative;
   display: flex;
@@ -416,21 +416,32 @@ body {
 }
 
 .select-filter {
-  background-color: var(--bg-surface-elevated, #23272f);
-  color: var(--text-primary, #f6f7f9);
-  border: 1px solid var(--border-color, #343a46);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.875rem;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.825rem;
   font-family: inherit;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.select-filter:focus {
+.select-filter:hover {
+  border-color: var(--border-medium);
+}
+
+.select-filter:focus,
+.select-filter:active {
+  background-color: var(--bg-surface-elevated, #23272f);
   border-color: var(--accent-blue, #3b82f6);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.select-filter option {
+  background-color: var(--bg-surface-elevated, #23272f);
+  color: var(--text-primary);
 }
 
 .search-box {
@@ -764,6 +775,16 @@ tr.is-recruited td.col-name .hero-name {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin: 0.15rem 0 0 0;
+}
+
+.form-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
 }
 
 .input-action-row {
@@ -1584,6 +1605,58 @@ tr.is-recruited td.col-name .hero-name {
   color: var(--text-secondary);
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
+}
+
+/* --- Fish Tracker --- */
+.fish-table {
+  width: 100%;
+}
+
+.col-fish-name {
+  width: 220px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.col-fish-location {
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.col-fish-rarity {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.col-fish-status {
+  width: 140px;
+  white-space: nowrap;
+}
+
+/* --- Fish Status Badges --- */
+.status-badge.status-caught,
+.status-caught {
+  color: var(--status-recruited-text);
+  background-color: var(--status-recruited-bg);
+  border: 1px solid var(--status-recruited-border);
+}
+
+.status-badge.status-catchable,
+.status-catchable {
+  color: #38bdf8;
+  background-color: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.status-badge.status-undiscovered,
+.status-undiscovered {
+  color: var(--text-muted);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.rarity-5 {
+  color: #f59e0b;
 }
 
 /* --- Responsive Subnav --- */
