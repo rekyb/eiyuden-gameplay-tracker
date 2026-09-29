@@ -1,16 +1,15 @@
 # Next Session Handover & Context
 
-- **Current Branch:** `feature/fish-tracker`
-- **Working Tree:** Clean (pushed to `origin/feature/fish-tracker`)
-- **Pull Request:** [#4](https://github.com/rekyb/eiyuden-gameplay-tracker/pull/4)
-- **Status:** Fish tracker implementation complete, documented, tested (114 Python + 40 Node.js tests), and submitted as PR #4.
+- **Current Branch:** `feature/qol-improvements`
+- **Working Tree:** Clean
+- **Status:** Section header descriptions QOL feature completed across all 4 tracker views, documented, tested (116 Python + 41 Node.js tests), and ready for PR / merge.
 
 ---
 
 ## 1. Quick Resume Instructions for Next Session
 
 To continue in the next session, instruct the agent:
-> *"Resume from `docs/NEXT_SESSION.md`. Working on `feature/fish-tracker` branch. All tests passing (114 Python + 40 Node.js tests)."*
+> *"Resume from `docs/NEXT_SESSION.md`. Working on `feature/qol-improvements` branch. All tests passing (116 Python + 41 Node.js tests)."*
 
 ---
 
@@ -34,16 +33,31 @@ To continue in the next session, instruct the agent:
 | Fish Client | Implemented filtering, 5-star rating rendering, reactive status badges, and save sync | ✅ Done (verified) | `79ed801` |
 | UI Polish | Refined `.select-filter` to match searchbar in resting state and elevate on focus/click | ✅ Done (verified) | `fa94413` |
 | UX Polish | Added save slot 0-based indexing quick instruction in Settings dialog | ✅ Done (verified) | `3e7f275` |
-| Verification | Full regression testing across backend, frontend, and live player save `UserData999.dat` | ✅ Done (verified) | `9653347` |
+| Fish Verif | Full regression testing across backend, frontend, and live player save `UserData999.dat` | ✅ Done (verified) | `9653347` |
+| Section Spec | Designed section header banners & descriptions for all 4 tracker views | ✅ Done (approved) | `dbccbaf` |
+| Section Plan | Created task-driven implementation plan for section header descriptions | ✅ Done (approved) | `e8bc428` |
+| Section Tests | Added test assertions for section header banners, titles, and descriptions | ✅ Done (verified) | `f3e15fd` |
+| Section CSS | Added section header typography, border styling, and mobile responsive rules | ✅ Done (verified) | `cb05f17` |
+| Section HTML | Added `.section-header`, `h2.section-title`, and `p.section-desc` to all 4 view panels | ✅ Done (verified) | `281fa75` |
+| Section Verif | Full regression testing across backend and frontend suites, updated documentation | ✅ Done (verified) | *pending commit* |
 
-- **All tests passing:** 114 Python (`python -m unittest discover tests`) + 40 Node.js (`node --test tests/frontend/test_app.js`)
-- **Zero regressions:** Existing Heroes, Recipes, and Beigoma tracking unaffected.
-- **Live Save Verification:** Confirmed with `UserData999.dat` (20 caught, 5 discovered spots).
+- **All tests passing:** 116 Python (`python -m unittest discover tests`) + 41 Node.js (`node --test tests/frontend/test_app.js`)
+- **Zero regressions:** Existing Heroes, Recipes, Beigoma, and Fish tracking unaffected.
 
 ---
 
-## 3. Key Design Decisions for Fish Tracker
+## 3. Key Design Decisions
 
+### Section Descriptions & Header Banners (QOL)
+| Feature | Implementation Choice |
+|---------|-----------------------|
+| Scope | Contextual section headers and descriptive subtitles for all 4 tracker views (Heroes, Recipes, Beigoma, Fish) |
+| Markup | Semantic `<header class="section-header">`, `<h2 class="section-title">`, and `<p class="section-desc">` placed directly inside each `.view-panel` preceding toolbar/sub-nav |
+| Typography & Aesthetics | `1.15rem` semi-bold title with subtle text color and bottom border (`var(--border-subtle)`), `0.825rem` secondary body text with `1.45` line height |
+| Mobile Responsive | Scaled down title (`1.05rem`) and text (`0.775rem`) with tighter padding on viewports `<= 768px` |
+| Performance | Purely declarative static HTML & CSS; zero JavaScript runtime overhead |
+
+### Fish Tracker
 | Feature | Implementation Choice |
 |---------|-----------------------|
 | Scope | Single collection table tracking all 52 catchable fish required for "The Hero Who Fished the World" |
@@ -56,6 +70,8 @@ To continue in the next session, instruct the agent:
 
 ## 4. Reference Documents
 
+- **Section Descriptions Spec:** [`docs/superpowers/specs/2026-09-29-section-descriptions-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-29-section-descriptions-design.md)
+- **Section Descriptions Plan:** [`docs/superpowers/plans/2026-09-29-section-descriptions.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-29-section-descriptions.md)
 - **Fish Tracker Spec:** [`docs/superpowers/specs/2026-09-28-fish-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-fish-tracker-design.md)
 - **Fish Tracker Plan:** [`docs/superpowers/plans/2026-09-28-fish-tracker.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-28-fish-tracker.md)
 - **Beigoma Tracker Spec:** [`docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md)
