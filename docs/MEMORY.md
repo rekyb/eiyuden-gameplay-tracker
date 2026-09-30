@@ -1,35 +1,51 @@
 # Next Session Handover & Context
 
-- **Current Branch:** `feat/chest-tracker`
+- **Current Branch:** `hotfix-fish-sync-bug` (renamed from `feat/chest-tracker` on 2026-09-30)
 - **Working Tree:** `config/config.json` modified (user file, never stage); `docs/SENIOR_CODE_REVIEW.md` → `docs/CODE_REVIEW.md` rename uncommitted (user's, unrelated — leave alone)
-- **Status:** Chest Tracker **brainstorm → spec → implementation plan complete and committed**. Implementation NOT started. Execution method NOT yet chosen (pending user decision: subagent-driven recommended).
+- **Status:** **Scope narrowed to the fish save-sync bug fix only.** That fix is committed and complete. Chest Tracker Tasks 2–6 were **abandoned by user decision on 2026-09-30**; all chest design docs are intentionally retained.
 
 ---
 
 ## 1. Quick Resume Instructions for Next Session
 
 To continue in the next session, instruct the agent:
-> *"Resume from `docs/MEMORY.md`. Working on `feat/chest-tracker` branch. Chest tracker spec + plan are committed; ask me which execution method to use (subagent-driven vs native) and start implementing `docs/superpowers/plans/2026-09-29-chest-tracker.md`."*
+> *"Resume from `docs/MEMORY.md`. I'm on `hotfix-fish-sync-bug`. The fish save-sync fix is done and tested. The Chest Tracker was paused after the design/plan stage — see §2 for what was abandoned and what to keep."*
 
-**Baseline before starting implementation:** 116 Python (`python -m unittest discover -s tests -p "test_*.py"`) + 41 Node.js (`node --test tests/frontend/test_app.js`), all green.
+**Baseline (verified green 2026-09-30):** 116 Python (`python -m unittest discover -s tests -p "test_*.py"`) + 42 Node.js (`node --test tests/frontend/test_app.js`).
 
 ---
 
 ## 2. Progress Summary
 
-### Chest Tracker (this session — `feat/chest-tracker`)
+### Shipped on this branch — fish save-sync bug fix
 
 | Task | Description | Status | Commits |
 |------|-------------|--------|---------|
-| Branch | Created `feat/chest-tracker` from `feature/qol-improvements` (`a93b4a3`); baseline verified 116 + 41 green | ✅ Done | — |
-| Spike | Read-only save analysis: chest state lives at `_fieldAction._treasureChestList._opened` (list[int]); 156 opened in user's save; ID = `<field_prefix><2-digit index>`; 26 field groups observed; 227 total per community guides (Neoseeker/FoggyProductions). Throwaway scripts in `C:\Users\rekyb\AppData\Local\Temp\opencode\chest_spike*.py` | ✅ Done | — |
-| Bug Found | Fish save-sync regression: 3 count-snapshot sites in `static/app.js` (~1246, ~1338, ~1580) omit `fishCount` → toast deltas wrong; fix rolled into chest plan (Task 1 `snapshotCounts()`) | ✅ Found (fix planned) | — |
-| Chest Spec | Approved design: save-synced status, heroes-style UX (region column + dropdown, text-only how-to-obtain, 4 status tabs incl. Missable), Approach 1 save-observation calibration, fish snapshot fix | ✅ Done (approved) | `9454e45` |
-| Chest Plan | 7-task TDD implementation plan with exact tests/signatures + 5-item Review Focus | ✅ Done (committed, **not yet execution-approved**) | `c56c090` |
-| Execution | Choose subagent-driven vs native, then run plan tasks 1–7 | ⏳ **Pending user decision** | — |
+| Branch | Created from `feature/qol-improvements` (`a93b4a3`) | ✅ Done | — |
+| Plan Task 1 | `snapshotCounts()` helper consolidates tracker count snapshots; replaces 3 triplicated inline count objects. Also fixes `handleFileUpload()` passing `null` as `prevCounts`, which suppressed upload deltas entirely | ✅ Done | `666802e` |
+| Test | `snapshotCounts covers every SYNC_TRACKERS key` — a guard against this bug class recurring (auto-covers any tracker key added later) | ✅ Done | `666802e` |
+| Branch rename | `feat/chest-tracker` → `hotfix-fish-sync-bug` | ✅ Done | — |
 
-- **All tests passing:** 116 Python + 41 Node.js (unchanged this session — no code changes yet)
-- **Zero regressions:** Existing Heroes, Recipes, Beigoma, and Fish tracking unaffected.
+- **All tests passing:** 116 Python + 42 Node.js
+- **Zero regressions:** Heroes, Recipes, Beigoma, and Fish tracking unaffected.
+
+### Abandoned — Chest Tracker Tasks 2–6 (2026-09-30)
+
+Paused by user decision after Task 1. **Nothing from Tasks 2–6 was ever committed** — no data files, no backend, no UI. Specifically:
+
+| Was going to add | Now |
+|-------------------|-----|
+| `data/chests.json` (227-row catalog) | Not created |
+| `data/chest_fields.json` (calibration registry) | Not created |
+| `src/tracker/core/models.py` `load_chests` / `load_chest_fields` | Not created |
+| `save_reader.py` chest extraction + summary keys | Not created |
+| `GET /api/chests` + `/api/progress` chest keys | Not created |
+| Chest view in `static/index.html` / `style.css` | Not created |
+| `static/app.js` chest state, filtering, sync wiring | Not created |
+
+**One artifact was discarded:** `tests/unit/test_chests.py` (uncommitted, Task 2 Step 1, red on arrival). Deleted on abandon. Its full source is preserved verbatim in the plan at Task 2 Step 1, so nothing is lost — see [`docs/superpowers/plans/2026-09-29-chest-tracker.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-29-chest-tracker.md).
+
+**Throwaway calibration scripts** (read-only save analysis, safe to delete) live in `C:\Users\rekyb\AppData\Local\Temp\opencode\chest_spike{,2,3,4}.py`. Their findings are recorded in §3 below.
 
 ### Prior completed work (from `feature/qol-improvements`, ready for PR)
 
@@ -50,7 +66,18 @@ To continue in the next session, instruct the agent:
 
 ## 3. Key Design Decisions
 
-### Chest Tracker (approved spec §3–§7)
+### Shipped — fish save-sync fix
+
+| Feature | Implementation Choice |
+|---------|-----------------------|
+| Root cause | Three inline count-snapshot objects in `static/app.js` (`syncSave` ~line 1246, `handleFileUpload` ~line 1338, sync-button handler ~line 1580) each omitted keys. `handleFileUpload` additionally passed `null` as `prevCounts`, zeroing all upload deltas |
+| Fix | Single `snapshotCounts()` helper beside `SYNC_TRACKERS`, reading current `state`; all three call sites use it |
+| Regression guard | Test asserts every `SYNC_TRACKERS` key exists in the snapshot and is a number — fails if a future tracker is added to one list but not the other |
+| Safety | No new dependencies; save files still strictly read-only |
+
+### Retained for a future session — Chest Tracker design (spec §3–§7)
+
+Useful if the tracker is ever revived; **none of this is implemented.**
 
 | Feature | Implementation Choice |
 |---------|-----------------------|
@@ -60,15 +87,21 @@ To continue in the next session, instruct the agent:
 | Catalog | `data/chests.json`: 227 rows `{chest_id, region, location, howToObtain, method, missable, notes}` + `regions` list; compiled from Neoseeker (primary) + FoggyProductions (secondary), cross-checked to 227; **total always `len(catalog)`, never hardcoded** |
 | UX | Heroes clone: nav `Chests (X/227)`, section header, 4 status tabs (`All/Opened/Not Opened/Missable`), Region dropdown (JS-populated `#region-filter`), instant search; table `Region \| Location \| How to Obtain \| Status`; orange `Missable` chip only on unopened rows; missable = gimmick-flee risk (user confirmed respawn) |
 | Missable semantics | Filter over `missable: true` independent of open state (spec §3) |
-| Fish bug fix | New `snapshotCounts()` helper replaces 3 triplicated inline count objects (lines ~1246 syncSave, ~1338 handleFileUpload — also fixes `null` prevCounts suppressing all upload deltas, ~1580 sync button); `SYNC_TRACKERS` gains `chestCount` |
 | Safety | Save files strictly read-only; no new dependencies |
+
+### Spike findings (reusable, from the abandoned session)
+
+- Chest state lives at `_fieldAction._treasureChestList._opened` (`list[int]`)
+- 156 chests opened in the user's save at spike time
+- 26 distinct field groups observed
+- Community guides (Neoseeker / FoggyProductions) agree the game total is **227**
 
 ---
 
 ## 4. Reference Documents
 
-- **Chest Tracker Spec:** [`docs/superpowers/specs/2026-09-29-chest-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-29-chest-tracker-design.md)
-- **Chest Tracker Plan:** [`docs/superpowers/plans/2026-09-29-chest-tracker.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-29-chest-tracker.md)
+- **Chest Tracker Spec (retained, not implemented):** [`docs/superpowers/specs/2026-09-29-chest-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-29-chest-tracker-design.md)
+- **Chest Tracker Plan (retained, Tasks 1 done / 2–6 abandoned):** [`docs/superpowers/plans/2026-09-29-chest-tracker.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/plans/2026-09-29-chest-tracker.md)
 - **Section Descriptions Spec:** [`docs/superpowers/specs/2026-09-29-section-descriptions-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-29-section-descriptions-design.md)
 - **Fish Tracker Spec:** [`docs/superpowers/specs/2026-09-28-fish-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-fish-tracker-design.md)
 - **Beigoma Tracker Spec:** [`docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md`](file:///C:/projects/eiyuden-gameplay-tracker/docs/superpowers/specs/2026-09-28-beigoma-tracker-design.md)
@@ -78,7 +111,7 @@ To continue in the next session, instruct the agent:
 
 ## 5. Pending Decisions & Traps
 
-1. **Execution method:** ask the user — **subagent-driven** (recommended in session) vs **native**. Plan Task 7 updates this file again at completion.
-2. **Plan Task 2 STOP gate:** guide compilation may leave ambiguous/unobserved field prefixes — the agent must pause and ask the user to *enter region + save* (or open one chest there) for calibration. Expect this.
-3. Prior plan text says Task 7 commits the `NEXT_SESSION → MEMORY` rename — **already done in this session's checkpoint commit**; Task 7 should only update content.
-4. Never stage `config/config.json` or the `CODE_REVIEW` rename.
+1. **PR base branch is ambiguous — confirm before opening the PR.** `feature/qol-improvements` (the fork point, `a93b4a3`) is itself an unmerged PR branch sitting 21 commits ahead of `master`. A PR from this branch targets `feature/qol-improvements` to show only the 5 new commits; targeting `master` would fold in all 21.
+2. `config/config.json` now holds a real `save_path` and a non-empty `cooked_recipe_ids` array — it is a local user file, **never stage it**.
+3. The `docs/SENIOR_CODE_REVIEW.md` → `docs/CODE_REVIEW.md` rename is the user's uncommitted change — **never stage it**.
+4. If the Chest Tracker is revived, the plan's Task 2 Step 5 is a **STOP gate**: ambiguous field prefixes require the human partner to enter a region and save, or open one chest there, for calibration.
