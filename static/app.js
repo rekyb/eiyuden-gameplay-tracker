@@ -1191,6 +1191,23 @@ const SYNC_TRACKERS = [
 ];
 
 /**
+ * Snapshot of the current tracker counts, keyed to match SYNC_TRACKERS entries.
+ * Capture this before applyProgress() so buildSyncToast() can compute deltas.
+ * Add a new key here when a new SYNC_TRACKERS entry is introduced.
+ *
+ * @returns {{heroCount: number, recipeCount: number, beigomaCount: number, trainerCount: number, fishCount: number}}
+ */
+function snapshotCounts() {
+  return {
+    heroCount:    state.recruitedIds.size,
+    recipeCount:  state.acquiredRecipeIds.size,
+    beigomaCount: state.beigomaCollectedIds.length,
+    trainerCount: state.beigomaDefeatedTrainerIds.length,
+    fishCount:    state.fishCaughtIds.size,
+  };
+}
+
+/**
  * Builds a human-friendly sync toast message.
  *
  * When deltas are detected, emits delta copy:
@@ -1243,12 +1260,7 @@ async function syncSave({ silent = false, statusTarget = null } = {}) {
     state.saveStatus = data;
 
     // Snapshot counts before applying new progress (for delta toast)
-    const prevCounts = {
-      heroCount:    state.recruitedIds.size,
-      recipeCount:  state.acquiredRecipeIds.size,
-      beigomaCount: state.beigomaCollectedIds.length,
-      trainerCount: state.beigomaDefeatedTrainerIds.length,
-    };
+    const prevCounts = snapshotCounts();
 
     if (!data.file_exists || data.corrupted || !res.ok) {
       applyProgress({
@@ -1324,6 +1336,9 @@ async function handleFileUpload(file) {
       // LocalStorage might be restricted
     }
 
+    // Snapshot counts before applying new progress (for delta toast)
+    const prevCounts = snapshotCounts();
+
     if (data.summary) {
       state.saveStatus = data.summary;
       applyProgress(data.summary);
@@ -1335,12 +1350,7 @@ async function handleFileUpload(file) {
       dom.configDialog.close();
     }
 
-    showToast(buildSyncToast(null, {
-      heroCount:    state.recruitedIds.size,
-      recipeCount:  state.acquiredRecipeIds.size,
-      beigomaCount: state.beigomaCollectedIds.length,
-      trainerCount: state.beigomaDefeatedTrainerIds.length,
-    }), 'success');
+    showToast(buildSyncToast(prevCounts, snapshotCounts()), 'success');
   } catch (err) {
     showToast(`Upload failed: ${err.message}`, 'error');
   }
@@ -1577,12 +1587,7 @@ function setupEventListeners() {
       }
 
       // Snapshot counts before sync so the toast can show only what changed
-      const prevCounts = {
-        heroCount:    state.recruitedIds.size,
-        recipeCount:  state.acquiredRecipeIds.size,
-        beigomaCount: state.beigomaCollectedIds.length,
-        trainerCount: state.beigomaDefeatedTrainerIds.length,
-      };
+      const prevCounts = snapshotCounts();
 
       try {
         const delayPromise = new Promise(resolve => setTimeout(resolve, 3000));
@@ -2279,6 +2284,7 @@ if (typeof module !== 'undefined' && module.exports) {
     switchBeigomaSubview,
     applyProgress,
     buildSyncToast,
+    snapshotCounts,
     SYNC_TRACKERS,
     scheduleCookedSync,
     syncSave,

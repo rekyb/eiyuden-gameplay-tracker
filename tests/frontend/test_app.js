@@ -521,6 +521,14 @@ test('buildSyncToast generates proper delta and up-to-date messages', () => {
   assert.strictEqual(noChangeMsg, 'Save up to date');
 });
 
+test('snapshotCounts covers every SYNC_TRACKERS key', () => {
+  const snap = app.snapshotCounts();
+  for (const t of app.SYNC_TRACKERS) {
+    assert.ok(Object.prototype.hasOwnProperty.call(snap, t.key), `snapshot missing ${t.key}`);
+    assert.strictEqual(typeof snap[t.key], 'number');
+  }
+});
+
 test('renderTable renders all filtered heroes into tbody without pagination', () => {
   app.state.characters = Array.from({ length: 45 }, (_, i) => ({
     id: i + 1,
